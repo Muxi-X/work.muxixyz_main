@@ -3,6 +3,7 @@ import os
 from work_muxixyz_app import create_app,db
 from flask import current_app,url_for,jsonify
 from flask_sqlalchemy import SQLAlchemy
+from ..work_muxixyz_app.models import Team,Group,User,Project,Message,Statu,File,Comment
 import random
 import json
 
@@ -40,6 +41,29 @@ class BasicTestCase(unittest.TestCase):
     def test_app_exist(self):
         self.assertFalse(current_app is None)
 
+# API FOR GET A TOKEN AND PREPARTION
+
+    def test_management_a_auth(self):
+        response=self.client.post(
+            url_for('api.login',_external=True),
+            data=json.dumps({
+                "username": 'test',
+            }),
+            headers=self.get_api_headers(False),
+        )
+        s=json.loads(response.data.decode('utf-8'))['token']
+        global TOKEN
+        TOKEN=s
+        muxi=Team(name='test',count=3)
+        superuser=User(name='cat',email='cat@test.com',tel='11111111111',role=15,team_id=1)
+        muxi.creator=1
+        admin=User(name='dog',email='dog@test.com',tel='22222222222',role=1,team_id=1)
+        usr=User(name='pig',email='pig@test.com',tel='33333333333',role=1,team_id=1)
+        db.session.add(muxi,superuser,admin,usr)
+        db.session.commit()
+        print ('OK')
+# END
+
 # API FOR MANAGEMENT START
 
     def test_management_a_newgroup(self):
@@ -49,14 +73,14 @@ class BasicTestCase(unittest.TestCase):
                 "groupName": 'test',
                 "userlist": {3} 
             }),
-            content_type='application/json'
+            headers=self.get_api_headers(True)
         )
         self.assertTrue(response.status_code==200)
 
     def test_management_b_groupuserlist(self):
         response=self.client.get(
             'http://localhost/api/v1.0/group/1/userList',            
-            content_type='application/json'
+            headers=self.get_api_headers(True)
         )
         self.assertTrue(response.status_code==200)
         s=json.loads(response.data.decode('utf-8'))['list']
@@ -65,7 +89,7 @@ class BasicTestCase(unittest.TestCase):
     def test_management_c_grouplist(self):
         response=self.client.get(
             url_for('api.GroupList',_external=True),
-            content_type='application/json'
+            headers=self.get_api_headers(True)
         )
         self.assertTrue(response.status_code==200)
         s=json.loads(response.data.decode('utf-8'))['list']
@@ -74,7 +98,7 @@ class BasicTestCase(unittest.TestCase):
     def test_management_d_projectuserlist(self):
         response=self.client.get(
             'http://localhost/api/v1.0/project/1/userList',            
-            content_type='application/json'
+            headers=self.get_api_headers(True)
         )
         self.assertTrue(response.status_code==200)
         s=json.loads(response.data.decode('utf-8'))['list']
@@ -83,7 +107,7 @@ class BasicTestCase(unittest.TestCase):
     def test_management_e_userprojectlist(self):
         response=self.client.get(
             'http://localhost/api/v1.0/user/1/project/list',
-            content_type='application/json'
+            headers=self.get_api_headers(True)
         )
         self.assertTrue(response.status_code==200)
         s=json.loads(response.data.decode('utf-8'))['list']
@@ -95,7 +119,7 @@ class BasicTestCase(unittest.TestCase):
             data=json.dumps({
                 "userID": 1,
             }),
-            content_type='application/json'
+            headers=self.get_api_headers(True)
         )
         self.assertTrue(response.status_code==200)
 
@@ -105,7 +129,7 @@ class BasicTestCase(unittest.TestCase):
             data=json.dumps({
                 "luckdog": 'luckdog',
             }),
-            content_type='application/json'
+            headers=self.get_api_headers(True)
         )
         self.assertTrue(response.status_code==200)
 
@@ -115,7 +139,7 @@ class BasicTestCase(unittest.TestCase):
             data=json.dumps({
                 "projectList": {1},
             }),
-            content_type='application/json'
+            headers=self.get_api_headers(True)
         )
         self.assertTrue(response.status_code==200)
 
@@ -125,7 +149,7 @@ class BasicTestCase(unittest.TestCase):
             data=json.dumps({
                 "groupID": 1,
             }),
-            content_type='application/json'
+            headers=self.get_api_headers(True)
         )
         self.assertTrue(response.status_code==200)
 
@@ -135,7 +159,7 @@ class BasicTestCase(unittest.TestCase):
             data=json.dumps({
                 "role": 2,
             }),
-            content_type='application/json'
+            headers=self.get_api_headers(True)
         )
         self.assertTrue(response.status_code==200)
 
@@ -149,7 +173,7 @@ class BasicTestCase(unittest.TestCase):
                 'message': True,
                 'email': False,
             }),
-            content_type='application/json'
+            headers=self.get_api_headers(True)
         )
         self.assertTrue(response.status_code==200)
 
