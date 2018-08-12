@@ -9,7 +9,7 @@ def login_required(f):
     def decorated_function(*args,**kwargs):
             if not 'token' in request.headers:
                 print (request.headers)
-                abort(403)
+                abort(401)
             usr=None
             t=request.headers['token'].encode('utf-8')
             s=Serializer(current_app.config['SECRET_KEY'])
@@ -17,7 +17,7 @@ def login_required(f):
             try:
                 data=s.loads(t)
             except:
-                abort(405)
+                abort(401)
             uid=data.get('confirm')
 #            if uid is None:
 #                print ('you write a shit decorator!')
