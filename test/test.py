@@ -10,6 +10,20 @@ import json
 
 class BasicTestCase(unittest.TestCase):
 
+    def get_api_headers(self,ifToken):
+        if ifToken is True:
+            return {
+                'token': TOKEN,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        else:
+            return {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+
+
     def setUp(self):
         self.app = create_app(os.getenv('FLASK_CONFIG') or 'default')
         self.app_context = self.app.app_context()
