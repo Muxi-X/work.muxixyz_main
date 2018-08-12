@@ -68,7 +68,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_management_a_newgroup(self):
         response=self.client.post(
-            url_for('api.GroupUserlist',_external=True),
+            url_for('api.NewGroup',_external=True),
             data=json.dumps({
                 "groupName": 'test',
                 "userlist": {3} 
@@ -79,7 +79,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_management_b_groupuserlist(self):
         response=self.client.get(
-            'http://localhost/api/v1.0/group/1/userList',            
+            'http://localhost/api/v1.0/group/1/userList',
             headers=self.get_api_headers(True)
         )
         self.assertTrue(response.status_code==200)
