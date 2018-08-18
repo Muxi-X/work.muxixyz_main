@@ -1,7 +1,7 @@
 from flask import jsonify,request,current_app,url_for
 from . import api
 from .. import db
-from ..models import Team,Group,User,Project,Message,Statu,File,Comment
+from ..models import Team,Group,User,Project,User2Project,Message,Statu,File,Comment
 from ..decorator import login_required
 
 import requests
@@ -12,7 +12,7 @@ import requests
 def NewGroup(uid):
     role=4 # 100
     usr=User.query.filter_by(id=uid).first()
-    if usr.role|role is not role:
+    if usr.role|role != role:
         response=jsonify({
             "msg": 'you are not superuser!',
         })
@@ -119,7 +119,7 @@ def ProjectUserList(uid,pid):
 def ProjectList(uid):
     role=6 #110
     usr=User.query.filter_by(id=uid).first()
-    if usr.role|role is not role:
+    if usr.role|role != role:
         response=jsonify({
             "msg": 'you just are a member!',
         })
@@ -155,14 +155,14 @@ def UserProjectList(uid):
 # page     
     usr=User.query.filter_by(id=uid).first()
     if usr.role > 1:
-    	response=requests.get(
-    		url_for('api.ProjectList',_external=True),
-    		headers={
+        response=requests.get(
+            url_for('api.ProjectList',_external=True),
+            headers={
                 "token": request.headers.get('token'),
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-    		}
-    	)
+            }
+        )
     for p in usr.projects:
         c=int(counter)//10
         if (c+1) ==page:
@@ -185,14 +185,14 @@ def UserProjectList(uid):
 def User2bMember(uid):
     usr=User.query.filter_by(id=uid).first()
     role=6
-    if usr.role|role is not role:
-    	response=jsonify({
+    if usr.role|role != role:
+        response=jsonify({
             "msg": 'you are not superuser or admin!',
-    	})
-    	response.status_code=401
-    	return response
-# role	
-    if usr.role is not 0:
+        })
+        response.status_code=401
+        return response
+# role    
+    if usr.role != 0:
         response=jsonify({
             "msg": 'user already be a member!',
         })
@@ -202,9 +202,129 @@ def User2bMember(uid):
     db.session.add(usr)
     db.session.commit()
     response=jsonify({
-    	"msg": 'successful!',
+        "msg": 'successful!',
     })
     response.status_code=200
     return response
 
-@
+#role: 100
+@api.route('/user/addAdmin/',methods=['POST'])
+@login_required
+def AddAdmin(uid):
+    usr=User.query.filter_by(id=uid).first()
+
+    role=4
+    if role|usr.role != role:
+        response=jsonify({
+            "msg": 'you are not superuser!'
+        })
+        response.status_code=401
+        return response
+    lname=request.get_json().get('luckydog')
+    luckydog=User.query.filter_by(name=lname).first()
+    luckydog.role=3
+    db.session.add(luckydog)
+    db.session.commit()
+    response=jsonify({})
+    response.status_code=200
+    return response
+
+#role: 110
+@api.route('/user/<int: id>/managePro/',methods=['POST'])
+@login_required
+def ManageProject(uid,id):
+    role=6 #110
+    usr=User.query.filter_by(id=uid).first()
+    if role|usr.role != role:
+        response=jsonify({
+            "msg": 'you are not superuser or admin!',
+        })
+        response.status_code=401
+        return response
+
+    newPList=request.get_json().get('projectList')
+    oldPList=User2Project.query.filter_by(user_id=id).all()
+    for pid in newPList:
+        pjc=Project.query.filter_by(id=pid).first()
+        if pjc in oldPList && !(pjc in newPList):
+            record=User2Project.query.filter_by(user_id=id,project_id=pid).first()
+            db.session.delete(record)
+        if !(pjc in oldPList) && pjc in newPList:
+            record=User2Project(user_id=id,project_id=pid)
+            db.session.add(record)
+    db.session.commit()
+    responseh=jsonify({})
+    response.status_code=200
+    return response
+
+#role: 110
+@api.route('/user/<int: id>/manageGroup/',methods=['POST'])
+@login_required
+def ManageGroup(uid,id):
+    usr=User.query.filter_by(id=uid).first()
+    role=6 #110
+    if role|usr.role != role:
+        response=jsonify({
+            "msg": 'you are not superuser or admin',
+        })
+        response.status_code=401
+        return response
+
+    gid=request.get_json().get('groupID')
+    usr=User.query.filter_by(id=id).first()
+    usr.group_id=gid
+    db.session.add(usr)
+    db.session.commit()
+    response=jsonify({})
+    response.status_code=200.
+    return response
+
+#role: 100
+@api.route('/user/<int: id>/setRole/',methods=['POST'])
+@login_required
+def SetRole(uid,id):
+    usr=User.query.filter_by(id=uid).first()
+    role=4
+    if role|usr.role != role:
+        response=jsonify({
+            "msg": 'you are not a superuser!',
+        })
+        response.status_code=401
+        return response
+
+    role=request.get_json().get('role')
+    usr=User.query.filter_by(id=id).first()
+    usr.role=role
+    db.session.add(usr)
+    db.session.commit()
+    response=jsonify({})
+    response.status_code=200
+    return response
+
+#role: 0001
+@api.route('/user/<int: id>/setting/',methods=['POST'])
+@login_required
+def Setting(uid,id):
+    if uid != id:
+        response=jsonify({
+        	"msg": 'this is others personal setting!',
+        })
+        response.status_code=401
+        return response
+
+    username=request.get_json().get('username')
+    address=request.get_json().get('address')
+    tel=reqruest.get_json().get('tel')
+    email=request.get_json().get('email')
+    message=request.get_json().get('message')
+    usr=User.query.filter_by(id=id).first()
+    usr.username=username
+    usr.email=address
+    usr.tel=tel
+    usr.email_service=email
+    usr.message=message
+    db.session.add(usr)
+    db.session.commit()
+    response=jsonify({})
+    response.status_code=200
+    return response
