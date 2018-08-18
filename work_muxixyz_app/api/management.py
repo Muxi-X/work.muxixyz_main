@@ -4,6 +4,8 @@ from .. import db
 from ..models import Team,Group,User,Project,Message,Statu,File,Comment
 from ..decorator import login_required
 
+import requests
+
 
 @api.route('/group/new/',methods=['POST'])
 @login_required
@@ -147,6 +149,15 @@ def UserProjectList(uid):
     pjcs=list([None,None,None,None,None,None,None,None,None,None,None])
 # page     
     usr=User.query.filter_by(id=uid).first()
+    if usr.role > 1:
+    	response=requests.get(
+    		url_for('api.ProjectList',_external=True),
+    		headers={
+                "token": request.headers.get('token'),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+    		}
+    	)
     for p in usr.projects:
         c=int(counter)//10
         if (c+1) ==page:
