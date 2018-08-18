@@ -91,7 +91,7 @@ class Comment(db.Model):
     __tablename__='comments'
     id=db.Column(db.Integer,primary_key=True)
     kind=db.Column(db.Integer)
-    content=db.Column(db.String)
+    content=db.Column(db.Text)
     time=db.Column(db.String(50))
     creator=db.Column(db.Integer)
     fileID=db.Column(db.Integer,db.ForeignKey('files.id'),default=0)
@@ -101,7 +101,7 @@ class Message(db.Model):
     __tablename__='messages'
     id=db.Column(db.Integer,primary_key=True)
     time=db.Column(db.String)
-    action=db.Column(db.String)
+    action=db.Column(db.Text)
     kind=db.Column(db.Integer)
     readed=db.Column(db.Boolean,default=False)
     from_id=db.Column(db.Integer)

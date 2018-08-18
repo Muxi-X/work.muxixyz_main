@@ -111,7 +111,7 @@ def ProjectUserList(uid,pid):
 @api.route('/project/list/',methods=['GET'])
 @login_required
 def ProjectList(uid):
-	role=14 #1110
+    role=14 #1110
     usr=User.query.filter_by(id=uid).first()
     if usr.role|role is not role:
         response=jsonify({
@@ -137,3 +137,57 @@ def ProjectList(uid):
     response.status_code=200
     return response
 
+@api.route('/user/project/list/',methods=['GET'])
+@login_required
+def UserProjectList(uid):
+    page=1
+    if request.args.get('page') is not None:
+        page=int(request.args.get('page'))
+    counter=0
+    pjcs=list([None,None,None,None,None,None,None,None,None,None,None])
+# page     
+    usr=User.query.filter_by(id=uid).first()
+    for p in usr.projects:
+        c=int(counter)//10
+        if (c+1) ==page:
+            usrs[counter%10]={
+                "projectID": p.id,
+                "projectName": p.name,
+                "userCount": p.count,
+            }
+        counter+=1
+    response=jsonify({
+        "count": counter,
+        "list": pjcs,
+    })
+    response.status_code=200
+    return response
+
+@api.route('/user/2bmember/',methods=['POST'])
+@login_required
+def User2bMember(uid):
+    usr=User.query.filter_by(id=uid).first()
+    role=12
+    if usr.role|role is not role:
+    	response=jsonify({
+            "msg": 'you are not superuser or admin!',
+    	})
+    	response.status_code=401
+    	return response
+# role	
+    if usr.role is not 0:
+        response=jsonify({
+            "msg": 'user already be a member!',
+        })
+        response.status_code=402
+        return response
+    usr.role=1
+    db.session.add(usr)
+    db.session.commit()
+    response=jsonify({
+    	"msg": 'successful!',
+    })
+    response.status_code=200
+    return response
+
+@
