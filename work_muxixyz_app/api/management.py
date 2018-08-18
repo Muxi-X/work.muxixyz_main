@@ -6,11 +6,11 @@ from ..decorator import login_required
 
 import requests
 
-
+#role: 100
 @api.route('/group/new/',methods=['POST'])
 @login_required
 def NewGroup(uid):
-    role=8 # 1000
+    role=4 # 100
     usr=User.query.filter_by(id=uid).first()
     if usr.role|role is not role:
         response=jsonify({
@@ -38,6 +38,7 @@ def NewGroup(uid):
     response.status_code=200
     return response
 
+#role: 001
 @api.route('/group/<int: gid>/userList',methods=['GET'])
 @login_required
 def GroupUserList(uid,gid):
@@ -64,6 +65,7 @@ def GroupUserList(uid,gid):
     response.status_code=200
     return response
 
+#role: 001
 @api.route('/group/list',methods=['GET'])
 @login_required
 def GroupList(uid):
@@ -85,6 +87,7 @@ def GroupList(uid):
     response.status_code=200
     return response
 
+#role: 001
 @api.route('/project/<int: pid>/userList/',methods=['GET'])
 @login_required
 def ProjectUserList(uid,pid):
@@ -110,10 +113,11 @@ def ProjectUserList(uid,pid):
     response.status_code=200
     return response
 
+#role: 110
 @api.route('/project/list/',methods=['GET'])
 @login_required
 def ProjectList(uid):
-    role=14 #1110
+    role=6 #110
     usr=User.query.filter_by(id=uid).first()
     if usr.role|role is not role:
         response=jsonify({
@@ -139,6 +143,7 @@ def ProjectList(uid):
     response.status_code=200
     return response
 
+#role: 001
 @api.route('/user/project/list/',methods=['GET'])
 @login_required
 def UserProjectList(uid):
@@ -174,11 +179,12 @@ def UserProjectList(uid):
     response.status_code=200
     return response
 
+#role: 110
 @api.route('/user/2bmember/',methods=['POST'])
 @login_required
 def User2bMember(uid):
     usr=User.query.filter_by(id=uid).first()
-    role=12
+    role=6
     if usr.role|role is not role:
     	response=jsonify({
             "msg": 'you are not superuser or admin!',
