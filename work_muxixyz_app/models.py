@@ -98,8 +98,8 @@ class Comment(db.Model):
     content=db.Column(db.Text)
     time=db.Column(db.String(50))
     creator=db.Column(db.Integer)
-    fileID=db.Column(db.Integer,db.ForeignKey('files.id'),default=0)
-    statuID=db.Column(db.Integer,db.ForeignKey('status.id'),default=0)
+    file_id=db.Column(db.Integer,db.ForeignKey('files.id'),default=0)
+    statu_id=db.Column(db.Integer,db.ForeignKey('status.id'),default=0)
 
 class Message(db.Model):
     __tablename__='messages'
@@ -112,7 +112,7 @@ class Message(db.Model):
     receive_id=db.Column(db.Integer,db.ForeignKey('users.id'))
     file_id=db.Column(db.Integer,db.ForeignKey('files.id'),default=0)
     statu_id=db.Column(db.Integer,db.ForeignKey('status.id'),default=0)
-    commen_id=db.Column(db.Integer,db.ForeignKey('comments.id'),default=0)
+    comment_id=db.Column(db.Integer,db.ForeignKey('comments.id'),default=0)
 
 def init_db():
 	db.create_all()
