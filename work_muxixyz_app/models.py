@@ -12,7 +12,7 @@ class User(db.Model):
     email=db.Column(db.String(35),unique=True)
     avatar=db.Column(db.String(50))
     tel=db.Column(db.String(15))
-    role=db.Column(db.Integer)
+    role=db.Column(db.Integer,default=0)
 
     email_service=db.Column(db.Boolean,default=True)
     message=db.Column(db.Boolean,default=True)
@@ -52,6 +52,7 @@ class Group(db.Model):
     name=db.Column(db.String(10),unique=True)
     count=db.Column(db.Integer)
     leader=db.Column(db.Integer)
+    users=db.relationship('User',backref='group',lazy='dynamic')
 
 class Project(db.Model):
     __tablename__='projects'

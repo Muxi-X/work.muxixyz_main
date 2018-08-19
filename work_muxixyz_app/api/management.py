@@ -12,12 +12,13 @@ import requests
 def NewGroup(uid):
     role=4 # 100
     usr=User.query.filter_by(id=uid).first()
-    if usr.role|role != role:
+    if usr.role&role != role:
+        print ('role:'+str(usr.role)+' role|role:'+str(usr.role|role))
         response=jsonify({
             "msg": 'you are not superuser!',
         })
         response.status_code=401
-        return response 
+        return response
     gname=request.get_json().get('groupName')
     ulist=request.get_json().get('userlist')
     group=Group(name=gname,count=0)
@@ -39,7 +40,7 @@ def NewGroup(uid):
     return response
 
 #role: 001
-@api.route('/group/<int: gid>/userList',methods=['GET'])
+@api.route('/group/<int:gid>/userList',methods=['GET'])
 @login_required
 def GroupUserList(uid,gid):
     page=1
@@ -88,58 +89,33 @@ def GroupList(uid):
     return response
 
 #role: 001
-@api.route('/project/<int: pid>/userList/',methods=['GET'])
+@api.route('/project/<int:pid>/userList/',methods=['GET'])
 @login_required
 def ProjectUserList(uid,pid):
     page=1
     if request.args.get('page') is not None:
         page=int(request.args.get('page'))
-    pjt=Project.query.filter_by(id=pid).first()
+    user=User2Project.query.filter_by(project_id=pid).all()
     counter=0
     usrs=list([None,None,None,None,None,None,None,None,None,None,None])
-    for u in pjc.users:
+    for U in user:
         c=int(counter)//10
         if (c+1) ==page:
-            usrs[counter%10]={
+            u=User.query.filter_by(id=U.user_id).first()
+            usrs[counter%10] = {
                 "username": u.name,
                 "userID": u.id,
                 "avatar": u.avatar,
-            }
+                }
         counter+=1
+    pjc=Project.query.filter_by(id=pid).first()
+    pjc.count=counter
+    db.session.add(pjc)
+    db.session.commit()
     response=jsonify({
                  "count": counter,
                  "list": usrs,
              })
-    response.status_code=200
-    return response
-
-#role: 110
-@api.route('/project/list/',methods=['GET'])
-@login_required
-def ProjectList(uid):
-    role=6 #110
-    usr=User.query.filter_by(id=uid).first()
-    if usr.role|role != role:
-        response=jsonify({
-            "msg": 'you just are a member!',
-        })
-        response.status_code=401
-        return response
-    pid=1
-    l=list([])
-    while True:
-        pjc=Project.query.filter_by(id=gid).first()
-        if pjc is None:
-            break
-        l.append({
-            "projectID": pid,
-            "peojectName": pjc.name,
-            "userCount": pjc.count,
-        })
-        pid+=1
-    response=jsonify({
-        "projectList": l,
-    })
     response.status_code=200
     return response
 
@@ -152,17 +128,28 @@ def UserProjectList(uid):
         page=int(request.args.get('page'))
     counter=0
     pjcs=list([None,None,None,None,None,None,None,None,None,None,None])
-# page     
+# page
     usr=User.query.filter_by(id=uid).first()
     if usr.role > 1:
-        response=requests.get(
-            url_for('api.ProjectList',_external=True),
-            headers={
-                "token": request.headers.get('token'),
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            }
-        )
+        pid=1
+        l=list([])
+        while True:
+            pjc=Project.query.filter_by(id=pid).first()
+            if pjc is None:
+                break
+            l.append({
+                "projectID": pid,
+                "peojectName": pjc.name,
+                "userCount": pjc.count,
+            })
+            counter+=1
+            pid+=1
+        response=jsonify({
+        	"count": counter,
+            "projectList": l,
+        })
+        response.status_code=200
+        return response
     for p in usr.projects:
         c=int(counter)//10
         if (c+1) ==page:
@@ -174,7 +161,7 @@ def UserProjectList(uid):
         counter+=1
     response=jsonify({
         "count": counter,
-        "list": pjcs,
+        "projectList": pjcs,
     })
     response.status_code=200
     return response
@@ -184,14 +171,16 @@ def UserProjectList(uid):
 @login_required
 def User2bMember(uid):
     usr=User.query.filter_by(id=uid).first()
-    role=6
-    if usr.role|role != role:
+    role=2
+    if usr.role&role != role:
         response=jsonify({
             "msg": 'you are not superuser or admin!',
         })
         response.status_code=401
         return response
-# role    
+# role
+    uid=request.get_json().get('userID')
+    usr=User.query.filter_by(id=uid).first()
     if usr.role != 0:
         response=jsonify({
             "msg": 'user already be a member!',
@@ -214,7 +203,7 @@ def AddAdmin(uid):
     usr=User.query.filter_by(id=uid).first()
 
     role=4
-    if role|usr.role != role:
+    if role&usr.role != role:
         response=jsonify({
             "msg": 'you are not superuser!'
         })
@@ -230,12 +219,12 @@ def AddAdmin(uid):
     return response
 
 #role: 110
-@api.route('/user/<int: id>/managePro/',methods=['POST'])
+@api.route('/user/<int:id>/managePro/',methods=['POST'])
 @login_required
 def ManageProject(uid,id):
-    role=6 #110
+    role=2 #110
     usr=User.query.filter_by(id=uid).first()
-    if role|usr.role != role:
+    if role&usr.role != role:
         response=jsonify({
             "msg": 'you are not superuser or admin!',
         })
@@ -246,24 +235,24 @@ def ManageProject(uid,id):
     oldPList=User2Project.query.filter_by(user_id=id).all()
     for pid in newPList:
         pjc=Project.query.filter_by(id=pid).first()
-        if pjc in oldPList && !(pjc in newPList):
+        if (pjc in oldPList) and (pjc not in newPList):
             record=User2Project.query.filter_by(user_id=id,project_id=pid).first()
             db.session.delete(record)
-        if !(pjc in oldPList) && pjc in newPList:
+        if (pjc not in oldPList) and pjc in newPList:
             record=User2Project(user_id=id,project_id=pid)
             db.session.add(record)
     db.session.commit()
-    responseh=jsonify({})
+    response=jsonify({})
     response.status_code=200
     return response
 
 #role: 110
-@api.route('/user/<int: id>/manageGroup/',methods=['POST'])
+@api.route('/user/<int:id>/manageGroup/',methods=['POST'])
 @login_required
 def ManageGroup(uid,id):
     usr=User.query.filter_by(id=uid).first()
-    role=6 #110
-    if role|usr.role != role:
+    role=2 #110
+    if role&usr.role != role:
         response=jsonify({
             "msg": 'you are not superuser or admin',
         })
@@ -280,12 +269,12 @@ def ManageGroup(uid,id):
     return response
 
 #role: 100
-@api.route('/user/<int: id>/setRole/',methods=['POST'])
+@api.route('/user/<int:id>/setRole/',methods=['POST'])
 @login_required
 def SetRole(uid,id):
     usr=User.query.filter_by(id=uid).first()
     role=4
-    if role|usr.role != role:
+    if role&usr.role != role:
         response=jsonify({
             "msg": 'you are not a superuser!',
         })
@@ -301,20 +290,20 @@ def SetRole(uid,id):
     response.status_code=200
     return response
 
-#role: 0001
-@api.route('/user/<int: id>/setting/',methods=['POST'])
+#role: 001
+@api.route('/user/<int:id>/setting/',methods=['POST'])
 @login_required
 def Setting(uid,id):
     if uid != id:
         response=jsonify({
-        	"msg": 'this is others personal setting!',
+            "msg": 'this is others personal setting!',
         })
         response.status_code=401
         return response
 
     username=request.get_json().get('username')
     address=request.get_json().get('address')
-    tel=reqruest.get_json().get('tel')
+    tel=request.get_json().get('tel')
     email=request.get_json().get('email')
     message=request.get_json().get('message')
     usr=User.query.filter_by(id=id).first()
