@@ -4,7 +4,7 @@ import os
 from work_muxixyz_app import create_app, db
 from flask import current_app, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from work_muxixyz_app.models import Team, Group, User, Project, Message, Statu, File, Comment, User2Project
+from work_muxixyz_app.models import Team, Group, User, Project, Message, Statu, File, Comment, User2Project, Folder, File
 import random
 import json
 
@@ -52,13 +52,21 @@ class BasicTestCase(unittest.TestCase):
         # usr=User(name='test',email='pig@test.com',tel='33333333333',role=1,team_id=1)
         # project=Project(name='test')
         # rela=User2Project(user_id=6,project_id=6)
+        # folder = Folder(name='test', project_id=5)
+        file = File(filename='test', kind=1, editor_id=6, creator_id=6, folder_id=1, project_id=5)
+        # statu = Statu(content='test', time='test', like=1, comment=1, user_id=5, )
         # db.session.add(muxi)
         # db.session.add(superuser)
         # db.session.add(admin)
         # db.session.add(usr)
         # db.session.add(project)
         # db.session.add(rela)
-        # db.session.commit()
+        # db.session.add(folder)
+        db.session.add(file)
+        # db.session.add(statu)
+        db.session.commit()
+        global fid
+        fid = str(file.id)
         response = self.client.post(
             url_for('api.login', _external=True),
             data=json.dumps({
@@ -101,17 +109,19 @@ class BasicTestCase(unittest.TestCase):
         )
         self.assertTrue(response.status_code == 200)
 
-    #
-    # def test_project_a_3_comments(self):
-    #     response = self.client.post(
-    #         'http://localhost/api/v1.0/project/1/file/1/comments/',
-    #         data = json.dumps({
-    #             "content": "test"
-    #         }),
-    #         headers = self.get_a_api_headers(True)
-    #     )
-    #     self.assertTrue(response.status_code == 200)
-    #
+
+    def test_project_a_3_comments(self):
+        response = self.client.post(
+            'http://localhost/api/v1.0/project/' + pid + '/file/1/comments/',
+            data=json.dumps({
+                "content": "test"
+            }),
+            headers=self.get_a_api_headers(True)
+        )
+        global cid
+        cid = json.loads(response.data)['cid']
+        self.assertTrue(response.status_code == 200)
+
     def test_project_a_4_member(self):
         response = self.client.put(
             'http://localhost/api/v1.0/project/' + pid + '/member/',
@@ -121,21 +131,21 @@ class BasicTestCase(unittest.TestCase):
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
-    #
-    # def test_project_b_1_comment(self):
-    #     respons = self.client.get(
-    #         'http://localhost/api/v1.0/project/1/file/1/comment/1/',
-    #         headers = self.get_a_api_headers(True)
-    #     )
-    #     self.assertTrue(response.status_code == 200)
-    #
-    # def test_project_b_2_comments(self):
-    #     response = self.client.get(
-    #         'http://localhost/api/v1.0/project/1/file/1/comments/',
-    #         headers = self.get_a_api_headers(True)
-    #     )
-    #     self.assertTrue(response.status_code == 200)
-    #
+
+    def test_project_b_1_comment(self):
+        response = self.client.get(
+            'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comment/' + cid + '/',
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+
+    def test_project_b_2_comments(self):
+        response = self.client.get(
+            'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comments/',
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+
     def test_project_b_3_member(self):
         response = self.client.get(
             'http://localhost/api/v1.0/project/' + pid + '/member/',
@@ -150,13 +160,13 @@ class BasicTestCase(unittest.TestCase):
         )
         self.assertTrue(response.status_code == 200)
 
-    # def test_project_c_1_comment(self):
-    #     response = self.client.delete(
-    #         'http://localhost/api/v1.0/project/1/file/1/comment/1/',
-    #         headers = self.get_a_api_headers(True)
-    #     )
-    #     self.assertTrue(response.status_code == 200)
-    #
+    def test_project_c_1_comment(self):
+        response = self.client.delete(
+            'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comment/' + cid + '/',
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+
     def test_project_c_2_project(self):
         response = self.client.delete(
             'http://localhost/api/v1.0/project/' + pid + '/',
