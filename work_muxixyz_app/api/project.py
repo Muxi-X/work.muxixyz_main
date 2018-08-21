@@ -43,6 +43,7 @@ def project_new(uid):
             db.session.commit()
     except Exception as e:
         return jsonify({
+            "errormessage": e
         }), 500
     return jsonify({
         'project_id': str(project.id)
@@ -63,8 +64,9 @@ def project_pid(uid, pid):
 
             db.session.add(project)
             db.session.commit()
-        except:
+        except Exception as e:
             return jsonify({
+                "errormesage": e
             }), 500
         return jsonify({
         }), 200
@@ -82,8 +84,8 @@ def project_pid(uid, pid):
                 db.session.delete(file)
             db.session.commit()
         except Exception as e:
-            print(e)
             return jsonify({
+                "errormessage": e
             }), 500
         return jsonify({
         }), 200
@@ -98,8 +100,9 @@ def project_pid(uid, pid):
                 "name": name,
                 "userCount": userCount
             }), 200
-        except:
+        except Exception as e:
             return jsonify({
+                "errormessage": e
             }), 500
     else:
         return jsonify({
@@ -123,8 +126,8 @@ def project_member(uid, pid):
                 db.session.add(nuser)
             db.session.commit()
         except Exception as e:
-            print(e)
             return jsonify({
+                "errormessage": e
             }), 500
         return jsonify({
         }), 200
@@ -150,3 +153,91 @@ def project_member(uid, pid):
     else:
         return jsonify({
         }), 405
+
+
+@api.route('project/<int:pid>/file/<int:fid>/comments/', methods=['POST', 'GET'])
+@login_required
+def project_file_comments(uid, pid, fid):
+    if request.method == 'POST':
+        import time
+        content = request.get_json().get('content')
+        localtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        comment = Comment(
+            kind=1,
+            content=content,
+            time=localtime,
+            creator=uid,
+            fileID=fid
+        )
+        try:
+            db.session.add(comment)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({
+                "errormessage": e
+            }), 500
+        return jsonify({
+            "cid": str(comment.id)
+        }), 200
+    elif request.method == 'GET':
+        comments = Comment.query.filter_by(fileID=fid).all()
+        commentList = []
+        try:
+            for comment in comments:
+                creator = User.query.filter_by(id=comment.creator).first()
+                username = creator.name
+                avatar = creator.avatar
+                time = comment.time
+                content = comment.content
+                commentList.append(
+                    {
+                        "username": username,
+                        "avatar": avatar,
+                        "time": time,
+                        "content": content
+                    }
+                )
+        except Exception as e:
+            return jsonify({
+                "errormessage": e
+            }), 500
+        return jsonify({
+            "commentList": commentList
+        })
+    else:
+        return jsonify({
+        }), 403
+
+
+@api.route('project/<int:pid>/file/<int:fid>/comment/<int:cid>/', methods=['GET', 'DELETE'])
+@login_required
+def project_file_comment(uid, pid, fid, cid):
+    if request.method == 'GET':
+        try:
+            comment = Comment.query.filter_by(id=cid).first()
+            creator = User.query.filter_by(id=comment.creator).first()
+            username = creator.name
+            acatar = creator.avatar
+            time - Comment.time
+            content = comment.content
+        except Exception as e:
+            return jsonify({
+                "errormessage": e
+            })
+        return jsonify({
+        }), 200
+    elif request.method == 'DELETE':
+        try:
+            comment = Comment.query.filter_by(id=cid).first()
+            db.session.delete(comment)
+            db.session.commit()
+        except Exception as e:
+            return jsonify({
+                "errormessage": e
+            })
+        return jsonify({
+        }), 200
+    else:
+        return jsonify({
+        }), 403
