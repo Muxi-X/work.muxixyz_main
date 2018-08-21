@@ -32,8 +32,12 @@ def test_management():
 def test_project():
 
     import unittest
-    tests=uniitest.TestLoader().discover('test_project')
-    unittest.TextTestRunner(berbosity=2).run(tests)
+    tests=unittest.TestLoader().discover('test_project')
+    unittest.TextTestRunner(verbosity=2).run(tests)
+
+@manager.command
+def createdb():
+    db.create_all()
 
 if __name__=='__main__':
     manager.run()
