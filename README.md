@@ -1,2 +1,6 @@
-# work.muxixyz_management
-The backend code of Project-Muxixyz's management macro service.
+# work.muxixyz_project
+# ENV
+
+    MYSQLUSER  
+    MYSQLPASSWORD   
+    MYSQLHOST
