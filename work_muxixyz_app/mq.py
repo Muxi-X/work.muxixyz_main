@@ -2,19 +2,19 @@ import pika
 import time
 
 
-def newfeed(uid, json):
+def newfeed(uid, avatar_url, action, kind, sourceID):
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(
             host='localhost'))
     channel = connection.channel()
-    time1 = str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-    avatar_url = str(json.avatar_url)
-    ACTION = str(json.get('action'))
-    KIND = str(json.get('kind'))
-    SOURCEID = str(json.get('sourceID'))
-    a_feed = time1+'/'+avatar_url+'/'+ACTION+'/'+KIND+'/'+SOURCEID 
+    time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    avatar_url = avatar_url
+    ACTION = action
+    KIND = kind
+    SOURCEID = sourceID
+    a_feed = {'time':time1,'avatar_url':avatar_url,'action':ACTION,'kind':KIND,'source':SOURCEID 
     channel.queue_declare(
-        queue=str(xid))
+        queue='feed')
     channel.basic_publish(
         exchange='',
         routing_key='feed'),
