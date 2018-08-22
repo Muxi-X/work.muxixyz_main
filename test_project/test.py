@@ -45,32 +45,35 @@ class BasicTestCase(unittest.TestCase):
         self.assertFalse(current_app is None)
 
     def test_management_a_auth(self):
-        # muxi=Team(name='test',count=3)
-        # superuser=User(name='test1',email='cat@test.com',tel='11111111111',role=7,team_id=1)
-        # muxi.creator=1
-        # admin=User(name='test2',email='dog@test.com',tel='22222222222',role=1,team_id=1)
-        # usr=User(name='test3',email='pig@test.com',tel='33333333333',role=1,team_id=1)
-        # project=Project(name='test')
-        # rela=User2Project(user_id=6,project_id=6)
-        # folder = Folder(name='test', project_id=5)
-        file = File(filename='test', kind=1, editor_id=6, creator_id=6, folder_id=1, project_id=5)
-        # statu = Statu(content='test', time='test', like=1, comment=1, user_id=5, )
-        # db.session.add(muxi)
-        # db.session.add(superuser)
-        # db.session.add(admin)
-        # db.session.add(usr)
-        # db.session.add(project)
-        # db.session.add(rela)
-        # db.session.add(folder)
+        muxi=Team(name='test', count=3, creator=1)
+        db.session.add(muxi)
+        db.session.commit()
+        superuser=User(name='test1',email='cat@test.com',tel='11111111111',role=7,team_id=muxi.id)
+        admin=User(name='test2',email='dog@test.com',tel='22222222222',role=1,team_id=muxi.id)
+        usr=User(name='test3',email='pig@test.com',tel='33333333333',role=1,team_id=muxi.id)
+        db.session.add(superuser)
+        db.session.add(admin)
+        db.session.add(usr)
+        db.session.commit()
+        project=Project(name='test')
+        db.session.add(project)
+        db.session.commit()
+        rela=User2Project(user_id=superuser.id,project_id=project.id)
+        folder = Folder(name='test', project_id=project.id)
+        db.session.add(folder)
+        db.session.commit()
+        file = File(filename='test', kind=1, editor_id=superuser.id, creator_id=superuser.id, folder_id=folder.id, project_id=project.id)
+        statu = Statu(content='test', time='test', like=1, comment=1, user_id=superuser.id, )
+        db.session.add(rela)
         db.session.add(file)
-        # db.session.add(statu)
+        db.session.add(statu)
         db.session.commit()
         global fid
         fid = str(file.id)
         response = self.client.post(
             url_for('api.login', _external=True),
             data=json.dumps({
-                "username": 'test',
+                "username": 'test1',
             }),
             headers=self.get_a_api_headers(False),
         )
@@ -83,8 +86,8 @@ class BasicTestCase(unittest.TestCase):
             url_for('api.project_new', _external=True),
             # 'http://localhost/api/v1.0/project/new/',
             data=json.dumps({
-                "username": "test",
-                "projectname": "test",
+                "username": "test1",
+                "projectname": "test1",
                 "userlist": [
                     {
                         "userID": 6,
