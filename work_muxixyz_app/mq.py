@@ -12,13 +12,17 @@ def newfeed(uid, avatar_url, action, kind, sourceID):
     ACTION = action
     KIND = kind
     SOURCEID = sourceID
-    a_feed = {'time':time1,'avatar_url':avatar_url,'action':ACTION,'kind':KIND,'source':SOURCEID 
-    channel.queue_declare(
-        queue='feed')
+    a_feed = {
+        'time':time1,
+        'avatar_url':avatar_url,
+        'action':ACTION,
+        'kind':KIND,
+        'source':SOURCEID}
+    channel.queue_declare(queue='feed')
     channel.basic_publish(
         exchange='',
-        routing_key='feed'),
+        routing_key='feed',
         body=str(a_feed),
         properties=pika.BasicProperties(
             delivery_mode=2))
-    connection.close() 
+    connection.close()
