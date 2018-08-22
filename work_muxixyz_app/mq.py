@@ -1,11 +1,13 @@
 import pika
 import time
+import os
 
+MQHOST = os.getenv("MQHOST") or "localhost"
 
 def newfeed(uid, avatar_url, action, kind, sourceID):
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(
-            host='localhost'))
+            host=MQHOST))
     channel = connection.channel()
     time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     avatar_url = avatar_url
@@ -15,6 +17,7 @@ def newfeed(uid, avatar_url, action, kind, sourceID):
     a_feed = {
         'time':time1,
         'avatar_url':avatar_url,
+        'uid':uid,
         'action':ACTION,
         'kind':KIND,
         'source':SOURCEID}
