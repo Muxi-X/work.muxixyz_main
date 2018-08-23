@@ -39,6 +39,25 @@ def NewGroup(uid):
     response.status_code=200
     return response
 
+@api.route('/group/<int:gid>/',methods=['DELETE'])
+@login_required
+def GroupDelete(uid,gid):
+    role=3
+    usr=User.query.filter_by(id=uid).first()
+    if role&usr.role != role:
+        response=jsonify({})
+        response.status_code=401
+        return response
+    grp=Group.query.filter_by(id=gid).first()
+    for u in grp.users:
+        u.group_id=None
+        db.session.add(u)
+    db.session.delete(grp)
+    db.session.commit()
+    response=jsonify({})
+    response.status_code=200
+    return response
+
 #role: 001
 @api.route('/group/<int:gid>/userList',methods=['GET'])
 @login_required
@@ -46,10 +65,16 @@ def GroupUserList(uid,gid):
     page=1
     if request.args.get('page') is not None:
         page=int(request.args.get('page'))
-    grp=Group.query.filter_by(id=gid).first()
     counter=0
     usrs=list([None,None,None,None,None,None,None,None,None,None,None])
-    for u in grp.users:
+    if gid == 0 :
+        # get all users
+        team=Team.query.filter_by(id=1).first()
+        users=team.users
+    else:
+        grp=Group.query.filter_by(id=gid).first()
+        users=grp.users
+    for u in users:
         c=int(counter)//10
         if (c+1) ==page:
             usrs[counter%10]={
@@ -130,9 +155,9 @@ def UserProjectList(uid):
     pjcs=list([None,None,None,None,None,None,None,None,None,None,None])
 # page
     usr=User.query.filter_by(id=uid).first()
-    if usr.role > 1:
-        pid=1
-        l=list([])
+    if usr.role > 1: # 111 superuser 7
+        pid=1        # 011 admin     3
+        l=list([])   # 001 user      1
         while True:
             pjc=Project.query.filter_by(id=pid).first()
             if pjc is None:
