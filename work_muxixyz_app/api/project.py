@@ -22,7 +22,7 @@ def project_new(uid):
     project = Project(name=projectname,
                       intro=intro,
                       time=localtime,
-                      count=count,
+                      count=count + 1,
                       team_id=team_id)
 
     try:
@@ -47,7 +47,7 @@ def project_new(uid):
         }), 500
     return jsonify({
         'project_id': str(project.id)
-    }), 200
+    }), 201
 
 
 @api.route('project/<int:pid>/', methods=['POST', 'DELETE', 'GET'])
@@ -69,7 +69,7 @@ def project_pid(uid, pid):
                 "errormesage": e
             }), 500
         return jsonify({
-        }), 200
+        }), 201
     elif request.method == 'DELETE':
         try:
             project = Project.query.filter_by(id=pid).first()
@@ -174,12 +174,13 @@ def project_file_comments(uid, pid, fid):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
+            print(e)
             return jsonify({
                 "errormessage": e
             }), 500
         return jsonify({
             "cid": str(comment.id)
-        }), 200
+        }), 201
     elif request.method == 'GET':
         comments = Comment.query.filter_by(fileID=fid).all()
         commentList = []

@@ -62,7 +62,7 @@ class Project(db.Model):
     name = db.Column(db.String(10)) # add unique = True
     intro = db.Column(db.String(100))
     time = db.Column(db.String(50))
-    count = db.Column(db.Integer)
+    count = db.Column(db.Integer, default=0)
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
     files = db.relationship('File', backref='project', lazy='dynamic')
     folders = db.relationship('Folder', backref='project', lazy='dynamic')
@@ -89,7 +89,7 @@ class Statu(db.Model):
 class Folder(db.Model):
     __tablename__ = 'folders'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    kind = db.Column(db.Boolean, default=False)
+    kind = db.Column(db.Boolean, default=False) # false==folder of file true==folder of md
     name = db.Column(db.String(30), nullable=False) # add unique = True
     father_id = db.Column(db.Integer, db.ForeignKey('folders.id'))
     # father = db.relationship('Folder', backref=db.backref('children'))
@@ -104,7 +104,7 @@ class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     url = db.Column(db.String(150)) # add unique = True
     filename = db.Column(db.String(150))
-    kind = db.Column(db.Boolean, default=False)
+    kind = db.Column(db.Boolean, default=False)# false==file true==md
     re = db.Column(db.Boolean, default=False)
     editor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     # editor = db.relationship('User', backref=db.backref('efiles'))
