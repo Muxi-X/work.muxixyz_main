@@ -201,4 +201,10 @@ class BasicTestCase(unittest.TestCase):
         )
         self.assertTrue(response.status_code==200)
 
+    def test_management_m_deletemember(self):
+        response=self.client.delete(
+            'http://localhost/api/v1.0/user/3/',
+            headers=self.get_api_headers(True)
+        )
+        self.assertTrue(response.status_code==200)
 # API FOR MANAGEMENT END

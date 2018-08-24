@@ -54,8 +54,7 @@ class Group(db.Model):
     name = db.Column(db.String(10), unique = True)
     count = db.Column(db.Integer)
     leader = db.Column(db.Integer)
-    users = db.relationship('User', backref='group', lazy='dynamic')
-
+    users = db.relationship('User',backref='group',lazy='dynamic')
 
 class Project(db.Model):
     __tablename__ = 'projects'
@@ -150,4 +149,5 @@ def init_db():
 
 
 if __name__ == '__main__':
-    init_db()
+#    init_db()
+    db.create_all()
