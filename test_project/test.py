@@ -198,7 +198,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_a_file(self):
         response = self.client.put(
-            url_for('api.project_f', pid=pid, foid=foid, toid=str(int(foid) - 1), _external=True),
+            url_for('api.project_f', pid=pid, foid=foid, toid=1, _external=True),
             data = json.dumps({
                 "kind": 1
             }),
@@ -290,32 +290,32 @@ class BasicTestCase(unittest.TestCase):
         )
         self.assertTrue(response.status_code == 200)
 
-    def test_project_c_1_comment(self):
-        response = self.client.delete(
-            url_for('api.project_file_comment', pid=pid, fid=fid, cid=cid, _external=True),
-            # 'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comment/' + cid + '/',
-            headers=self.get_a_api_headers(True)
-        )
-        self.assertTrue(response.status_code == 200)
+    # def test_project_c_1_comment(self):
+    #     response = self.client.delete(
+    #         url_for('api.project_file_comment', pid=pid, fid=fid, cid=cid, _external=True),
+    #         # 'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comment/' + cid + '/',
+    #         headers=self.get_a_api_headers(True)
+    #     )
+    #     self.assertTrue(response.status_code == 200)
 
-    def test_project_c_2_project(self):
-        response = self.client.delete(
-            url_for('api.project_pid', pid=pid, _external=True),
-            # 'http://localhost/api/v1.0/project/' + pid + '/',
-            headers=self.get_a_api_headers(True)
-        )
-        self.assertTrue(response.status_code == 200)
+    # def test_project_c_2_project(self):
+    #     response = self.client.delete(
+    #         url_for('api.project_pid', pid=pid, _external=True),
+    #         # 'http://localhost/api/v1.0/project/' + pid + '/',
+    #         headers=self.get_a_api_headers(True)
+    #     )
+    #     self.assertTrue(response.status_code == 200)
 
-    def test_project_c_4_file(self):
-        response = self.client.delete(
-            url_for('api.project_folder', pid=pid, foid=foid, _external=True),
-            headers=self.get_a_api_headers(True)
-        )
-        self.assertTrue(response.status_code == 200)
+    # def test_project_c_4_file(self):
+    #     response = self.client.delete(
+    #         url_for('api.project_folder', pid=pid, foid=foid, _external=True),
+    #         headers=self.get_a_api_headers(True)
+    #     )
+    #     self.assertTrue(response.status_code == 200)
 
-    def test_project_c_3_file(self):
-        response = self.client.delete(
-            url_for('api.project_file', pid=pid, foid=foid, fid=fid, _external=True),
-            headers=self.get_a_api_headers(True)
-        )
-        self.assertTrue(response.status_code == 200)
+    # def test_project_c_3_file(self):
+    #     response = self.client.delete(
+    #         url_for('api.project_file', pid=pid, foid=foid, fid=fid, _external=True),
+    #         headers=self.get_a_api_headers(True)
+    #     )
+    #     self.assertTrue(response.status_code == 200)
