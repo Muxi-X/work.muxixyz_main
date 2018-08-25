@@ -20,7 +20,7 @@ def newfeed(uid, avatar_url, action, kind, sourceID):
         'uid':uid,
         'action':ACTION,
         'kind':KIND,
-        'source':SOURCEID}
+        'sourceid':SOURCEID}
     channel.queue_declare(queue='feed')
     channel.basic_publish(
         exchange='',
