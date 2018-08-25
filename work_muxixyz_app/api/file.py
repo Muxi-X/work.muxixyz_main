@@ -37,6 +37,7 @@ def project_folder(uid, pid, foid):
                 "errormessage": str(e)
             }), 500
         return jsonify({
+            "foid": str(folder.id)
         }), 201
     elif request.method == 'GET':
         fList = []
@@ -176,10 +177,12 @@ def project_file(uid, pid, foid, fid):
             db.session.add(myfile)
             db.session.commit()
         except Exception as e:
+            db.session.rollback()
             return jsonify({
-                "errormessage": str(e)
+                "errormessage": e
             }), 500
         return jsonify({
+            "fid": str(myfile.id)
         }), 201
     elif request.method == 'GET':
         try:

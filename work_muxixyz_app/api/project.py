@@ -167,7 +167,7 @@ def project_file_comments(uid, pid, fid):
             content=content,
             time=localtime,
             creator=uid,
-            fileID=fid
+            file_id=fid
         )
         try:
             db.session.add(comment)
@@ -182,7 +182,7 @@ def project_file_comments(uid, pid, fid):
             "cid": str(comment.id)
         }), 201
     elif request.method == 'GET':
-        comments = Comment.query.filter_by(fileID=fid).all()
+        comments = Comment.query.filter_by(file_id=fid).all()
         commentList = []
         try:
             for comment in comments:
