@@ -125,8 +125,8 @@ class Comment(db.Model):
     content = db.Column(db.Text)
     time = db.Column(db.String(50))
     creator = db.Column(db.Integer)
-    fileID = db.Column(db.Integer, db.ForeignKey('files.id'), default=1)
-    statuID = db.Column(db.Integer, db.ForeignKey('status.id'), default=1)
+    file_id = db.Column(db.Integer, db.ForeignKey('files.id'), default=1)
+    statu_id = db.Column(db.Integer, db.ForeignKey('status.id'), default=1)
 
 
 class Message(db.Model):
