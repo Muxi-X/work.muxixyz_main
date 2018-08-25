@@ -43,7 +43,7 @@ def project_new(uid):
             db.session.commit()
     except Exception as e:
         return jsonify({
-            "errormessage": e
+            "errormessage": str(e)
         }), 500
     return jsonify({
         'project_id': str(project.id)
@@ -85,7 +85,7 @@ def project_pid(uid, pid):
             db.session.commit()
         except Exception as e:
             return jsonify({
-                "errormessage": e
+                "errormessage": str(e)
             }), 500
         return jsonify({
         }), 200
@@ -102,7 +102,7 @@ def project_pid(uid, pid):
             }), 200
         except Exception as e:
             return jsonify({
-                "errormessage": e
+                "errormessage": str(e)
             }), 500
     else:
         return jsonify({
@@ -127,7 +127,7 @@ def project_member(uid, pid):
             db.session.commit()
         except Exception as e:
             return jsonify({
-                "errormessage": e
+                "errormessage": str(e)
             }), 500
         return jsonify({
         }), 200
@@ -176,7 +176,7 @@ def project_file_comments(uid, pid, fid):
             db.session.rollback()
             print(e)
             return jsonify({
-                "errormessage": e
+                "errormessage": str(e)
             }), 500
         return jsonify({
             "cid": str(comment.id)
@@ -201,7 +201,7 @@ def project_file_comments(uid, pid, fid):
                 )
         except Exception as e:
             return jsonify({
-                "errormessage": e
+                "errormessage": str(e)
             }), 500
         return jsonify({
             "commentList": commentList
@@ -224,7 +224,7 @@ def project_file_comment(uid, pid, fid, cid):
             content = comment.content
         except Exception as e:
             return jsonify({
-                "errormessage": e
+                "errormessage": str(e)
             })
         return jsonify({
         }), 200
@@ -235,7 +235,7 @@ def project_file_comment(uid, pid, fid, cid):
             db.session.commit()
         except Exception as e:
             return jsonify({
-                "errormessage": e
+                "errormessage": str(e)
             })
         return jsonify({
         }), 200
