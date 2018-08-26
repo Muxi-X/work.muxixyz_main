@@ -148,7 +148,7 @@ class Feed(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.String(20))
     avatar_url = db.Column(db.String(100))
-    action = db.Column(db.String(10))
+    action = db.Column(db.String(100))
     kind = db.Column(db.Integer)
     sourceid = db.Column(db.Integer)
     divider = db.Column(db.Boolean)
