@@ -19,7 +19,11 @@ migrate=Migrate(app,db)
 
 manager.add_command('db',MigrateCommand)
 
-MQHOST = os.getenv('MQHOST') or 'localhost'
+MQHOST = os.getenv('MQHOST') or '120.78.194.125'
+MQUSERNAME = os.getenv("MQUSERNAME")
+MQPASSWORD = os.getenv("MQPASSWORD")
+
+
 
 def make_shell_context():
     return dict(app=app)
@@ -50,9 +54,13 @@ def test_status():
 
 @manager.command
 def receive():
+    credentials = pika.PlainCredentials(MQUSERNAME, MQPASSWORD)
     connection = pika.BlockingConnection(
     pika.ConnectionParameters(
-        host=MQHOST))
+        host=MQHOST,
+        port=5672,
+        virtual_host='/',
+        credentials=credentials))
     channel = connection.channel()
     feed_queue = channel.queue_declare(queue='feed')
     def callback(ch, method, properties, body):
