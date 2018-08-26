@@ -132,14 +132,19 @@ class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.String(30))
     action = db.Column(db.Text)
-    kind = db.Column(db.Integer)
+#    kind = db.Column(db.Integer)
     readed = db.Column(db.Boolean, default=False)
     from_id = db.Column(db.Integer)
     receive_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     file_id = db.Column(db.Integer, db.ForeignKey('files.id'), default=0)
-    statu_id = db.Column(db.Integer, db.ForeignKey('status.id'), default=0)
-    commen_id = db.Column(db.Integer, db.ForeignKey('comments.id'), default=0)
+#    statu_id = db.Column(db.Integer, db.ForeignKey('status.id'), default=0)
+#    commen_id = db.Column(db.Integer, db.ForeignKey('comments.id'), default=0)
 
+class User2File(db.Model):
+    __tablename__ = 'user2files'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    file_id = db.Column(db.Integer)
 
 def init_db():
     db.create_all()
