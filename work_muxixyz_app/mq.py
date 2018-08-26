@@ -4,13 +4,14 @@ import os
 
 MQHOST = os.getenv("MQHOST") or "localhost"
 
-def newfeed(uid, avatar_url, action, kind, sourceID):
+def newfeed(uid, action, kind, sourceID):
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(
             host=MQHOST))
     channel = connection.channel()
     time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    avatar_url = avatar_url
+    user = User.query.filter_by(id=uid).first()
+    avatar_url = user.avatar
     ACTION = action
     KIND = kind
     SOURCEID = sourceID
