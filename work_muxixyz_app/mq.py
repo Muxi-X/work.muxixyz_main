@@ -11,8 +11,9 @@ def newfeed(uid, action, kind, sourceID):
     channel = connection.channel()
     time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     user = User.query.filter_by(id=uid).first()
+    username = user.name
     avatar_url = user.avatar
-    ACTION = action
+    ACTION = username + ' ' + action
     KIND = kind
     SOURCEID = sourceID
     a_feed = {
