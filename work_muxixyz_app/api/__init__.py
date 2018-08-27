@@ -2,4 +2,4 @@ from flask import Blueprint
 
 api=Blueprint("api",__name__)
 
-from . import auth, management, project, file
+from . import auth, project, file

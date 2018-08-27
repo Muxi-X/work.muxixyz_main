@@ -6,8 +6,8 @@ from ..decorator import login_required
 import time
 
 
-@api.route('project/new/', methods=['POST'])
-@login_required
+@api.route('project/new/', methods=['POST'], endpoint='ProjectNew')
+@login_required(role = 2)
 def project_new(uid):
     username = request.get_json().get('username')
     projectname = request.get_json().get('projectname')
@@ -50,8 +50,8 @@ def project_new(uid):
     }), 201
 
 
-@api.route('project/<int:pid>/', methods=['POST', 'DELETE', 'GET'])
-@login_required
+@api.route('project/<int:pid>/', methods=['POST', 'DELETE'], endpoint='ProjectPid')
+@login_required(role = 2)
 def project_pid(uid, pid):
     if request.method == 'POST':
         intro = request.get_json().get('intro')
@@ -89,74 +89,83 @@ def project_pid(uid, pid):
             }), 500
         return jsonify({
         }), 200
-    elif request.method == 'GET':
-        try:
-            project = Project.query.filter_by(id=pid).first()
-            intro = project.intro
-            name = project.name
-            userCount = project.count
-            return jsonify({
-                "intro": intro,
-                "name": name,
-                "userCount": userCount
-            }), 200
-        except Exception as e:
-            return jsonify({
-                "errormessage": str(e)
-            }), 500
-    else:
-        return jsonify({
-        }), 405
 
 
-@api.route('project/<int:pid>/member/', methods=['PUT', 'GET'])
-@login_required
-def project_member(uid, pid):
-    if request.method == 'PUT':
-        userlist = request.get_json().get('userList')
-        try:
-            project = Project.query.filter_by(id=pid).first()
-            project.count += len(userlist)
-            db.session.add(project)
-            for user in userlist:
-                nuser = User2Project(
-                    user_id=user,
-                    project_id=pid
-                )
-                db.session.add(nuser)
-            db.session.commit()
-        except Exception as e:
-            return jsonify({
-                "errormessage": str(e)
-            }), 500
+@api.route('project/<int:pid>/', methods=['GET'], endpoint='ProjectPidGet')
+@login_required(role = 1)
+def project_pid_get(uid, pid):
+    u2ps = User2Project.query.filter_by(user_id=uid).all()
+    flag = True
+    for u2p in u2ps:
+        if u2p.project_id == pid:
+            flag = False
+            break
+    if flag:
+        return jsonify({}), 401
+    try:
+        project = Project.query.filter_by(id=pid).first()
+        intro = project.intro
+        name = project.name
+        userCount = project.count
         return jsonify({
+            "intro": intro,
+            "name": name,
+            "userCount": userCount
         }), 200
-    elif request.method == 'GET':
-        try:
-            memberList = []
-            u2plist = User2Project.query.filter_by(project_id=pid).all()
-            for u2p in u2plist:
-                user = User.query.filter_by(id=u2p.user_id).first()
-                memberList.append(
-                    {
-                        "userID": user.id,
-                        "username": user.name,
-                        "avatar": user.avatar
-                    }
-                )
-        except Exception as e:
-            print(e)
-            return jsonify({
-            }), 500
+    except Exception as e:
         return jsonify({
-        }), 200
-    else:
-        return jsonify({
-        }), 405
+            "errormessage": str(e)
+        }), 500
 
 
-@api.route('project/<int:pid>/file/<int:fid>/comments/', methods=['POST', 'GET'])
-@login_required
+@api.route('project/<int:pid>/member/', methods=['PUT'], endpoint='ProjectMemberPut')
+@login_required(role = 2)
+def project_member_put(uid, pid):
+    userlist = request.get_json().get('userList')
+    try:
+        project = Project.query.filter_by(id=pid).first()
+        project.count += len(userlist)
+        db.session.add(project)
+        for user in userlist:
+            nuser = User2Project(
+                user_id=user,
+                project_id=pid
+            )
+            db.session.add(nuser)
+        db.session.commit()
+    except Exception as e:
+        return jsonify({
+            "errormessage": str(e)
+        }), 500
+    return jsonify({
+    }), 200
+
+
+@api.route('project/<int:pid>/member/', methods=['GET'], endpoint='ProjectMemberGet')
+@login_required(role = 1)
+def project_member_get(uid, pid):
+    try:
+        memberList = []
+        u2plist = User2Project.query.filter_by(project_id=pid).all()
+        for u2p in u2plist:
+            user = User.query.filter_by(id=u2p.user_id).first()
+            memberList.append(
+                {
+                    "userID": user.id,
+                    "username": user.name,
+                    "avatar": user.avatar
+                }
+            )
+    except Exception as e:
+        print(e)
+        return jsonify({
+        }), 500
+    return jsonify({
+    }), 200
+
+
+@api.route('project/<int:pid>/file/<int:fid>/comments/', methods=['POST', 'GET'], endpoint='ProjectFileComments')
+@login_required(role = 1)
 def project_file_comments(uid, pid, fid):
     if request.method == 'POST':
         import time
@@ -211,9 +220,9 @@ def project_file_comments(uid, pid, fid):
         }), 403
 
 
-@api.route('project/<int:pid>/file/<int:fid>/comment/<int:cid>/', methods=['GET', 'DELETE'])
-@login_required
-def project_file_comment(uid, pid, fid, cid):
+@api.route('project/<int:pid>/file/<int:fid>/comment/<int:cid>/', methods=['GET', 'DELETE'], endpoint='ProjectFileComment')
+@login_required(role = 1)
+def project_file_comment_get(uid, pid, fid, cid):
     if request.method == 'GET':
         try:
             comment = Comment.query.filter_by(id=cid).first()
@@ -230,6 +239,8 @@ def project_file_comment(uid, pid, fid, cid):
         }), 200
     elif request.method == 'DELETE':
         try:
+            if comment.creator != uid:
+                return jsonify({}), 401
             comment = Comment.query.filter_by(id=cid).first()
             db.session.delete(comment)
             db.session.commit()

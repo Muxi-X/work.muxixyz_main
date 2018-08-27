@@ -8,8 +8,8 @@ import qiniu.config
 import os
 import requests
 
-@api.route('project/<int:pid>/folder/<int:foid>/', methods=['POST', 'GET', 'PUT', 'DELETE'])
-@login_required
+@api.route('project/<int:pid>/folder/<int:foid>/', methods=['POST', 'GET', 'PUT', 'DELETE'], endpoint='ProjectFolder')
+@login_required(role = 1)
 def project_folder(uid, pid, foid):
     if request.method == 'POST':
         try:
@@ -121,8 +121,8 @@ def project_folder(uid, pid, foid):
         return jsonify({
         }), 200
 
-@api.route('froject/<int:pid>/file/<int:foid>/<int:fid>/', methods=['POST', 'GET', 'PUT', 'DELETE'])
-@login_required
+@api.route('froject/<int:pid>/file/<int:foid>/<int:fid>/', methods=['POST', 'GET', 'PUT', 'DELETE'], endpoint='ProjectFile')
+@login_required(role = 1)
 def project_file(uid, pid, foid, fid):
     access_key = 'YCdnGHp2tRa7V0KDisHqXehlny0eVNM5vQow1cQV'  # os.environ.get('ACCESS_KEY)
     secret_key = 'ZGgkaNPunh6Y32FcsAtvhOd61rnlcKeeXPZ-qIlr'  # os.environ.get('SECRET_KEY)
@@ -240,6 +240,8 @@ def project_file(uid, pid, foid, fid):
     elif request.method == 'DELETE':
         try:
             file = File.query.filter_by(id=fid, re=False).first()
+            if file.creator_id != uid:
+                return jsonify({}), 401
             ret, info = bucket.delete(bucket_name, file.filename)
             db.session.delete(file)
             db.session.commit()
@@ -254,8 +256,8 @@ def project_file(uid, pid, foid, fid):
         }), 403
 
 
-@api.route('project/<int:pid>/f<int:foid>/<int:toid>/', methods=['PUT'])
-@login_required
+@api.route('project/<int:pid>/f<int:foid>/<int:toid>/', methods=['PUT'], endpoint='ProjectF')
+@login_required(role = 1)
 def project_f(uid, pid, foid, toid):
     kind = request.get_json().get('kind')
     try:
@@ -277,8 +279,8 @@ def project_f(uid, pid, foid, toid):
     }), 200
 
 
-@api.route('project/<int:pid>/re/',  methods=['POST', 'GET', 'PUT'])
-@login_required
+@api.route('project/<int:pid>/re/',  methods=['POST', 'GET', 'PUT'], endpoint='ProjectRe')
+@login_required(role = 1)
 def project_re(uid, pid):
     if request.method == 'POST':
         id = request.get_json().get("id")
