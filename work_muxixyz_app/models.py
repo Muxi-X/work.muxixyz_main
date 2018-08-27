@@ -46,7 +46,7 @@ class Team(db.Model):
     count = db.Column(db.Integer)
     time = db.Column(db.String(50))
     creator = db.Column(db.Integer)
-
+    users = db.relationship('User', backref='team', lazy='dynamic')
 
 class Group(db.Model):
     __tablename__ = 'groups'

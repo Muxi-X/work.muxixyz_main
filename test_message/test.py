@@ -41,7 +41,7 @@ class BasicTestCase(unittest.TestCase):
 
 # API FOR GET A TOKEN AND PREPARTION
 
-    def test_management_a_auth(self):
+    def test_message_a_auth(self):
         muxi=Team(name='test',count=3)
         superuser=User(name='cat',email='cat@test.com',tel='11111111111',role=7,team_id=1)
         muxi.creator=1
@@ -70,17 +70,17 @@ class BasicTestCase(unittest.TestCase):
         TOKEN=s
         print ('OK')
 # END
-    def test_management_b_userattention(self):
+    def test_message_b_userattention(self):
         response=self.client.post(
             url_for('api.UserAttention',_external=True),
             data=json.dumps({
                 "fileID": 1,
             }),
-            headers=self.get_api_headers(False),
+            headers=self.get_api_headers(True),
         )
         self.assertTrue(response.status_code==200)
     
-    def test_management_c_newmessage(self):
+    def test_message_c_newmessage(self):
         response=self.client.post(
             url_for('api.MessageNew',_external=True),
             data=json.dumps({
@@ -91,7 +91,32 @@ class BasicTestCase(unittest.TestCase):
                     "sourceID": 1
                 }
             }),
-            headers=self.get_api_headers(False),
+            headers=self.get_api_headers(True),
         )
         self.assertTrue(response.status_code==200)
     
+    def test_message_d_readall(self):
+        response=self.client.post(
+            url_for('api.ReadAll',_external=True),
+            data=json.dumps({
+                {
+                    "username": 'cat',
+                }
+            }),
+            headers=self.get_api_headers(True),
+        )
+        self.assertTrue(response.status_code==200)
+    
+    def test_message_e_messageinfo(self):
+        response=self.client.get(
+            url_for('http://localhost/api/v1.0/message/cat/1/',_external=True),
+            headers=self.get_api_headers(True),
+        )
+        self.assertTrue(response.status_code==200)
+    
+    def test_message_f_messagelist(self):
+        response=self.client.get(
+            url_for('http://localhost/api/v1.0/messagelist/?kind=1&page=1',_external=True),
+            headers=self.get_api_headers(True),
+        )
+        self.assertTrue(response.status_code==200)
