@@ -91,7 +91,7 @@ class BasicTestCase(unittest.TestCase):
                 "projectname": "test1",
                 "userlist": [
                     {
-                        "userID": 6,
+                        "userID": 1,
                        "userName": "test"
                     }
                 ],
@@ -172,7 +172,7 @@ class BasicTestCase(unittest.TestCase):
             url_for('api.ProjectMemberPut', pid=pid, fid=fid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/member/',
             data=json.dumps({
-                "userList": [6]
+                "userList": [1, 6]
             }),
             headers=self.get_a_api_headers(True)
         )

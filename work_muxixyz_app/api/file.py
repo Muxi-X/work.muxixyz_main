@@ -217,6 +217,7 @@ def project_file(uid, pid, foid, fid):
             else:
                 content = ' '
         except Exception as e:
+            print(e)
             return jsonify({
                 "errormessage": str(e)
             }), 500

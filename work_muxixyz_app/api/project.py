@@ -168,7 +168,17 @@ def project_member_put(uid, pid):
         project = Project.query.filter_by(id=pid).first()
         project.count += len(userlist)
         db.session.add(project)
+        u2ps = User2Project.query.filter_by(project_id=pid).all()
+        nu = []
+        for u2p in u2ps:
+            if u2p.user_id in userlist:
+                nu.append(u2p.user_id)
+                continue
+            db.session.delete(u2p)
+        db.session.commit()
         for user in userlist:
+            if user in nu:
+                continue
             nuser = User2Project(
                 user_id=user,
                 project_id=pid
@@ -176,6 +186,7 @@ def project_member_put(uid, pid):
             db.session.add(nuser)
         db.session.commit()
     except Exception as e:
+        print (e)
         return jsonify({
             "errormessage": str(e)
         }), 500
