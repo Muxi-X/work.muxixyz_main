@@ -7,6 +7,7 @@ from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
 import os
 import requests
+import time
 from ..mq import newfeed
 
 access_key = 'YCdnGHp2tRa7V0KDisHqXehlny0eVNM5vQow1cQV'  # os.environ.get('ACCESS_KEY)
@@ -28,6 +29,7 @@ def project_folder(uid, pid, foid):
                     kind=kind,
                     name=foldername,
                     father_id=foid,
+                    time = time.time(),
                     project_id=pid
                 )
             else:

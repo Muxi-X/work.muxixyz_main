@@ -106,6 +106,7 @@ class File(db.Model):
     filename = db.Column(db.String(150))
     kind = db.Column(db.Boolean, default=False)# false==file true==md
     re = db.Column(db.Boolean, default=False)
+    time = db.Column(db.String(30))
     editor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     # editor = db.relationship('User', backref=db.backref('efiles'))
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
