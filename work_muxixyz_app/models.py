@@ -54,6 +54,7 @@ class Group(db.Model):
     name = db.Column(db.String(10), unique = True)
     count = db.Column(db.Integer)
     leader = db.Column(db.Integer)
+    time = db.Column(db.String(30))
     users = db.relationship('User',backref='group',lazy='dynamic')
 
 class Project(db.Model):

@@ -3,6 +3,8 @@ from . import api
 from .. import db
 from ..models import Team, Group, User, Project, User2Project, Message, Statu, File, Comment
 from ..decorator import login_required
+from ..timetools import to_readable_time
+import time
 
 import requests
 
@@ -12,7 +14,10 @@ import requests
 def new_group(uid):
     gname = request.get_json().get('groupName')
     ulist = request.get_json().get('userlist')
-    group = Group(name = gname, count = 0)
+    group = Group(
+        time = to_readable_time(str(time.time())),
+        name = gname, count = 0
+    )
     db.session.add(group)
     db.session.commit()
     for u in ulist:
@@ -61,19 +66,42 @@ def group_user_list(uid, gid):
         grp = Group.query.filter_by(id = gid).first()
         users = grp.users
     for u in users:
+        grp=Group.query.filter_by(id=u.group_id).first()
         c = int(counter)//10
         if (c+1)  == page:
             usrs[counter%10] = {
                 "username": u.name, 
                 "userID": u.id, 
                 "role": u.role, 
-                "email": u.email, 
+                "email": u.email,
+                "avatar": u.avatar,
+                "groupName": grp.name,
             }
         counter += 1
     response = jsonify({
                  "count": counter, 
                  "list": usrs, 
              })
+    response.status_code = 200
+    return response
+
+#role: 110
+@api.route('/group/<int:gid>/manageUser/', methods = ['POST'], endpoint = 'GroupManageUser')
+@login_required(role = 2)
+def group_manage_user(uid, gid):
+    newUList = request.get_json().get('userList')
+    oldUList = Group.query.filter_by(id = gid).first().users
+    for u in newUList:
+        usr = User.query.filter_by(id = u).first()
+        if usr not in oldUList:
+            usr.group_id = gid
+            db.session.add(usr)
+    for usr in oldUList:
+        if usr.id not in newUList:
+            usr.group_id=None
+            db.session.add(usr)
+    db.session.commit()
+    response = jsonify({})
     response.status_code = 200
     return response
 
@@ -219,12 +247,13 @@ def manage_project(uid, id):
     oldPList = User2Project.query.filter_by(user_id = id).all()
     for pid in newPList:
         pjc = Project.query.filter_by(id = pid).first()
-        if (pjc in oldPList) and (pjc not in newPList):
-            record = User2Project.query.filter_by(user_id = id, project_id = pid).first()
-            db.session.delete(record)
-        if (pjc not in oldPList) and pjc in newPList:
+        if pjc not in oldPList:
             record = User2Project(user_id = id, project_id = pid)
             db.session.add(record)
+    for pjc in oldPList:
+        if pjc.id not in newPList:
+            record = User2Project.query.filter_by(user_id = id, project_id = pid).first()
+            db.session.delete(record)
     db.session.commit()
     response = jsonify({})
     response.status_code = 200
