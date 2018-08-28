@@ -1,17 +1,27 @@
 import pika
 import time
 import os
+from work_muxixyz_app import db
+from work_muxixyz_app.models import User
 
-MQHOST = os.getenv("MQHOST") or "localhost"
+MQHOST = os.getenv("MQHOST") or "120.78.194.125"
+MQUSERNAME = os.getenv("MQUSERNAME") or "feed"
+MQPASSWORD = os.getenv("MQPASSWORD") or "muxixyz"
 
-def newfeed(uid, avatar_url, action, kind, sourceID):
+def newfeed(uid, action, kind, sourceID):
+    credentials = pika.PlainCredentials(MQUSERNAME, MQPASSWORD)
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(
-            host=MQHOST))
+            host=MQHOST,
+            port=5672,
+            virtual_host='/',
+            credentials=credentials))
     channel = connection.channel()
     time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    avatar_url = avatar_url
-    ACTION = action
+    user = User.query.filter_by(id=uid).first()
+    username = user.name
+    avatar_url = user.avatar
+    ACTION = username + ' ' + action
     KIND = kind
     SOURCEID = sourceID
     a_feed = {
@@ -20,7 +30,7 @@ def newfeed(uid, avatar_url, action, kind, sourceID):
         'uid':uid,
         'action':ACTION,
         'kind':KIND,
-        'source':SOURCEID}
+        'sourceid':SOURCEID}
     channel.queue_declare(queue='feed')
     channel.basic_publish(
         exchange='',

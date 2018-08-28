@@ -125,8 +125,8 @@ class Comment(db.Model):
     content = db.Column(db.Text)
     time = db.Column(db.String(50))
     creator = db.Column(db.Integer)
-    file_id = db.Column(db.Integer, db.ForeignKey('files.id'), default=1)
-    statu_id = db.Column(db.Integer, db.ForeignKey('status.id'), default=1)
+    file_id=db.Column(db.Integer,db.ForeignKey('files.id',ondelete="cascade"))
+    statu_id=db.Column(db.Integer,db.ForeignKey('status.id', ondelete='cascade'))
 
 
 class Message(db.Model):
@@ -138,9 +138,9 @@ class Message(db.Model):
     readed = db.Column(db.Boolean, default=False)
     from_id = db.Column(db.Integer)
     receive_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    file_id = db.Column(db.Integer, db.ForeignKey('files.id'), default=0)
-    statu_id = db.Column(db.Integer, db.ForeignKey('status.id'), default=0)
-    commen_id = db.Column(db.Integer, db.ForeignKey('comments.id'), default=0)
+    file_id = db.Column(db.Integer, db.ForeignKey('files.id'))
+    statu_id = db.Column(db.Integer, db.ForeignKey('status.id'))
+    comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
 
 
 def init_db():

@@ -1,9 +1,19 @@
 from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
-from ..models import Team, Group, User, Project, Message, Statu, File, Comment, User2Project
+from ..models import Team, Group, User, Project, Message, Statu, File, Folder, Comment, User2Project
 from ..decorator import login_required
 import time
+from ..mq import newfeed
+from qiniu import Auth, put_file, etag, BucketManager
+import qiniu.config
+
+access_key = 'YCdnGHp2tRa7V0KDisHqXehlny0eVNM5vQow1cQV'  # os.environ.get('ACCESS_KEY)
+secret_key = 'ZGgkaNPunh6Y32FcsAtvhOd61rnlcKeeXPZ-qIlr'  # os.environ.get('SECRET_KEY)
+url = 'pdw7hnao1.bkt.clouddn.com'                        # os.environ.get('URL')
+bucket_name = 'test-work'
+q = qiniu.Auth(access_key, secret_key)
+bucket = BucketManager(q)
 
 
 @api.route('project/new/', methods=['POST'], endpoint='ProjectNew')
@@ -45,6 +55,9 @@ def project_new(uid):
         return jsonify({
             "errormessage": str(e)
         }), 500
+    action = "create" + projectname
+    kind = 1
+    newfeed(uid, action, kind, project.id)
     return jsonify({
         'project_id': str(project.id)
     }), 201
@@ -68,9 +81,27 @@ def project_pid(uid, pid):
             return jsonify({
                 "errormesage": e
             }), 500
+        action = "revise" + name
+        kind = 1
+        newfeed(uid, action, kind, project.id)
         return jsonify({
         }), 201
     elif request.method == 'DELETE':
+        def folder_deleter(deid):
+            defiles = File.query.filter_by(folder_id=deid, re=False).all()
+            for de in defiles:
+                ret, info = bucket.delete(bucket_name, de.filename)
+                db.session.delete(de)
+                db.session.commit()
+
+            defolders = Folder.query.filter_by(father_id=deid, re=False).all()
+            if len(defolders) == 0:
+                defolder = Folder.query.filter_by(id=deid, re=False).first()
+                db.session.delete(defolder)
+                db.session.commit()
+            else:
+                for defo in defolders:
+                    folder_deleter(defo.id)
         try:
             project = Project.query.filter_by(id=pid).first()
             db.session.delete(project)
@@ -79,14 +110,25 @@ def project_pid(uid, pid):
             for u2p in user2projects:
                 db.session.delete(u2p)
             db.session.commit()
-            files = File.query.filter_by(project_id=pid)
+            files = File.query.filter_by(project_id=pid, folder_id=None)
             for file in files:
                 db.session.delete(file)
             db.session.commit()
+            folders = Folder.query.filter_by(project_id=pid, father_id=None).all()
+            for fo in folders:
+                try:
+                    folder_deleter(fo.id)
+                except Exception as e:
+                    return jsonify({
+                        "errormessage": str(e)
+                    })
         except Exception as e:
             return jsonify({
                 "errormessage": str(e)
             }), 500
+        action = "delete" + project.name
+        kind = 1
+        newfeed(uid, action, kind, project.id)
         return jsonify({
         }), 200
 
@@ -137,6 +179,9 @@ def project_member_put(uid, pid):
         return jsonify({
             "errormessage": str(e)
         }), 500
+    action = "add member of" + project.name
+    kind = 1
+    newfeed(uid, action, kind, project.id)
     return jsonify({
     }), 200
 
@@ -187,6 +232,9 @@ def project_file_comments(uid, pid, fid):
             return jsonify({
                 "errormessage": str(e)
             }), 500
+        action = "create comment"
+        kind = 1
+        newfeed(uid, action, kind, comment.id)
         return jsonify({
             "cid": str(comment.id)
         }), 201
@@ -229,7 +277,7 @@ def project_file_comment_get(uid, pid, fid, cid):
             creator = User.query.filter_by(id=comment.creator).first()
             username = creator.name
             acatar = creator.avatar
-            time - Comment.time
+            time = Comment.time
             content = comment.content
         except Exception as e:
             return jsonify({
@@ -248,6 +296,9 @@ def project_file_comment_get(uid, pid, fid, cid):
             return jsonify({
                 "errormessage": str(e)
             })
+        action = "delete comment"
+        kind = 1
+        newfeed(uid, action, kind, comment.id)
         return jsonify({
         }), 200
     else:
