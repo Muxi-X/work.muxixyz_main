@@ -27,6 +27,5 @@ def login_required(role):
                 abort(401)
             rv=f(uid,*args,**kwargs)
             return rv
-#        middle.__name__=f.__name__
         return decorated_function
     return deco
