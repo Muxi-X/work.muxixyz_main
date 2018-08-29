@@ -45,32 +45,36 @@ class BasicTestCase(unittest.TestCase):
         self.assertFalse(current_app is None)
 
     def test_management_a_auth(self):
-        # muxi=Team(name='test',count=3)
-        # superuser=User(name='test',email='cat@test.com',tel='11111111111',role=7,team_id=1)
-        # muxi.creator=1
-        # admin=User(name='test',email='dog@test.com',tel='22222222222',role=1,team_id=1)
-        # usr=User(name='test',email='pig@test.com',tel='33333333333',role=1,team_id=1)
-        # project=Project(name='test')
-        # rela=User2Project(user_id=6,project_id=6)
-        # folder = Folder(name='test', project_id=5)
-        file = File(filename='test', kind=1, editor_id=6, creator_id=6, folder_id=1, project_id=5)
-        # statu = Statu(content='test', time='test', like=1, comment=1, user_id=5, )
-        # db.session.add(muxi)
-        # db.session.add(superuser)
-        # db.session.add(admin)
-        # db.session.add(usr)
-        # db.session.add(project)
-        # db.session.add(rela)
-        # db.session.add(folder)
-        db.session.add(file)
-        # db.session.add(statu)
+        muxi=Team(name='test', count=3, creator=1)
+        db.session.add(muxi)
         db.session.commit()
-        global fid
-        fid = str(file.id)
+        superuser=User(name='test1',email='cat@test.com',tel='11111111111',role=7,team_id=muxi.id)
+        admin=User(name='test2',email='dog@test.com',tel='22222222222',role=1,team_id=muxi.id)
+        usr=User(name='test3',email='pig@test.com',tel='33333333333',role=1,team_id=muxi.id)
+        db.session.add(superuser)
+        db.session.add(admin)
+        db.session.add(usr)
+        db.session.commit()
+        # project=Project(name='test')
+        # db.session.add(project)
+        # db.session.commit()
+        # rela=User2Project(user_id=superuser.id,project_id=project.id)
+        # folder = Folder(name='test', project_id=project.id, kind=True)
+        # db.session.add(folder)
+        # db.session.commit()
+        # file = File(filename='test', kind=True, editor_id=superuser.id, creator_id=superuser.id, folder_id=folder.id, project_id=project.id, url='http://pdw7hnao1.bkt.clouddn.com/changefilename%2009-57-20-432.md')
+        # statu = Statu(content='test', time='test', like=1, comment=1, user_id=superuser.id, )
+        # db.session.add(rela)
+        # db.session.add(file)
+        # db.session.add(statu)
+        # db.session.commit()
+        # pid = str(project.id)
+        # foid = str(folder.id)
+        # fid = str(file.id)
         response = self.client.post(
             url_for('api.login', _external=True),
             data=json.dumps({
-                "username": 'test',
+                "username": 'test1',
             }),
             headers=self.get_a_api_headers(False),
         )
@@ -80,14 +84,15 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_1_new(self):
         response = self.client.post(
-            'http://localhost/api/v1.0/project/new/',
+            url_for('api.project_new', _external=True),
+            # 'http://localhost/api/v1.0/project/new/',
             data=json.dumps({
-                "username": "test",
-                "projectname": "test",
+                "username": "test1",
+                "projectname": "test1",
                 "userlist": [
                     {
                         "userID": 6,
-                        "userName": "test"
+                       "userName": "test"
                     }
                 ],
                 "intro": "test"
@@ -95,36 +100,77 @@ class BasicTestCase(unittest.TestCase):
             headers=self.get_a_api_headers(True)
         )
         global pid
-        pid = json.loads(response.data)['project_id']
-        self.assertTrue(response.status_code == 200)
+        pid = json.loads(response.data.decode('utf-8'))['project_id']
+        self.assertTrue(response.status_code == 201)
 
     def test_project_a_2_project(self):
         response = self.client.post(
-            'http://localhost/api/v1.0/project/' + pid + '/',
+            url_for('api.project_pid', pid=pid, _external=True),
+            # 'http://localhost/api/v1.0/project/' + pid + '/',
             data=json.dumps({
                 "intro": "test1",
                 "name": "test1"
             }),
             headers=self.get_a_api_headers(True)
         )
-        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.status_code == 201)
 
-
-    def test_project_a_3_comments(self):
+    def test_project_a_3_folder(self):
         response = self.client.post(
-            'http://localhost/api/v1.0/project/' + pid + '/file/1/comments/',
+            url_for('api.project_folder', pid=pid, foid=0, _external=True),
+            data=json.dumps({
+                "foldername": "test",
+                "kind": True
+            }), 
+            headers=self.get_a_api_headers(True)
+        )
+        global foid
+        foid = json.loads(response.data.decode('utf-8'))['foid']
+        self.assertTrue(response.status_code == 201)
+
+    def test_project_a_4_folder(self):
+        response = self.client.post(
+            url_for('api.project_folder', pid=pid, foid=0, _external=True),
+            data=json.dumps({
+                "foldername": "test",
+                "kind": False
+            }), 
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 201)
+
+    def test_project_a_5_file(self):
+        response = self.client.post(
+            url_for('api.project_file', pid=pid, foid=foid, fid=0, _external=True),
+            data = json.dumps({
+                "content": "this is the content",
+                "filename": "filename1",
+                "kind": True
+            }),
+            headers=self.get_a_api_headers(True)
+        )
+        global fid
+        fid = json.loads(response.data.decode('utf-8'))['fid']
+        self.assertTrue(response.status_code == 201)
+
+
+    def test_project_a_6_comments(self):
+        response = self.client.post(
+            url_for('api.project_file_comments', pid=pid, fid=fid, _external=True),
+            # 'http://localhost/api/v1.0/project/' + pid + '/file/1/comments/',
             data=json.dumps({
                 "content": "test"
             }),
             headers=self.get_a_api_headers(True)
         )
         global cid
-        cid = json.loads(response.data)['cid']
-        self.assertTrue(response.status_code == 200)
+        cid = json.loads(response.data.decode('utf-8'))['cid']
+        self.assertTrue(response.status_code == 201)
 
-    def test_project_a_4_member(self):
+    def test_project_a_7_member(self):
         response = self.client.put(
-            'http://localhost/api/v1.0/project/' + pid + '/member/',
+            url_for('api.project_member', pid=pid, fid=fid, _external=True),
+            # 'http://localhost/api/v1.0/project/' + pid + '/member/',
             data=json.dumps({
                 "userList": [6]
             }),
@@ -132,44 +178,147 @@ class BasicTestCase(unittest.TestCase):
         )
         self.assertTrue(response.status_code == 200)
 
+    def test_project_a_8_file(self):
+        response = self.client.put(
+            url_for('api.project_folder', pid=pid, foid=foid, _external=True),
+            data = json.dumps({
+                "foldername": "change"
+            }),
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+
+    def test_project_a_9_file(self):
+        response = self.client.put(
+            url_for('api.project_file', pid=pid, foid=foid, fid=fid, _external=True),
+            data = json.dumps({
+                "filename": "changefiadamej",
+                "content": "changecontentgf"
+            }),
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+
+    def test_project_a_a_file(self):
+        response = self.client.put(
+            url_for('api.project_f', pid=pid, foid=foid, toid=1, _external=True),
+            data = json.dumps({
+                "kind": 1
+            }),
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+    def test_project_a_b_file(self):
+        response = self.client.put(
+            url_for('api.project_f', pid=pid, foid=fid, toid=foid, _external=True),
+            data = json.dumps({
+                "kind": 2
+            }),
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+
     def test_project_b_1_comment(self):
         response = self.client.get(
-            'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comment/' + cid + '/',
+            url_for('api.project_file_comment', pid=pid, fid=fid, cid=cid, _external=True),
+            # 'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comment/' + cid + '/',
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
 
     def test_project_b_2_comments(self):
         response = self.client.get(
-            'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comments/',
+            url_for('api.project_file_comments', pid=pid, fid=fid, _external=True),
+            # 'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comments/',
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
 
     def test_project_b_3_member(self):
         response = self.client.get(
-            'http://localhost/api/v1.0/project/' + pid + '/member/',
+            url_for('api.project_member', pid=pid, _external=True),
+            # 'http://localhost/api/v1.0/project/' + pid + '/member/',
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
     #
     def test_project_b_4_project(self):
         response = self.client.get(
-            'http://localhost/api/v1.0/project/' + pid + '/',
+            url_for('api.project_pid', pid=pid, _external=True),
+            # 'http://localhost/api/v1.0/project/' + pid + '/',
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+
+    def test_project_b_5_project(self):
+        response = self.client.get(
+            url_for('api.project_folder', pid=pid, foid=foid, _external=True),
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+
+    def test_project_b_6_project(self):
+        response = self.client.get(
+            url_for('api.project_file', pid=pid, foid=foid, fid=fid, _external=True),
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+
+    def test_project_b_7_file(self):
+        response = self.client.post(
+            url_for('api.project_re', pid=pid, _external=True),
+            data = json.dumps({
+                "id": foid,
+                "kind": 2
+            }),
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+    
+    def test_project_b_8_file(self):
+        response = self.client.get(
+            url_for('api.project_re', pid=pid, _external=True),
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+    
+    def test_project_b_9_file(self):
+        response = self.client.put(
+            url_for('api.project_re', pid=pid, _external=True),
+            data = json.dumps({
+                "id": foid,
+                "kind": 2
+            }),
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
 
     def test_project_c_1_comment(self):
         response = self.client.delete(
-            'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comment/' + cid + '/',
+            url_for('api.project_file_comment', pid=pid, fid=fid, cid=cid, _external=True),
+            # 'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comment/' + cid + '/',
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
 
     def test_project_c_2_project(self):
         response = self.client.delete(
-            'http://localhost/api/v1.0/project/' + pid + '/',
+            url_for('api.project_pid', pid=pid, _external=True),
+            # 'http://localhost/api/v1.0/project/' + pid + '/',
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+
+    def test_project_c_4_file(self):
+        response = self.client.delete(
+            url_for('api.project_folder', pid=pid, foid=str(int(foid)+1), _external=True),
+            headers=self.get_a_api_headers(True)
+        )
+        self.assertTrue(response.status_code == 200)
+
+    def test_project_c_3_file(self):
+        response = self.client.delete(
+            url_for('api.project_file', pid=pid, foid=foid, fid=fid, _external=True),
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
