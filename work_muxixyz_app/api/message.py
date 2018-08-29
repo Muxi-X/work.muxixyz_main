@@ -51,7 +51,6 @@ def message_new(uid):
     sourceID = request.get_json().get('sourceID')
     Mer = User.query.filter_by(name = maker).first()
     Rer = User.query.filter_by(name = receiver).first()
-    t = str(time.time())
     if uid !=  Rer.id:
         response = jsonify({})
         response.status_code = 401
