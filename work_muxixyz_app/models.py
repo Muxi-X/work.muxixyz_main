@@ -8,7 +8,7 @@ from flask import current_app
 
 class User(db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(20), unique = True)
     email = db.Column(db.String(35), unique = True)
     avatar = db.Column(db.String(50))
@@ -41,7 +41,7 @@ class User(db.Model):
 
 class Team(db.Model):
     __tablename__ = 'teams'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(10), unique = True)
     count = db.Column(db.Integer)
     time = db.Column(db.String(50))
@@ -50,7 +50,7 @@ class Team(db.Model):
 
 class Group(db.Model):
     __tablename__ = 'groups'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(10), unique = True)
     count = db.Column(db.Integer)
     leader = db.Column(db.Integer)
@@ -59,7 +59,7 @@ class Group(db.Model):
 
 class Project(db.Model):
     __tablename__ = 'projects'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(10), unique = True)
     intro = db.Column(db.String(100))
     time = db.Column(db.String(50))
@@ -68,10 +68,14 @@ class Project(db.Model):
     files = db.relationship('File', backref='project', lazy='dynamic')
     folders = db.relationship('Folder', backref='project', lazy='dynamic')
 
+class Apply(db.Model):
+    __tablename__ = 'applys'
+    id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 class User2Project(db.Model):
     __tablename__ = 'user2projects'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer)
     project_id = db.Column(db.Integer)
 

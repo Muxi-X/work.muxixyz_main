@@ -1,7 +1,7 @@
 from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
-from ..models import Team, Group, User, Project, User2Project, Message, Statu, File, Comment
+from ..models import Team, Group, User, Project, User2Project, Message, Statu, File, Comment, Apply
 from ..decorator import login_required
 from ..timetools import to_readable_time
 import time
@@ -178,7 +178,8 @@ def user_project_list(uid):
                 break
             l.append({
                 "projectID": pid, 
-                "peojectName": pjc.name, 
+                "projectName": pjc.name, 
+                "intro": pjc.intro,
                 "userCount": pjc.count, 
             })
             counter += 1
@@ -226,12 +227,33 @@ def user_2b_member(uid):
     response.status_code = 200
     return response
 
+# role: 100
+@api.route('/user/admins/', methods = ['GET'], endpoint = 'AdminList')
+@login_required(4)
+def admin_list(uid):
+    admins = User.query.filter_by(role = 3).all()
+    if admins is None:
+        response = jsonify({})
+        response.status_code = 201
+        return response
+    l=list([])
+    for admin in admins:
+        l.append({
+            "userID": admin.id,
+            "userName": admin.name,
+        })
+    response = jsonify({
+        "list": l,
+    })
+    response.status_code = 200
+    return response
+
 #role: 100
 @api.route('/user/addAdmin/', methods = ['POST'], endpoint = 'AddAdmin')
 @login_required(role = 4)
 def add_admin(uid):
-    lname = request.get_json().get('luckydog')
-    luckydog = User.query.filter_by(name = lname).first()
+    lid = request.get_json().get('luckydog')
+    luckydog = User.query.filter_by(id = lname).first()
     luckydog.role = 3
     db.session.add(luckydog)
     db.session.commit()
@@ -330,3 +352,43 @@ def delete_member(uid,id):
     response = jsonify({})
     response.status_code = 200
     return response
+
+# role 110
+@api.route('/team/applyList/', methods = ['GET'], endpoint = 'ApplyList')
+@login_required(2)
+def apply_list(uid):
+    usrs = db.session.query(Apply).all()
+    l = list([])
+    if usrs is None:
+        response = jsonify({
+            "msg": 'Application all done!',
+        })
+        response.status_code = 201
+        return response
+    for u in usrs:
+        l.append({
+            "userID": u.id,
+            "userName": u.name,
+            "avatar": u.avatar,
+        })
+    response = jsonify({
+        "msg": "successful",
+    })
+    response.status_code = 200
+    return response
+
+# role: 110
+@api.route('/team/apply/<int:id>/', methods = ['DELETE'], endpoint = "RefuseApply")
+@login_required(2)
+def refuse_apply(uid,id):
+    record = Apply.query.filter_by(user_id = id).first()
+    if record is None:
+        response = jsonify({})
+        response.status_code = 403
+        return response
+    db.session.delete(record)
+    db.session.commit()
+    response = jsonify({})
+    response.status_code = 200
+    return response
+    
