@@ -32,17 +32,15 @@ def newstatus(uid):
     db.session.add(statu)
     db.session.commit()
     user = User.query.filter_by(id=uid).first()
-    avatar_url = user.avatar
-    action = 'update '+ user.name + '\'s status'
+    action = 'create a new  status'
     kind = 0
     sourceID = 0
     newfeed(
         uid,
-        avatar_url,
         action,
         kind,
         sourceID)
-    response = jsonify({"message":"feed add successfully"})
+    response = jsonify({"message":"statu create successfully"})
     response.status_code = 200
     return response
 
@@ -82,6 +80,33 @@ def getstatu(uid,sid):
     response.status_code = 200
     return response
 
+
+@api.route('/status/<int:sid>/', methods=['PUT'], endpoint='editstatu')
+@login_required(1)
+def editstatu(uid, sid):
+    statu = Statu.query.filter_by(id=sid).first()
+    if statu.user_id == uid:
+        content = request.get_json().get('content')
+        title = request.get_json().get('title')
+        time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        statu = Statu.query.filter_by(id=sid).first()
+        statu.content = content
+        statu.title = title
+        statu.time = time1
+        db.session.add(statu)
+        db.session.commit()
+        user = User.query.filter_by(id=uid).first()
+        action = 'update '+ user.name + '\'s status'
+        kind = 0
+        sourceID = 0
+        newfeed(
+            uid,
+            action,
+            kind,
+            sourceID)
+        response = jsonify({"message":"statu edit successfully"})
+        response.status_code = 200
+        return response
 
 @api.route('/status/<int:sid>/', methods=['DELETE'], endpoint='deletestatu')
 @login_required(1)

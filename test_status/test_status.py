@@ -22,10 +22,6 @@ class SampleTestCase(unittest.TestCase):
         db.create_all()
 
 
-     def test_k_teardown(self):
-         db.session.remove()
-         db.drop_all()
-         self.app_context.pop()
 
 
     def get_api_headers(self, iftoken):
@@ -91,7 +87,24 @@ class SampleTestCase(unittest.TestCase):
 
 
 # status PART
+    
+#    def test_b_1_sharedoc(self):
+#       response = self.client.get(
+#            url_for('api.sharedoc', docid=1, _external=True),
+#            headers=self.get_api_headers(True))
+#        global url
+#        url = response.data
+#        self.assertTrue(response.status_code == 200)
+    
+    
+#    def test_b_2_sharedoc(self):
+#        response = self.client.get(
+#            url_for('api.viewdoc', url=url, _external=True),
+#            headers=self.get_api_headers(True))
+#        print(response.data)
+#        self.assertTrue(response.status_code == 200)
 
+    
     def test_b_status_new(self):
         response = self.client.post(
             url_for('api.newstatus', _external=True),
@@ -100,16 +113,33 @@ class SampleTestCase(unittest.TestCase):
                 "title": 'August 24'}),
             headers=self.get_api_headers(True))
         self.assertTrue(response.status_code == 200)
+    
 
+    def test_c_1_status_like(self):
+        response = self.client.put(
+            url_for('api.like', sid = 1, _external=True),
+            data=json.dumps({
+                "iflike": 1}),
+            headers=self.get_api_headers(True))
+        self.assertTrue(response.status_code == 200)
 
-    def test_c_status_get(self):
+    def test_c_2_status_get(self):
         response = self.client.get(
             url_for('api.getstatu', sid = 1, _external=True),
             headers=self.get_api_headers(True))
         self.assertTrue(response.status_code == 200)
         #print(response.data)
 
- 
+    def test_c_3_status_edit(self):
+        response = self.client.put(
+            url_for('api.editstatu', sid = 1, _external=True),
+            data=json.dumps({
+                "content": 'excited',
+                "title": 'August 29'}),
+            headers=self.get_api_headers(True))
+        self.assertTrue(response.status_code == 200)
+            
+
     def test_d_status_list(self):
         response = self.client.get(
             url_for('api.statulist', page = 1, _external=True),
@@ -134,22 +164,22 @@ class SampleTestCase(unittest.TestCase):
             headers=self.get_api_headers(True))
         self.assertTrue(response.status_code == 200)
     
-    
+    '''    
     def test_g_comment_get(self):
         response = self.client.get(
             url_for('api.getcomment', sid = 1, cid = 1, _external=True),
             headers=self.get_api_headers(True))
         self.assertTrue(response.status_code == 200)
         #print(response.data)
-    
-    
+    '''
+    '''
     def test_h_comment_getlist(self):
         response = self.client.get(
             url_for('api.getcommentlist', sid = 1, _external=True),
             headers=self.get_api_headers(True))
         self.assertTrue(response.status_code == 200)
-        print(response.data)
-    
+        #print(response.data)
+    '''
     
     def test_i_comment_delete(self):
         response = self.client.delete(
