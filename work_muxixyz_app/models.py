@@ -63,7 +63,7 @@ class Project(db.Model):
     name = db.Column(db.String(10), unique = True)
     intro = db.Column(db.String(100))
     time = db.Column(db.String(50))
-    count = db.Column(db.Integer)
+    count = db.Column(db.Integer, default=0)
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
     files = db.relationship('File', backref='project', lazy='dynamic')
     folders = db.relationship('Folder', backref='project', lazy='dynamic')
@@ -94,10 +94,12 @@ class Statu(db.Model):
 class Folder(db.Model):
     __tablename__ = 'folders'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(30), unique=True, nullable=False)
+    kind = db.Column(db.Boolean, default=False) # false==folder of file true==folder of md
+    name = db.Column(db.String(30), nullable=False) # add unique = True
     father_id = db.Column(db.Integer, db.ForeignKey('folders.id'))
     # father = db.relationship('Folder', backref=db.backref('children'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
+    re = db.Column(db.Boolean, default=False)
     # project = db.relationship('Project', backref=db.backref('folders'))
     files = db.relationship('File', backref='folder', lazy='dynamic')
 
@@ -105,9 +107,10 @@ class Folder(db.Model):
 class File(db.Model):
     __tablename__ = 'files'
     id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String(150), unique = True)
+    url = db.Column(db.String(150)) # add unique = True
     filename = db.Column(db.String(150))
-    kind = db.Column(db.Boolean, default=False)
+    kind = db.Column(db.Boolean, default=False)# false==file true==md
+    re = db.Column(db.Boolean, default=False)
     editor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     # editor = db.relationship('User', backref=db.backref('efiles'))
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -117,7 +120,7 @@ class File(db.Model):
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
     # project = db.relationship(Project, backref=db.backref('pfiles'))
     # comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
-    # comment = db.relationship('Comment', backref=db.backref('comments'))
+    comments = db.relationship('Comment', backref='file', lazy='dynamic')
 
 
 class Comment(db.Model):
@@ -127,9 +130,8 @@ class Comment(db.Model):
     content = db.Column(db.Text)
     time = db.Column(db.String(50))
     creator = db.Column(db.Integer)
-    fileID = db.Column(db.Integer, db.ForeignKey('files.id'), default=0)
-    file = db.relationship('File', backref=db.backref('comments'))
-    statuID = db.Column(db.Integer, db.ForeignKey('status.id'), default=0)
+    file_id = db.Column(db.Integer, db.ForeignKey('files.id'), default=1)
+    statu_id = db.Column(db.Integer, db.ForeignKey('status.id'), default=1)
 
 
 class Message(db.Model):
