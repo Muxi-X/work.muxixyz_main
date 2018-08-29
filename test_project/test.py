@@ -248,7 +248,7 @@ class BasicTestCase(unittest.TestCase):
             url_for('api.ProjectPidGet', pid=pid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/',
             headers=self.get_a_api_headers(True)
-        )
+        )   
         self.assertTrue(response.status_code == 200)
 
     def test_project_b_5_project(self):
