@@ -8,9 +8,9 @@ from flask import current_app
 
 class User(db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(20)) # add unique = True
-    email = db.Column(db.String(35)) # add unique = True
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(20), unique = True)
+    email = db.Column(db.String(35), unique = True)
     avatar = db.Column(db.String(50))
     tel = db.Column(db.String(15))
     role = db.Column(db.Integer)
@@ -41,25 +41,26 @@ class User(db.Model):
 
 class Team(db.Model):
     __tablename__ = 'teams'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(10)) # add unique = True
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(10), unique = True)
     count = db.Column(db.Integer)
     time = db.Column(db.String(50))
     creator = db.Column(db.Integer)
-
+    users = db.relationship('User', backref='team', lazy='dynamic')
 
 class Group(db.Model):
     __tablename__ = 'groups'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(10)) # add unique = True
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(10), unique = True)
     count = db.Column(db.Integer)
     leader = db.Column(db.Integer)
-
+    time = db.Column(db.String(30))
+    users = db.relationship('User',backref='group',lazy='dynamic')
 
 class Project(db.Model):
     __tablename__ = 'projects'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(10)) # add unique = True
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(10), unique = True)
     intro = db.Column(db.String(100))
     time = db.Column(db.String(50))
     count = db.Column(db.Integer, default=0)
@@ -67,10 +68,14 @@ class Project(db.Model):
     files = db.relationship('File', backref='project', lazy='dynamic')
     folders = db.relationship('Folder', backref='project', lazy='dynamic')
 
+class Apply(db.Model):
+    __tablename__ = 'applys'
+    id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 class User2Project(db.Model):
     __tablename__ = 'user2projects'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer)
     project_id = db.Column(db.Integer)
 
@@ -134,14 +139,19 @@ class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.String(30))
     action = db.Column(db.Text)
-    kind = db.Column(db.Integer)
+#    kind = db.Column(db.Integer)
     readed = db.Column(db.Boolean, default=False)
     from_id = db.Column(db.Integer)
     receive_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     file_id = db.Column(db.Integer, db.ForeignKey('files.id'), default=0)
-    statu_id = db.Column(db.Integer, db.ForeignKey('status.id'), default=0)
-    commen_id = db.Column(db.Integer, db.ForeignKey('comments.id'), default=0)
+#    statu_id = db.Column(db.Integer, db.ForeignKey('status.id'), default=0)
+#    commen_id = db.Column(db.Integer, db.ForeignKey('comments.id'), default=0)
 
+class User2File(db.Model):
+    __tablename__ = 'user2files'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    file_id = db.Column(db.Integer)
 
 def init_db():
     db.create_all()
@@ -151,4 +161,5 @@ def init_db():
 
 
 if __name__ == '__main__':
-    init_db()
+#    init_db()
+    db.create_all()

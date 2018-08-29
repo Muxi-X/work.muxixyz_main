@@ -36,6 +36,13 @@ def test_project():
     unittest.TextTestRunner(verbosity=2).run(tests)
 
 @manager.command
+def test_message():
+
+    import unittest
+    tests=unittest.TestLoader().discover('test_message')
+    unittest.TextTestRunner(verbosity=2).run(tests)
+
+@manager.command
 def createdb():
     db.create_all()
 
