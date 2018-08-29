@@ -84,14 +84,14 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_1_new(self):
         response = self.client.post(
-            url_for('api.project_new', _external=True),
+            url_for('api.ProjectNew', _external=True),
             # 'http://localhost/api/v1.0/project/new/',
             data=json.dumps({
                 "username": "test1",
                 "projectname": "test1",
                 "userlist": [
                     {
-                        "userID": 6,
+                        "userID": 1,
                        "userName": "test"
                     }
                 ],
@@ -105,7 +105,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_2_project(self):
         response = self.client.post(
-            url_for('api.project_pid', pid=pid, _external=True),
+            url_for('api.ProjectPid', pid=pid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/',
             data=json.dumps({
                 "intro": "test1",
@@ -117,7 +117,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_3_folder(self):
         response = self.client.post(
-            url_for('api.project_folder', pid=pid, foid=0, _external=True),
+            url_for('api.ProjectFolder', pid=pid, foid=0, _external=True),
             data=json.dumps({
                 "foldername": "test",
                 "kind": True
@@ -130,7 +130,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_4_folder(self):
         response = self.client.post(
-            url_for('api.project_folder', pid=pid, foid=0, _external=True),
+            url_for('api.ProjectFolder', pid=pid, foid=0, _external=True),
             data=json.dumps({
                 "foldername": "test",
                 "kind": False
@@ -141,7 +141,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_5_file(self):
         response = self.client.post(
-            url_for('api.project_file', pid=pid, foid=foid, fid=0, _external=True),
+            url_for('api.ProjectFile', pid=pid, foid=foid, fid=0, _external=True),
             data = json.dumps({
                 "content": "this is the content",
                 "filename": "filename1",
@@ -156,7 +156,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_6_comments(self):
         response = self.client.post(
-            url_for('api.project_file_comments', pid=pid, fid=fid, _external=True),
+            url_for('api.ProjectFileComments', pid=pid, fid=fid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/file/1/comments/',
             data=json.dumps({
                 "content": "test"
@@ -169,10 +169,10 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_7_member(self):
         response = self.client.put(
-            url_for('api.project_member', pid=pid, fid=fid, _external=True),
+            url_for('api.ProjectMemberPut', pid=pid, fid=fid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/member/',
             data=json.dumps({
-                "userList": [6]
+                "userList": [1, 6]
             }),
             headers=self.get_a_api_headers(True)
         )
@@ -180,7 +180,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_8_file(self):
         response = self.client.put(
-            url_for('api.project_folder', pid=pid, foid=foid, _external=True),
+            url_for('api.ProjectFolder', pid=pid, foid=foid, _external=True),
             data = json.dumps({
                 "foldername": "change"
             }),
@@ -190,7 +190,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_9_file(self):
         response = self.client.put(
-            url_for('api.project_file', pid=pid, foid=foid, fid=fid, _external=True),
+            url_for('api.ProjectFile', pid=pid, foid=foid, fid=fid, _external=True),
             data = json.dumps({
                 "filename": "changefiadamej",
                 "content": "changecontentgf"
@@ -201,16 +201,17 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_a_file(self):
         response = self.client.put(
-            url_for('api.project_f', pid=pid, foid=foid, toid=1, _external=True),
+            url_for('api.ProjectF', pid=pid, foid=foid, toid=1, _external=True),
             data = json.dumps({
                 "kind": 1
             }),
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
+
     def test_project_a_b_file(self):
         response = self.client.put(
-            url_for('api.project_f', pid=pid, foid=fid, toid=foid, _external=True),
+            url_for('api.ProjectF', pid=pid, foid=fid, toid=foid, _external=True),
             data = json.dumps({
                 "kind": 2
             }),
@@ -220,7 +221,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_b_1_comment(self):
         response = self.client.get(
-            url_for('api.project_file_comment', pid=pid, fid=fid, cid=cid, _external=True),
+            url_for('api.ProjectFileComment', pid=pid, fid=fid, cid=cid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comment/' + cid + '/',
             headers=self.get_a_api_headers(True)
         )
@@ -228,7 +229,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_b_2_comments(self):
         response = self.client.get(
-            url_for('api.project_file_comments', pid=pid, fid=fid, _external=True),
+            url_for('api.ProjectFileComments', pid=pid, fid=fid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comments/',
             headers=self.get_a_api_headers(True)
         )
@@ -236,37 +237,37 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_b_3_member(self):
         response = self.client.get(
-            url_for('api.project_member', pid=pid, _external=True),
+            url_for('api.ProjectMemberGet', pid=pid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/member/',
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
-    #
+
     def test_project_b_4_project(self):
         response = self.client.get(
-            url_for('api.project_pid', pid=pid, _external=True),
+            url_for('api.ProjectPidGet', pid=pid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/',
             headers=self.get_a_api_headers(True)
-        )
+        )   
         self.assertTrue(response.status_code == 200)
 
     def test_project_b_5_project(self):
         response = self.client.get(
-            url_for('api.project_folder', pid=pid, foid=foid, _external=True),
+            url_for('api.ProjectFolder', pid=pid, foid=foid, _external=True),
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
 
     def test_project_b_6_project(self):
         response = self.client.get(
-            url_for('api.project_file', pid=pid, foid=foid, fid=fid, _external=True),
+            url_for('api.ProjectFile', pid=pid, foid=foid, fid=fid, _external=True),
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
 
     def test_project_b_7_file(self):
         response = self.client.post(
-            url_for('api.project_re', pid=pid, _external=True),
+            url_for('api.ProjectRe', pid=pid, _external=True),
             data = json.dumps({
                 "id": foid,
                 "kind": 2
@@ -277,14 +278,14 @@ class BasicTestCase(unittest.TestCase):
     
     def test_project_b_8_file(self):
         response = self.client.get(
-            url_for('api.project_re', pid=pid, _external=True),
+            url_for('api.ProjectRe', pid=pid, _external=True),
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
     
     def test_project_b_9_file(self):
         response = self.client.put(
-            url_for('api.project_re', pid=pid, _external=True),
+            url_for('api.ProjectRe', pid=pid, _external=True),
             data = json.dumps({
                 "id": foid,
                 "kind": 2
@@ -295,7 +296,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_c_1_comment(self):
         response = self.client.delete(
-            url_for('api.project_file_comment', pid=pid, fid=fid, cid=cid, _external=True),
+            url_for('api.ProjectFileComment', pid=pid, fid=fid, cid=cid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comment/' + cid + '/',
             headers=self.get_a_api_headers(True)
         )
@@ -303,7 +304,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_c_2_project(self):
         response = self.client.delete(
-            url_for('api.project_pid', pid=pid, _external=True),
+            url_for('api.ProjectPid', pid=pid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/',
             headers=self.get_a_api_headers(True)
         )
@@ -311,14 +312,14 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_c_4_file(self):
         response = self.client.delete(
-            url_for('api.project_folder', pid=pid, foid=str(int(foid)+1), _external=True),
+            url_for('api.ProjectFolder', pid=pid, foid=str(int(foid)+1), _external=True),
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
 
     def test_project_c_3_file(self):
         response = self.client.delete(
-            url_for('api.project_file', pid=pid, foid=foid, fid=fid, _external=True),
+            url_for('api.ProjectFile', pid=pid, foid=foid, fid=fid, _external=True),
             headers=self.get_a_api_headers(True)
         )
         self.assertTrue(response.status_code == 200)
