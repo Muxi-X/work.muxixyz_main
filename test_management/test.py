@@ -32,11 +32,11 @@ class BasicTestCase(unittest.TestCase):
         self.client = self.app.test_client()
         db.create_all()
 
-#    def tearDown(self):
-#        db.session.remove()
-#        db.drop_all()
-#        db.create_all()
-#        self.app_context.pop()
+    def test_z_tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        db.create_all()
+        self.app_context.pop()
 
     def test_app_exist(self):
         self.assertFalse(current_app is None)
@@ -143,7 +143,7 @@ class BasicTestCase(unittest.TestCase):
         response=self.client.post(
             url_for('api.AddAdmin',_external=True),
             data=json.dumps({
-                "luckydog": 'freshman',
+                "luckydog": '3',
             }),
             headers=self.get_api_headers(True)
         )

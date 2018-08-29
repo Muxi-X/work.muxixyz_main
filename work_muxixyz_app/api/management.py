@@ -4,6 +4,7 @@ from .. import db
 from ..models import Team, Group, User, Project, User2Project, Message, Statu, File, Comment, Apply
 from ..decorator import login_required
 from ..timetools import to_readable_time
+from ..mq import newfeed
 import time
 
 import requests
@@ -15,7 +16,7 @@ def new_group(uid):
     gname = request.get_json().get('groupName')
     ulist = request.get_json().get('userlist')
     group = Group(
-        time = to_readable_time(str(time.time())),
+        time = to_readable_time(str(int(time.time()))),
         name = gname, count = 0
     )
     db.session.add(group)
@@ -210,8 +211,8 @@ def user_project_list(uid):
 @api.route('/user/2bmember/', methods = ['POST'], endpoint = 'User2bMember')
 @login_required(role = 2)
 def user_2b_member(uid):
-    uid = request.get_json().get('userID')
-    usr = User.query.filter_by(id = uid).first()
+    user_id = request.get_json().get('userID')
+    usr = User.query.filter_by(id = user_id).first()
     if usr.role !=  0:
         response = jsonify({
             "msg": 'user already be a member!', 
@@ -221,6 +222,13 @@ def user_2b_member(uid):
     usr.role = 1
     db.session.add(usr)
     db.session.commit()
+    action = 'User: ' + usr.name + 'is a member of MUXI!'
+    newfeed(
+        uid,
+        action,
+        5,
+        user_id,
+    )
     response = jsonify({
         "msg": 'successful!', 
     })
@@ -253,10 +261,17 @@ def admin_list(uid):
 @login_required(role = 4)
 def add_admin(uid):
     lid = request.get_json().get('luckydog')
-    luckydog = User.query.filter_by(id = lname).first()
+    luckydog = User.query.filter_by(id = lid).first()
     luckydog.role = 3
     db.session.add(luckydog)
     db.session.commit()
+    action = 'User: ' + luckydog.name + 'is ADMINISTRATOR now!'
+    newfeed(
+        uid,
+        action,
+        5,
+        lid
+    )
     response = jsonify({})
     response.status_code = 200
     return response
@@ -369,7 +384,7 @@ def apply_list(uid):
         l.append({
             "userID": u.id,
             "userName": u.name,
-            "avatar": u.avatar,
+            "userEmail": u.email,
         })
     response = jsonify({
         "msg": "successful",
