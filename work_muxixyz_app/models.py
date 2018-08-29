@@ -18,6 +18,7 @@ class User(db.Model):
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
     status = db.relationship('Statu', backref='user', lazy='dynamic')
     receiveMsgs = db.relationship('Message', backref='user', lazy='dynamic')
+    feeds = db.relationship('Feed',backref='user',lazy='dynamic')
     # efiles = db.relationship('File', backref='user', lazy='dynamic')
     # cfiles = db.relationship('File', backref='user', lazy='dynamic')
 
@@ -62,7 +63,7 @@ class Project(db.Model):
     name = db.Column(db.String(10)) # add unique = True
     intro = db.Column(db.String(100))
     time = db.Column(db.String(50))
-    count = db.Column(db.Integer)
+    count = db.Column(db.Integer, default=0)
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
     files = db.relationship('File', backref='project', lazy='dynamic')
     folders = db.relationship('Folder', backref='project', lazy='dynamic')
@@ -79,17 +80,18 @@ class Statu(db.Model):
     __tablename__ = 'status'
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text)
+    title = db.Column(db.String(20))
     time = db.Column(db.String(50))
     like = db.Column(db.Integer)
     comment = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    comments = db.relationship('Comment', backref='statu', lazy='dynamic')
+    comments=db.relationship('Comment', backref='statu', passive_deletes=True, cascade='delete',lazy='dynamic')
 
 
 class Folder(db.Model):
     __tablename__ = 'folders'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    kind = db.Column(db.Boolean, default=False)
+    kind = db.Column(db.Boolean, default=False) # false==folder of file true==folder of md
     name = db.Column(db.String(30), nullable=False) # add unique = True
     father_id = db.Column(db.Integer, db.ForeignKey('folders.id'))
     # father = db.relationship('Folder', backref=db.backref('children'))
@@ -104,8 +106,9 @@ class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     url = db.Column(db.String(150)) # add unique = True
     filename = db.Column(db.String(150))
-    kind = db.Column(db.Boolean, default=False)
+    kind = db.Column(db.Boolean, default=False)# false==file true==md
     re = db.Column(db.Boolean, default=False)
+    time = db.Column(db.String(30))
     editor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     # editor = db.relationship('User', backref=db.backref('efiles'))
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -125,9 +128,8 @@ class Comment(db.Model):
     content = db.Column(db.Text)
     time = db.Column(db.String(50))
     creator = db.Column(db.Integer)
-    fileID = db.Column(db.Integer, db.ForeignKey('files.id'), default=1)
-    statuID = db.Column(db.Integer, db.ForeignKey('status.id'), default=1)
-
+    file_id=db.Column(db.Integer,db.ForeignKey('files.id',ondelete="cascade"),default=1)
+    statu_id=db.Column(db.Integer,db.ForeignKey('status.id', ondelete='cascade'),default=1)
 
 class Message(db.Model):
     __tablename__ = 'messages'
@@ -138,9 +140,9 @@ class Message(db.Model):
     readed = db.Column(db.Boolean, default=False)
     from_id = db.Column(db.Integer)
     receive_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    file_id = db.Column(db.Integer, db.ForeignKey('files.id'), default=0)
-    statu_id = db.Column(db.Integer, db.ForeignKey('status.id'), default=0)
-    commen_id = db.Column(db.Integer, db.ForeignKey('comments.id'), default=0)
+    file_id = db.Column(db.Integer, db.ForeignKey('files.id'))
+    statu_id = db.Column(db.Integer, db.ForeignKey('status.id'))
+    comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
 
 
 class Feed(db.Model):
@@ -155,6 +157,7 @@ class Feed(db.Model):
     user_id = db.Column(db.Integer,db.ForeignKey('users.id'))
 
 
+
 def init_db():
     db.create_all()
     usr = User(name='tst', email='tst@test.com', tel='11111111111')
@@ -164,3 +167,4 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
+
