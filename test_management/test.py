@@ -32,11 +32,11 @@ class BasicTestCase(unittest.TestCase):
         self.client = self.app.test_client()
         db.create_all()
 
-#    def tearDown(self):
-#        db.session.remove()
-#        db.drop_all()
-#        db.create_all()
-#        self.app_context.pop()
+    def test_z_tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        db.create_all()
+        self.app_context.pop()
 
     def test_app_exist(self):
         self.assertFalse(current_app is None)
@@ -143,7 +143,7 @@ class BasicTestCase(unittest.TestCase):
         response=self.client.post(
             url_for('api.AddAdmin',_external=True),
             data=json.dumps({
-                "luckydog": 'freshman',
+                "luckydog": '3',
             }),
             headers=self.get_api_headers(True)
         )
@@ -194,4 +194,17 @@ class BasicTestCase(unittest.TestCase):
         )
         self.assertTrue(response.status_code==200)
 
+    def test_management_l_deletegroup(self):
+        response=self.client.delete(
+            'http://localhost/api/v1.0/group/1/',
+            headers=self.get_api_headers(True)
+        )
+        self.assertTrue(response.status_code==200)
+
+    def test_management_m_deletemember(self):
+        response=self.client.delete(
+            'http://localhost/api/v1.0/user/3/',
+            headers=self.get_api_headers(True)
+        )
+        self.assertTrue(response.status_code==200)
 # API FOR MANAGEMENT END
