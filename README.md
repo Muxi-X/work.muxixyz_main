@@ -4,3 +4,8 @@
     MYSQLUSER  
     MYSQLPASSWORD   
     MYSQLHOST
+
+# work.muxixyz_status
+# ENV
+
+	MQHOST
