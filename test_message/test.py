@@ -50,7 +50,7 @@ class BasicTestCase(unittest.TestCase):
         usr = User(name = 'pig', email = 'pig@test.com', tel = '33333333333', role = 1, team_id = 1)
         project = Project(name = 'test')
         rela = User2Project(user_id = 1, project_id = 1)
-        f = File(filename = 'test')
+        f = File(filename = 'test', creator_id = 1, project_id = 1, time = str(time.time()))
         db.session.add(muxi)
         db.session.add(superuser)
         db.session.add(admin)
@@ -129,7 +129,19 @@ class BasicTestCase(unittest.TestCase):
 
     def test_message_g_attentionlist(self):
         response = self.client.get(
-            url_for('api.AttentionList', _external = True), 
+            url_for('api.UserAttention', _external = True), 
             headers = self.get_api_headers(True), 
         )
+        self.assertTrue(response.status_code == 200)
+    
+    def test_message_h_deleteattention(self):
+        data = {
+            "fileName": 'test',
+        }
+        response = self.client.delete(
+            url_for('api.UserAttention', _external = True),
+            headers = self.get_api_headers(True),
+            query_string = data,
+        )
+        print (response.__dict__)
         self.assertTrue(response.status_code == 200)

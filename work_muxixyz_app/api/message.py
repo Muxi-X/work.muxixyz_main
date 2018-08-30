@@ -8,7 +8,7 @@ from ..timetools import to_readable_time
 from operator import lt
 import time
 
-@api.route('/user/attention/',methods = ['POST','GET'],endpoint = 'UserAttention')
+@api.route('/user/attention/',methods = ['POST', 'GET', 'DELETE'],endpoint = 'UserAttention')
 @login_required(1)
 def user_attention(uid):
     if request.method  ==  'POST':
@@ -27,8 +27,11 @@ def user_attention(uid):
     if request.method  ==  'GET':
         l = list([])
         files = User2File.query.filter_by(user_id = uid).all()
-        for f in files:
+        for f_id in files:
+            f = File.query.filter_by(id = f_id.file_id).first()
             editor = User.query.filter_by(id = f.editor_id).first()
+            if editor is None:
+                editor = User.query.filter_by(id = f.creator_id).first()
             project = Project.query.filter_by(id = f.project_id).first()
             l.append({
                 "fileName": f.filename,
@@ -39,6 +42,21 @@ def user_attention(uid):
         response = jsonify({
             "list": l,
         })
+        response.status_code = 200
+        return response
+    if request.method == 'DELETE':
+        fileName = request.args.get('fileName')
+        f = File.query.filter_by(filename = fileName).first()
+        if f is None:
+            response = jsonify({
+                "fileName": fileName,
+            })
+            response.status_code = 403
+            return response
+        record = User2File.query.filter_by(file_id = f.id).first()
+        db.session.delete(record)
+        db.session.commit()
+        response = jsonify({})
         response.status_code = 200
         return response
 
@@ -131,7 +149,7 @@ def message_info(uid,username,mid):
         return response
     msg = Message.query.filter_by(id = mid).first()
     if msg is None:
-        response({
+        response = jsonify({
             "msg": 'message is None'
         })
         response.status_code = 403

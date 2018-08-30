@@ -145,7 +145,7 @@ class Message(db.Model):
     readed = db.Column(db.Boolean, default=False)
     from_id = db.Column(db.Integer)
     receive_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-
+    file_id = db.Column(db.Integer)
     
 class Feed(db.Model):
     __tablename__ = 'feeds'
