@@ -9,8 +9,8 @@ from ..models import User, File, Comment
 from ..decorator import login_required
 from work_muxixyz_app import db
 from flask_sqlalchemy import SQLAlchemy
-from qiniu import Auth, put_file, etag, BuketManager
-
+from qiniu import Auth, put_file, etag, BucketManager
+import qiniu.config
 
 access_key = 'YCdnGHp2tRa7V0KDisHqXehlny0eVNM5vQow1cQV'  # os.environ.get('ACCESS_KEY)
 secret_key = 'ZGgkaNPunh6Y32FcsAtvhOd61rnlcKeeXPZ-qIlr'  # os.environ.get('SECRET_KEY)
@@ -44,7 +44,7 @@ def viewdoc(url):
     url = url.decode()
     data = eval(url)
     docid = data.get('docid')
-    doc = File.query.filter_by(id=docid).first())
+    doc = File.query.filter_by(id=docid).first()
     docname = doc.filename
     finaleditor = User.query.filter_by(id=doc.editor_id).first().name
     creator = User.query.filter_by(id=doc.creator_id).first().name
