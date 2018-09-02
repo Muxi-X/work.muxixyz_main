@@ -3,11 +3,11 @@ import os
 
 DIALECT = 'mysql'
 DRIVER = 'pymysql'
-USERNAME = 'root'
-PASSWORD = 'root'
-HOST = '127.0.0.1'
+USERNAME = 'muxitest'
+PASSWORD = 'Muxitest304'
+HOST = 'rm-wz907gsr637s950hmjo.mysql.rds.aliyuncs.com'
 PORT = '3306'
-DATABASE = 'main'
+DATABASE = 'workbenchtest'
 
 class Config:
     SECRET_KEY = 'work.muxixyz'
