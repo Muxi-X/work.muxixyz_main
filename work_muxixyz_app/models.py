@@ -13,7 +13,7 @@ class User(db.Model):
     email = db.Column(db.String(35), unique = True)
     avatar = db.Column(db.String(50))
     tel = db.Column(db.String(15))
-    role = db.Column(db.Integer)
+    role = db.Column(db.Integer, default = 0)
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
     status = db.relationship('Statu', backref='user', lazy='dynamic')

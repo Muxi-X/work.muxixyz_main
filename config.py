@@ -1,4 +1,3 @@
-'''config for shinna'''
 import os
 
 DIALECT = 'mysql'
@@ -10,7 +9,7 @@ PORT = 3306
 DATABASE = os.getenv("DBNAME")
 
 class Config:
-    SECRET_KEY = 'work.muxixyz'
+    SECRET_KEY = os.getenv("SECRET_WORK_KEY")
     SESSION_TYPE = 'filesystem'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_RECORD_QUERIES = True

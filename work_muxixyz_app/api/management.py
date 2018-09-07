@@ -9,6 +9,20 @@ import time
 
 import requests
 
+
+#role: 000
+@api.route('/user/2bSuperuser/', methods = ['POST'], endpoint = '2BSuperUser')
+#@login_required(role = 0)
+def user_2b_super_user():
+    username = request.get_json().get("name")
+    usr = User.query.filter_by(name = username).first()
+    usr.role = 7
+    db.session.add(usr)
+    db.session.commit()
+    response = jsonify({})
+    response.status_code = 200
+    return response
+
 #role: 100
 @api.route('/group/new/', methods = ['POST'], endpoint = 'NewGroup')
 @login_required(role = 4)
@@ -50,7 +64,7 @@ def group_delete(uid, gid):
     return response
 
 #role: 001
-@api.route('/group/<int:gid>/userList', methods = ['GET'], endpoint = 'GroupUserList')
+@api.route('/group/<int:gid>/userList/', methods = ['GET'], endpoint = 'GroupUserList')
 @login_required(role = 1)
 def group_user_list(uid, gid):
     role = 1
@@ -71,9 +85,9 @@ def group_user_list(uid, gid):
         c = int(counter)//10
         if (c+1)  == page:
             usrs[counter%10] = {
-                "username": u.name, 
-                "userID": u.id, 
-                "role": u.role, 
+                "username": u.name,
+                "userID": u.id,
+                "role": u.role,
                 "email": u.email,
                 "avatar": u.avatar,
                 "groupName": grp.name,
@@ -107,7 +121,7 @@ def group_manage_user(uid, gid):
     return response
 
 #role: 001
-@api.route('/group/list', methods = ['GET'], endpoint = 'GroupList')
+@api.route('/group/list/', methods = ['GET'], endpoint = 'GroupList')
 @login_required(role = 1)
 def group_list(uid):
     gid = 1
@@ -223,12 +237,7 @@ def user_2b_member(uid):
     db.session.add(usr)
     db.session.commit()
     action = 'User: ' + usr.name + 'is a member of MUXI!'
-    newfeed(
-        uid,
-        action,
-        5,
-        user_id,
-    )
+    newfeed(uid, action, 5, user_id)
     response = jsonify({
         "msg": 'successful!', 
     })
@@ -237,7 +246,7 @@ def user_2b_member(uid):
 
 # role: 100
 @api.route('/user/admins/', methods = ['GET'], endpoint = 'AdminList')
-@login_required(4)
+@login_required(role = 4)
 def admin_list(uid):
     admins = User.query.filter_by(role = 3).all()
     if admins is None:
@@ -266,12 +275,7 @@ def add_admin(uid):
     db.session.add(luckydog)
     db.session.commit()
     action = 'User: ' + luckydog.name + 'is ADMINISTRATOR now!'
-    newfeed(
-        uid,
-        action,
-        5,
-        lid
-    )
+    newfeed(uid, action, 5, lid)
     response = jsonify({})
     response.status_code = 200
     return response
@@ -352,7 +356,7 @@ def editsetting(uid, id):
 
 # role 110
 @api.route('/user/<int:id>/', methods = ['DELETE'], endpoint = 'DeleteMember')
-@login_required(2)
+@login_required(role = 2)
 def delete_member(uid,id):
     if uid == id :
         response = jsonify({
@@ -370,7 +374,7 @@ def delete_member(uid,id):
 
 # role 110
 @api.route('/team/applyList/', methods = ['GET'], endpoint = 'ApplyList')
-@login_required(2)
+@login_required(role = 2)
 def apply_list(uid):
     usrs = db.session.query(Apply).all()
     l = list([])
@@ -394,7 +398,7 @@ def apply_list(uid):
 
 # role: 110
 @api.route('/team/apply/<int:id>/', methods = ['DELETE'], endpoint = "RefuseApply")
-@login_required(2)
+@login_required(role = 2)
 def refuse_apply(uid,id):
     record = Apply.query.filter_by(user_id = id).first()
     if record is None:
@@ -406,4 +410,3 @@ def refuse_apply(uid,id):
     response = jsonify({})
     response.status_code = 200
     return response
-    
