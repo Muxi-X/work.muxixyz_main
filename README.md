@@ -1,11 +1,8 @@
-# work.muxixyz_project
 # ENV
 
-    MYSQLUSER  
-    MYSQLPASSWORD   
-    MYSQLHOST
+## MYSQL
 
-# work.muxixyz_status
-# ENV
-
-	MQHOST
++ USERNAME
++ PASSWORD
++ HOST
++ DBNAME

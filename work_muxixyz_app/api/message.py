@@ -9,7 +9,7 @@ from operator import lt
 import time
 
 @api.route('/user/attention/',methods = ['POST', 'GET', 'DELETE'],endpoint = 'UserAttention')
-@login_required(1)
+@login_required(role = 1)
 def user_attention(uid):
     if request.method  ==  'POST':
         fileID = request.get_json().get('fileID')
@@ -61,7 +61,7 @@ def user_attention(uid):
         return response
 
 @api.route('/message/new/',methods = ['POST'],endpoint = 'MessageNew')
-@login_required(1)
+@login_required(role = 1)
 def message_new(uid):
     receiver = request.get_json().get('receiver')
     maker = request.get_json().get('maker')
@@ -83,11 +83,10 @@ def message_new(uid):
     return response
 
 @api.route('/message/list/',methods = ['GET'],endpoint = 'MessageList')
-@login_required(1)
+@login_required(role = 1)
 def message_list(uid):
     kind = request.args.get('kind')
     msgs = Message.query.filter_by(receive_id = uid,readed = False).order_by(Message.id).all()
-#    msgs = sorted(msgs,key = cmp_to_key(lambda x,y:lt(x.time,y.time))).reverse()
     l = list([])
     limit = 0
     if kind  ==  1: #hover
@@ -122,7 +121,7 @@ def message_list(uid):
     return response
 
 @api.route('/message/readAll/',methods = ['POST'],endpoint = 'ReadAll')
-@login_required(1)
+@login_required(role = 1)
 def read_all(uid):
     username = request.get_json().get('username')
     usr = User.query.filter_by(name = username).first()
@@ -140,7 +139,7 @@ def read_all(uid):
     return response
 
 @api.route('/message/<string:username>/<int:mid>/',methods = ['GET'],endpoint = 'MessageInfo')
-@login_required(1)
+@login_required(role = 1)
 def message_info(uid,username,mid):
     usr = User.query.filter_by(name = username).first()
     if (usr is None) or (usr.id !=  uid):

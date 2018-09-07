@@ -9,10 +9,6 @@ from flask_script import Manager,Shell,Command
 from flask_migrate import Migrate,MigrateCommand
 from sqlalchemy import func
 
-
-importlib.reload(sys)
-#export PYTHONIOENCODING="UTF-8"
-
 app=create_app(os.getenv('FLASK_CONFIG') or 'default')
 manager=Manager(app)
 migrate=Migrate(app,db)
@@ -32,14 +28,12 @@ manager.add_command("shell",Shell(make_context=make_shell_context))
 
 @manager.command
 def test_management():
-
     import unittest
     tests=unittest.TestLoader().discover('test_management')
     unittest.TextTestRunner(verbosity=2).run(tests)
 
 @manager.command
 def test_project():
-
     import unittest
     tests=unittest.TestLoader().discover('test_project')
     unittest.TextTestRunner(verbosity=2).run(tests)
