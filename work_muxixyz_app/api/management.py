@@ -4,6 +4,7 @@ from .. import db
 from ..models import Team, Group, User, Project, User2Project, Message, Statu, File, Comment, Apply
 from ..decorator import login_required
 from ..timetools import to_readable_time
+from ..page import get_rows
 from ..mq import newfeed
 import time
 
@@ -69,33 +70,36 @@ def group_delete(uid, gid):
 def group_user_list(uid, gid):
     role = 1
     page = 1
+    pageSize = 10
     if request.args.get('page') is not None:
         page = int(request.args.get('page'))
-    counter = 0
-    usrs = list([None, None, None, None, None, None, None, None, None, None, None])
+#    counter = 0
+#    usrs = list([None, None, None, None, None, None, None, None, None, None, None])
     if gid  ==  0 :
-        # get all users
-        team = Team.query.filter_by(id = 1).first()
-        users = team.users
+        data = get_rows(User, User.team_id, 1, page, pageSize)
     else:
+        data = get_rows(User, User.group_id, gid, page, pageSize)
         grp = Group.query.filter_by(id = gid).first()
-        users = grp.users
-    for u in users:
-        grp=Group.query.filter_by(id=u.group_id).first()
-        c = int(counter)//10
-        if (c+1)  == page:
-            usrs[counter%10] = {
-                "username": u.name,
-                "userID": u.id,
-                "role": u.role,
-                "email": u.email,
-                "avatar": u.avatar,
-                "groupName": grp.name,
-            }
-        counter += 1
+
+    l = list([])
+    for u in data['dataList']:
+        if gid == 0:
+            grp = Group.query.filter_by(id = u.group_id).first()
+        l.append({
+            'username': u.name,
+            'userID': u.id,
+            'groupName': grp.name,
+            'role': u.role,
+            'email': u.email,
+            'avatar': u.avatar
+        })
+
     response = jsonify({
-                 "count": counter, 
-                 "list": usrs, 
+                 "count": data['rowsNum'],
+                 "pageMax": data['pageMax'],
+                 "pageNow": data['pageNum'],
+                 "hasNext": data['hasNext'],
+                 "list": l,
              })
     response.status_code = 200
     return response

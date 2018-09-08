@@ -19,26 +19,10 @@ class User(db.Model):
     status = db.relationship('Statu', backref='user', lazy='dynamic')
     receiveMsgs = db.relationship('Message', backref='user', lazy='dynamic')
     feeds = db.relationship('Feed',backref='user',lazy='dynamic')
-    # efiles = db.relationship('File', backref='user', lazy='dynamic')
-    # cfiles = db.relationship('File', backref='user', lazy='dynamic')
 
-    @staticmethod
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
         return s.dumps({'confirm': self.id}).decode('utf-8')
-
-    def confirm(self, token):
-        s = Serializer(current_app.config['SECRET_KEY'])
-        try:
-            data = s.loads(token.encode('utf-8'))
-        except:
-            return False
-        if data.get('confirm') != self.id:
-            return False
-        self.confirm = True
-        db.session.add(self)
-        return True
-
 
 class Team(db.Model):
     __tablename__ = 'teams'
