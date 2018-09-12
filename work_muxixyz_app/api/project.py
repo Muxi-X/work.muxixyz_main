@@ -1,23 +1,24 @@
 from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
-from ..models import Team, Group, User, Project, Message, Statu, File, Folder, Comment, User2Project
+from ..models import User, Project, Comment, User2Project, FolderForFile, FolderForMd, Doc, File
 from ..decorator import login_required
 import time
 from ..mq import newfeed
 from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
+import os
 
-access_key = 'YCdnGHp2tRa7V0KDisHqXehlny0eVNM5vQow1cQV'  # os.environ.get('ACCESS_KEY)
-secret_key = 'ZGgkaNPunh6Y32FcsAtvhOd61rnlcKeeXPZ-qIlr'  # os.environ.get('SECRET_KEY)
-url = 'pdw7hnao1.bkt.clouddn.com'                        # os.environ.get('URL')
+access_key = app.config['ACCESS_KEY']
+secret_key = app.config['SECRET_KEY']
+url = app.config['URL']
 bucket_name = 'test-work'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
 
 
-@api.route('project/new/', methods=['POST'], endpoint='ProjectNew')
-@login_required(role = 2)
+@api.route('/project/new/', methods=['POST'], endpoint='ProjectNew')
+@login_required(role=2)
 def project_new(uid):
     username = request.get_json().get('username')
     projectname = request.get_json().get('projectname')
@@ -34,7 +35,6 @@ def project_new(uid):
                       time=localtime,
                       count=count + 1,
                       team_id=team_id)
-
     try:
         db.session.add(project)
         db.session.commit()
@@ -53,88 +53,77 @@ def project_new(uid):
             db.session.commit()
     except Exception as e:
         return jsonify({
-            "errormessage": str(e)
+            "errmsg": str(e)
         }), 500
-    action = "create" + projectname
-    kind = 1
-    newfeed(uid, action, kind, project.id)
+    newfeed(uid, "create" + projectname, 1, project.id)
     return jsonify({
         'project_id': str(project.id)
     }), 201
 
 
-@api.route('project/<int:pid>/', methods=['POST', 'DELETE'], endpoint='ProjectPid')
-@login_required(role = 2)
-def project_pid(uid, pid):
-    if request.method == 'POST':
-        intro = request.get_json().get('intro')
-        name = request.get_json().get('name')
+@api.route('/project/<int:pid>/', methods=['POST'], endpoint='ProjectPidPost')
+@login_required(role=2)
+def project_pid_post(uid, pid):
+    intro = request.get_json().get('intro')
+    name = request.get_json().get('name')
 
-        try:
-            project = Project.query.filter_by(id=pid).first()
-            project.name = name
-            project.intro = intro
+    try:
+        project = Project.query.filter_by(id=pid).first()
+        project.name = name
+        project.intro = intro
 
-            db.session.add(project)
-            db.session.commit()
-        except Exception as e:
-            return jsonify({
-                "errormesage": e
-            }), 500
-        action = "revise" + name
-        kind = 1
-        newfeed(uid, action, kind, project.id)
+        db.session.add(project)
+        db.session.commit()
+    except Exception as e:
         return jsonify({
-        }), 201
-    elif request.method == 'DELETE':
-        def folder_deleter(deid):
-            defiles = File.query.filter_by(folder_id=deid, re=False).all()
-            for de in defiles:
-                ret, info = bucket.delete(bucket_name, de.filename)
-                db.session.delete(de)
-                db.session.commit()
+            "errormesage": str(e)
+        }), 500
+    newfeed(uid, "revise" + name, 1, project.id)
+    return jsonify({
+    }), 201
 
-            defolders = Folder.query.filter_by(father_id=deid, re=False).all()
-            if len(defolders) == 0:
-                defolder = Folder.query.filter_by(id=deid, re=False).first()
-                db.session.delete(defolder)
-                db.session.commit()
-            else:
-                for defo in defolders:
-                    folder_deleter(defo.id)
-        try:
-            project = Project.query.filter_by(id=pid).first()
-            db.session.delete(project)
-            db.session.commit()
-            user2projects = User2Project.query.filter_by(project_id=pid)
-            for u2p in user2projects:
-                db.session.delete(u2p)
-            db.session.commit()
-            files = File.query.filter_by(project_id=pid, folder_id=None)
-            for file in files:
-                db.session.delete(file)
-            db.session.commit()
-            folders = Folder.query.filter_by(project_id=pid, father_id=None).all()
-            for fo in folders:
-                try:
-                    folder_deleter(fo.id)
-                except Exception as e:
-                    return jsonify({
-                        "errormessage": str(e)
-                    })
-        except Exception as e:
-            return jsonify({
-                "errormessage": str(e)
-            }), 500
-        action = "delete" + project.name
-        kind = 1
-        newfeed(uid, action, kind, project.id)
+
+@api.route('/project/<int:pid>/', methods=['DELETE'], endpoint='ProjectPidDelete')
+@login_required(role=2)
+def project_pid_delete(uid, pid):
+    try:
+        project = Project.query.filter_by(id=pid).first()
+        db.session.delete(project)
+        db.session.commit()
+        user2projects = User2Project.query.filter_by(project_id=pid)
+        for u2p in user2projects:
+            db.session.delete(u2p)
+        db.session.commit()
+
+        files = File.query.filter_by(project_id=pid)
+        for file in files:
+            db.session.delete(file)
+        db.session.commit()
+
+        docs = Doc.query.filter_by(project_id=pid)
+        for doc in docs:
+            db.session.delete(doc)
+        db.session.commit()
+
+        folders1 = FolderForFile.query.filter_by(project_id=pid).all()
+        for folder in folders1:
+            db.session.delete(folder)
+
+        folders2 = FolderForMd.query.filter_by(project_id=pid).all()
+        for folder in folders2:
+            db.session.delete(folder)
+
+    except Exception as e:
         return jsonify({
-        }), 200
+            "errmsg": str(e)
+        }), 500
+    newfeed(uid, "delete" + project.name, 1, project.id)
+    return jsonify({
+    }), 200
 
 
-@api.route('project/<int:pid>/', methods=['GET'], endpoint='ProjectPidGet')
-@login_required(role = 1)
+@api.route('/project/<int:pid>/', methods=['GET'], endpoint='ProjectPidGet')
+@login_required(role=1)
 def project_pid_get(uid, pid):
     u2ps = User2Project.query.filter_by(user_id=uid).all()
     flag = True
@@ -156,12 +145,12 @@ def project_pid_get(uid, pid):
         }), 200
     except Exception as e:
         return jsonify({
-            "errormessage": str(e)
+            "errmsg": str(e)
         }), 500
 
 
-@api.route('project/<int:pid>/member/', methods=['PUT'], endpoint='ProjectMemberPut')
-@login_required(role = 2)
+@api.route('/project/<int:pid>/member/', methods=['PUT'], endpoint='ProjectMemberPut')
+@login_required(role=2)
 def project_member_put(uid, pid):
     userlist = request.get_json().get('userList')
     try:
@@ -188,17 +177,15 @@ def project_member_put(uid, pid):
     except Exception as e:
         print (e)
         return jsonify({
-            "errormessage": str(e)
+            "errmsg": str(e)
         }), 500
-    action = "add member of" + project.name
-    kind = 1
-    newfeed(uid, action, kind, project.id)
+    newfeed(uid, "add member of" + project.name, 1, project.id)
     return jsonify({
     }), 200
 
 
-@api.route('project/<int:pid>/member/', methods=['GET'], endpoint='ProjectMemberGet')
-@login_required(role = 1)
+@api.route('/project/<int:pid>/member/', methods=['GET'], endpoint='ProjectMemberGet')
+@login_required(role=1)
 def project_member_get(uid, pid):
     try:
         memberList = []
@@ -220,98 +207,126 @@ def project_member_get(uid, pid):
     }), 200
 
 
-@api.route('project/<int:pid>/file/<int:fid>/comments/', methods=['POST', 'GET'], endpoint='ProjectFileComments')
-@login_required(role = 1)
-def project_file_comments(uid, pid, fid):
-    if request.method == 'POST':
-        import time
-        content = request.get_json().get('content')
-        localtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        comment = Comment(
-            kind=1,
-            content=content,
-            time=localtime,
-            creator=uid,
-            file_id=fid
-        )
-        try:
-            db.session.add(comment)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            print(e)
-            return jsonify({
-                "errormessage": str(e)
-            }), 500
-        action = "create comment"
-        kind = 1
-        newfeed(uid, action, kind, comment.id)
+@api.route('/project/<int:pid>/file/<int:fid>/comments/', methods=['POST'], endpoint='ProjectFileCommentsPost')
+@login_required(role=1)
+def project_file_comments_post(uid, pid, fid):
+    import time
+    content = request.get_json().get('content')
+    localtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    comment = Comment(
+        kind=1,
+        content=content,
+        time=localtime,
+        creator=uid,
+        file_id=fid
+    )
+    try:
+        db.session.add(comment)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(e)
         return jsonify({
-            "cid": str(comment.id)
-        }), 201
-    elif request.method == 'GET':
-        comments = Comment.query.filter_by(file_id=fid).all()
-        commentList = []
-        try:
-            for comment in comments:
-                creator = User.query.filter_by(id=comment.creator).first()
-                username = creator.name
-                avatar = creator.avatar
-                time = comment.time
-                content = comment.content
-                commentList.append(
-                    {
-                        "username": username,
-                        "avatar": avatar,
-                        "time": time,
-                        "content": content
-                    }
-                )
-        except Exception as e:
-            return jsonify({
-                "errormessage": str(e)
-            }), 500
-        return jsonify({
-            "commentList": commentList
-        })
-    else:
-        return jsonify({
-        }), 403
+            "errmsg": str(e)
+        }), 500
+    newfeed(uid, "create comment", 1, comment.id)
+    return jsonify({
+        "cid": str(comment.id)
+    }), 201
 
 
-@api.route('project/<int:pid>/file/<int:fid>/comment/<int:cid>/', methods=['GET', 'DELETE'], endpoint='ProjectFileComment')
-@login_required(role = 1)
-def project_file_comment_get(uid, pid, fid, cid):
-    if request.method == 'GET':
-        try:
-            comment = Comment.query.filter_by(id=cid).first()
+@api.route('/project/<int:pid>/file/<int:fid>/comments/', methods=['GET'], endpoint='ProjectFileCommentsGet')
+@login_required(role=1)
+def project_file_comments_get(uid, pid, fid):
+    comments = Comment.query.filter_by(file_id=fid).all()
+    commentList = []
+    try:
+        for comment in comments:
             creator = User.query.filter_by(id=comment.creator).first()
             username = creator.name
-            acatar = creator.avatar
-            time = Comment.time
+            avatar = creator.avatar
+            time = comment.time
             content = comment.content
-        except Exception as e:
-            return jsonify({
-                "errormessage": str(e)
-            })
+            commentList.append(
+                {
+                    "username": username,
+                    "avatar": avatar,
+                    "time": time,
+                    "content": content
+                }
+            )
+    except Exception as e:
         return jsonify({
-        }), 200
-    elif request.method == 'DELETE':
-        try:
-            if comment.creator != uid:
-                return jsonify({}), 401
-            comment = Comment.query.filter_by(id=cid).first()
-            db.session.delete(comment)
-            db.session.commit()
-        except Exception as e:
-            return jsonify({
-                "errormessage": str(e)
-            })
-        action = "delete comment"
-        kind = 1
-        newfeed(uid, action, kind, comment.id)
+            "errmsg": str(e)
+        }), 500
+    return jsonify({
+        "commentList": commentList
+    })
+
+
+@api.route('/project/<int:pid>/file/<int:fid>/comment/<int:cid>/', methods=['GET'], endpoint='ProjectFileCommentGet')
+@login_required(role=1)
+def project_file_comment_get(uid, pid, fid, cid):
+    try:
+        comment = Comment.query.filter_by(id=cid).first()
+        creator = User.query.filter_by(id=comment.creator).first()
+        username = creator.name
+        avatar = creator.avatar
+        time = Comment.time
+        content = comment.content
+    except Exception as e:
         return jsonify({
-        }), 200
-    else:
+            "errmsg": str(e)
+        })
+    return jsonify({
+        "username": username,
+        "avatar": avatar,
+        "time": time,
+        "content": content
+    }), 200
+
+
+@api.route('/project/<int:pid>/file/<int:fid>/comment/<int:cid>/', methods=['DELETE'], endpoint='ProjectFileCommentDelete')
+@login_required(role=1)
+def project_file_comment_delete(uid, pid, fid, cid):
+    try:
+        if comment.creator != uid:
+            return jsonify({}), 401
+        comment = Comment.query.filter_by(id=cid).first()
+        db.session.delete(comment)
+        db.session.commit()
+    except Exception as e:
         return jsonify({
-        }), 403
+            "errmsg": str(e)
+        })
+    newfeed(uid, "delete comment", 1, comment.id)
+    return jsonify({
+    }), 200
+
+
+@api.route('/file/filetree/<int:pid>/', methods=['PUT'], endpoint='FileTreePut')
+@login_required(role=1)
+def file_tree_put(uid, pid):
+    filetree = request.get_json().get('filetree')
+    try:
+        project = Project.query.filter_by(id=pid).first()
+        project.filetree = filetree
+        db.session.add(project)
+        db.session.commit()
+    except Exception as e:
+        return jsonify({
+            'errmsg': str(e)
+        })
+    return jsonify({}), 200
+
+@api.route('file/filetree/<int:pid>/', methods=['GET'], endpoint='FileTreeGet')
+@login_required(role=1)
+def file_tree_get(uid, pid):
+    try:
+        return jsonify({
+            "filetree": Project.query.filter_by(id=pid).first().filetree
+        })
+    except Exception as e:
+        return jsonify({
+            'errmsg': str(e)
+        })

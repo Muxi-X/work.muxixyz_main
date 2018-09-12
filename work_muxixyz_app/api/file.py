@@ -3,7 +3,7 @@
 from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
-from ..models import Team, Group, User, Project, Message, Statu, File, Folder, Comment, User2Project
+from ..models import Team, Group, User, Project, Message, Statu, File, Doc , FolderForFile, FolderForMd, Comment, User2Project
 from ..decorator import login_required
 from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
@@ -12,48 +12,357 @@ import requests
 import time
 from ..mq import newfeed
 
-access_key = 'YCdnGHp2tRa7V0KDisHqXehlny0eVNM5vQow1cQV'  # os.environ.get('ACCESS_KEY)
-secret_key = 'ZGgkaNPunh6Y32FcsAtvhOd61rnlcKeeXPZ-qIlr'  # os.environ.get('SECRET_KEY)
-url = 'pdw7hnao1.bkt.clouddn.com'                        # os.environ.get('URL')
+access_key = app.config['ACCESS_KEY']
+secret_key = app.config['SECRET_KEY']
+url = app.config['URL']
 bucket_name = 'test-work'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
 
-@api.route('project/<int:pid>/folder/<int:foid>/', methods=['POST', 'GET', 'PUT', 'DELETE'], endpoint='ProjectFolder')
+
+@api.route('/folder/file/', methods=['POST'], endpoint='FolderFilePost')
 @login_required(role = 1)
-def project_folder(uid, pid, foid):
-    if request.method == 'POST':
-        try:
-            foldername = request.get_json().get('foldername')
-            kind = request.get_json().get('kind')
-            if foid != 0:
-                folder = Folder(
-                    kind=kind,
-                    name=foldername,
-                    father_id=foid,
-                    time = time.time(),
-                    project_id=pid
-                )
-            else:
-                folder = Folder(
-                    kind=kind,
-                    name=foldername,
-                    father_id=None,
-                    project_id=pid
-                )
-            db.session.add(folder)
-            db.session.commit()
-        except Exception as e:
+def folder_file_post(uid):
+    try:
+        foldername = request.get_json().get('foldername')
+        project_id = request.get_json().get('project_id')
+
+        folderforfile = FolderForFile(
+            name=foldername,
+            create_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            create_id = uid,
+            project_id=pid
+        )
+        db.session.add(folderforfile)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "errmsg": str(e)
+        }), 500
+    newfeed(uid, "create" + folderforfile.name, 6, folder.id)
+    return jsonify({
+        "id": str(folderforfile.id)
+    }), 201
+
+
+@api.route('/folder/file/<int:id>/', methods=['PUT'], endpoint='FolderFileIdPut')
+@login_required(role = 1)
+def folder_file_id_put(uid, id):
+    try:
+        foldername = request.get_json().get('foldername')
+        folderforfile = FolderForFile.query.filter_by(id=id).first()
+        folderforfile.name = foldername
+        db.session.add(folderforfile)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "errmsg": str(e)
+        }), 500
+    newfeed(uid, "revise" + folderforfile.name, 6, folder.id)
+    return jsonify({}), 200
+
+
+@api.route('/folder/file/<int:id>/', methods=['DELETE'], endpoint='FolderFileIdDelete')
+@login_required(role = 1)
+def folder_file_id_delete(uid, id):
+    name = FolderForFile.query.filter_by(id=id).first().name
+
+    folder = request.get_json().get('folder')
+    file = request.get_json().get('file')
+
+    try:
+        for folder_id in folder:
+            folderforfile = FolderForFile.query.filter_by(id=folder_id).first()
+            folderforfile.re = True
+            # db.session.delete(folderforfile)
+        db.session.commit()
+
+        for file_id in file:
+            file = File.query.filter_by(id=file_id).first()
+            # ret, info = bucket.delete(bucket_name, file.filename)         # 用于彻底删除，但是这里应该只是移动到回收站
+            file.re = True
+            # db.session.delete(file)
+        db.session.commit()
+
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        })
+    newfeed(uid, "delete" + name, 6, id)
+    return jsonify({}), 200
+
+
+@api.route('/folder/file/children/', methods=['POST'], endpoint='FolderFileChrildrenPost')
+@login_required(role = 1)
+def folder_file_chrildren_post(uid):
+    folder = request.get_json().get('folder')
+    file = request.get_json().get('file')
+
+    FolderList = []
+    FileList = []
+    try:
+        for folder_id in folder:
+            folderforfile = FolderForFile.query.filter_by(id=folder_id).first()
+            FolderList.append({
+                "id": folderforfile.id,
+                "name": folderforfile.name
+            })
+
+        for file_id in file:
+            file = File.query.filter_by(id=file_id).first()
+            FileList.append({
+                "id": file.id,
+                "name": file.filename,
+                "creator": User.query.filter_by(id=uid).first().name,
+                "url": file.url,
+                "create_time": file.create_time
+            })
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        })
+    return jsonify({
+        "FolderList": FolderList,
+        "FileList": FileList
+    }), 200
+
+
+@api.route('/folder/doc/', methods=['POST'], endpoint='FolderDocPost')
+@login_required(role = 1)
+def folder_doc_post(uid):
+    try:
+        foldername = request.get_json().get('foldername')
+        project_id = request.get_json().get('project_id')
+
+        folderformd = FolderForMd(
+            name=foldername,
+            create_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            create_id = uid,
+            project_id=pid
+        )
+        db.session.add(folderformd)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "errmsg": str(e)
+        }), 500
+    newfeed(uid, "create" + folderformd.name, 6, folder.id)
+    return jsonify({
+        "id": str(folderformd.id)
+    }), 201
+
+
+@api.route('/folder/doc/<int:id>/', methods=['PUT'], endpoint='FolderDocIdPut')
+@login_required(role = 1)
+def folder_doc_id_put(uid, id):
+    try:
+        foldername = request.get_json().get('foldername')
+        folderformd = FolderForMd.query.filter_by(id=id).first()
+        folderformd.name = foldername
+        db.session.add(folderformd)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "errmsg": str(e)
+        }), 500
+    newfeed(uid, "revise" + folderformd.name, 6, folder.id)
+    return jsonify({}), 200
+
+
+@api.route('/folder/doc/<int:id>/', methods=['DELETE'], endpoint='FolderDocIdDelete')
+@login_required(role = 1)
+def folder_doc_id_delete(uid, id):
+    name = FolderForMd.query.filter_by(id=id).first().name
+
+    folder = request.get_json().get('folder')
+    doc = request.get_json().get('doc')
+
+    try:
+        for folder_id in folder:
+            folderformd = FolderForMd.query.filter_by(id=folder_id).first()
+            folderformd.re = True
+            # db.session.delete(folderforfile)
+        db.session.commit()
+
+        for doc_id in doc:
+            doc = Doc.query.filter_by(id=doc_id).first()
+            # ret, info = bucket.delete(bucket_name, file.filename)         # 用于彻底删除，但是这里应该只是移动到回收站
+            doc.re = True
+            # db.session.delete(file)
+        db.session.commit()
+
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        })
+    newfeed(uid, "delete" + name, 6, id)
+    return jsonify({}), 200
+
+
+@api.route('/folder/doc/children/', methods=['POST'], endpoint='FolderDocChrildrenPost')
+@login_required(role = 1)
+def folder_doc_chrildren_post(uid):
+    folder = request.get_json().get('folder')
+    doc = request.get_json().get('doc')
+
+    FolderList = []
+    DocList = []
+    try:
+        for folder_id in folder:
+            folderformd = FolderForMd.query.filter_by(id=folder_id).first()
+            FolderList.append({
+                "id": folderformd.id,
+                "name": folderformd.name
+            })
+
+        for doc_id in doc:
+            doc = Doc.query.filter_by(id=doc_id).first()
+            DocList.append({
+                "id": doc.id,
+                "name": doc.filename,
+                "lastcontent": doc.content[:100]
+            })
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        })
+    return jsonify({
+        "FolderList": FolderList,
+        "DocList": DocList
+    }), 200
+
+
+@api.route('/file/file/', methods=['POST'], endpoint='FileFilePost')
+@login_required(role=1)
+def file_file_post(uid):
+    file = request.files.get('file')
+    project_id = request.get_json().get('project_id')
+    try:
+        file.save(os.path.join(os.getcwd(), file.filename).encode('utf-8').strip())
+        filename = file.filename
+        key = filename
+        localfile = os.path.join(os.getcwd(), file.filename)
+        res = qiniu_upload(key, localfile)
+        i = res.find('com')
+        res = 'http://' + res[:i+3] + '/' + res[i+3:]
+        os.remove(localfile)
+        newfile = File(
+            url=res,
+            filename=filename,
+            create_time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            create_id=uid,
+            project_id=project_id,
+        )
+        db.session.add(newfile)
+        db.session.commit()
+    except Exception as e:
             db.session.rollback()
             return jsonify({
-                "errormessage": str(e)
+                "errmsg": str(e)
             }), 500
-        action = "create" + folder.name
-        kind = 6
-        newfeed(uid, action, kind, folder.id)
+    newfeed(uid, "create" + filename, 6, newfile.id)
+    return jsonify({
+        "fid": str(newfile.id)
+    }), 201
+
+
+@api.route('/file/file/<int:id>/', methods=['DELETE'], endpoint='FileFileIdDelete')
+@login_required(role=2)
+def file_file_id_delete(uid, id):
+    try:
+        file = File.query.filter_by(id=id).first()
+        file.re = True
+        db.session.commit()
+    except Exception as e:
         return jsonify({
-            "foid": str(folder.id)
-        }), 201
+            "errmsg": str(e)
+        })
+    newfeed(uid, "delete" + file.filename, 6, newfile.id)
+    return jsonify({}), 200
+
+
+@api.route('/file/doc/', methods=['POST'], endpoint='FileDocPost')
+@login_required(role=1)
+def file_doc_post(uid):
+    mdname = request.get_json().get('mdname')
+    content = request.get_json().get('content')
+    project_id = request.get_json().get('project_id')
+    try:
+        newdoc = Doc(
+            content=content,
+            filename=mdname,
+            create_time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            create_id=uid,
+            editor_id=uid,
+            project_id=project_id,
+        )
+        db.session.add(newdoc)
+        db.session.commit()
+    except Exception as e:
+            db.session.rollback()
+            return jsonify({
+                "errmsg": str(e)
+            }), 500
+    newfeed(uid, "create" + mdname, 6, newdoc.id)
+    return jsonify({
+        "fid": str(newdoc.id)
+    }), 201
+
+
+@api.route('/file/doc/<int:id>/', methods=['DELETE'], endpoint='FileDocIdDelete')
+@login_required(role=2)
+def file_doc_id_delete(uid, id):
+    try:
+        doc = Doc.query.filter_by(id=id).first()
+        doc.re = True
+        db.session.commit()
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        })
+    newfeed(uid, "delete" + doc.filename, 6, newdoc.id)
+    return jsonify({}), 200
+
+
+@api.route('/file/doc/<int:id>/', methods=['GET'], endpoint='FileDocIdGet')
+@login_required(role=1)
+def file_doc_id_get(uid, id):
+    doc = Doc.query.filter_by(id=id).first()
+    try:
+        return jsonify({
+            "name": doc.filename,
+            "creator": User.query.filter_by(id=doc.create_id).first().name,
+            "conetnt": doc.content,
+            "lasteditor": User.query.filter_by(id=doc.editor_id).first().name,
+            "create_time": doc.create_time,
+         }),200
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        }), 500
+
+
+@api.route('/file/doc/<int:id>/', methods=['PUT'], endpoint='FileDocIdPut')
+@login_required(role=1)
+def file_doc_id_put(uid, id):
+    doc = Doc.query.filter_by(id=id).first()
+    DocName = request.get_json().get('DocName')
+    content = request.get_json().get('content')
+    try:
+        doc.filename = DocName
+        doc.content = content
+        db.session.commit()
+    except Exception as e:
+        return jsonify({
+            'errmsg': str(e)
+        })
+    newfeed(uid, "update" + doc.filename, 6, newdoc.id)
+    return jsonify({}), 200
+
     elif request.method == 'GET':
         fList = []
         mList = []
@@ -92,57 +401,13 @@ def project_folder(uid, pid, foid):
                     })
         except Exception as e:
             return jsonify({
-                "errormessage": str(e)
+                "errmsg": str(e)
             }), 500
         return jsonify({
             "fList": fList,
             "mList": mList
         }), 200
-    elif request.method == 'PUT':
-        try:
-            foldername = request.get_json().get('foldername')
-            folder = Folder.query.filter_by(id=foid, project_id=pid, re=False).first()
-            folder.name = foldername
-            db.session.add(folder)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({
-                "errormessage": str(e)
-            }), 500
-        action = "revise" + folder.name
-        kind = 6
-        newfeed(uid, action, kind, folder.id)
-        return jsonify({
-        }), 200
-    elif request.method == 'DELETE':
-        name = Folder.query.filter_by(id=foid, re=False).first().name
-        def folder_deleter(deid):
-            defiles = File.query.filter_by(folder_id=deid, re=False).all()
-            for de in defiles:
-                ret, info = bucket.delete(bucket_name, de.filename)
-                db.session.delete(de)
-                db.session.commit()
 
-            defolders = Folder.query.filter_by(father_id=deid, re=False).all()
-            if len(defolders) == 0:
-                defolder = Folder.query.filter_by(id=deid, re=False).first()
-                db.session.delete(defolder)
-                db.session.commit()
-            else:
-                for defo in defolders:
-                    folder_deleter(defo.id)
-        try:
-            folder_deleter(foid)
-        except Exception as e:
-            return jsonify({
-                "errormessage": str(e)
-            })
-        action = "delete" + name
-        kind = 6
-        newfeed(uid, action, kind, foid)
-        return jsonify({
-        }), 200
 
 @api.route('froject/<int:pid>/file/<int:foid>/<int:fid>/', methods=['POST', 'GET', 'PUT', 'DELETE'], endpoint='ProjectFile')
 @login_required(role = 1)
@@ -196,7 +461,7 @@ def project_file(uid, pid, foid, fid):
         except Exception as e:
             db.session.rollback()
             return jsonify({
-                "errormessage": e
+                "errmsg": e
             }), 500
         action = "create" + myfile.filename
         kind = 6
@@ -221,7 +486,7 @@ def project_file(uid, pid, foid, fid):
         except Exception as e:
             print(e)
             return jsonify({
-                "errormessage": str(e)
+                "errmsg": str(e)
             }), 500
         return jsonify({
             "name": name,
@@ -254,7 +519,7 @@ def project_file(uid, pid, foid, fid):
             db.session.commit()
         except Exception as e:
             return jsonify({
-                "errormessage": str(e)
+                "errmsg": str(e)
             }), 500
         action = "revise" + file.filename
         kind = 6
@@ -271,7 +536,7 @@ def project_file(uid, pid, foid, fid):
             db.session.commit()
         except Exception as e:
             return jsonify({
-                "errormessage": str(e)
+                "errmsg": str(e)
             }), 500
         action = "delete" + file.filename
         kind = 6
@@ -304,7 +569,7 @@ def project_f(uid, pid, foid, toid):
             db.session.commit()
     except Exception as e:
         return jsonify({
-            "errormessage": str(e)
+            "errmsg": str(e)
         }), 500
     action = "move" + mname
     kind = 6
@@ -336,7 +601,7 @@ def project_re(uid, pid):
                 db.session.commit()
         except Exception as e:
             return jsonify({
-                "errormessage": str(e)
+                "errmsg": str(e)
             }), 500
         action = "delete" + mname
         kind = 6
@@ -363,7 +628,7 @@ def project_re(uid, pid):
                 db.session.commit()
         except Exception as e:
             return jsonify({
-                "errormessage": str(e)
+                "errmsg": str(e)
             }), 500
         action = "put back" + mname
         kind = 6
@@ -408,7 +673,7 @@ def project_re(uid, pid):
                     })
         except Exception as e:
             return jsonify({
-                "errormessage": str(e)
+                "errmsg": str(e)
             }), 500
         return jsonify({
             "fList": fList,

@@ -105,7 +105,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_2_project(self):
         response = self.client.post(
-            url_for('api.ProjectPid', pid=pid, _external=True),
+            url_for('api.ProjectPidPost', pid=pid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/',
             data=json.dumps({
                 "intro": "test1",
@@ -156,7 +156,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_a_6_comments(self):
         response = self.client.post(
-            url_for('api.ProjectFileComments', pid=pid, fid=fid, _external=True),
+            url_for('api.ProjectFileCommentsPost', pid=pid, fid=fid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/file/1/comments/',
             data=json.dumps({
                 "content": "test"
@@ -221,7 +221,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_b_1_comment(self):
         response = self.client.get(
-            url_for('api.ProjectFileComment', pid=pid, fid=fid, cid=cid, _external=True),
+            url_for('api.ProjectFileCommentGet', pid=pid, fid=fid, cid=cid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comment/' + cid + '/',
             headers=self.get_a_api_headers(True)
         )
@@ -296,7 +296,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_c_1_comment(self):
         response = self.client.delete(
-            url_for('api.ProjectFileComment', pid=pid, fid=fid, cid=cid, _external=True),
+            url_for('api.ProjectFileCommentDelete', pid=pid, fid=fid, cid=cid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/file/' + fid + '/comment/' + cid + '/',
             headers=self.get_a_api_headers(True)
         )
@@ -304,7 +304,7 @@ class BasicTestCase(unittest.TestCase):
 
     def test_project_c_2_project(self):
         response = self.client.delete(
-            url_for('api.ProjectPid', pid=pid, _external=True),
+            url_for('api.ProjectPidDelete', pid=pid, _external=True),
             # 'http://localhost/api/v1.0/project/' + pid + '/',
             headers=self.get_a_api_headers(True)
         )

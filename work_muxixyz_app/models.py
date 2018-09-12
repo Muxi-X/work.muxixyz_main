@@ -50,8 +50,7 @@ class Project(db.Model):
     time = db.Column(db.String(50))
     count = db.Column(db.Integer, default=0)
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
-    files = db.relationship('File', backref='project', lazy='dynamic')
-    folders = db.relationship('Folder', backref='project', lazy='dynamic')
+    filetree = db.Column(db.Text, default = '')
 
 class Apply(db.Model):
     __tablename__ = 'applys'
@@ -77,37 +76,50 @@ class Statu(db.Model):
     comments=db.relationship('Comment', backref='statu', passive_deletes=True, cascade='delete',lazy='dynamic')
 
 
-class Folder(db.Model):
-    __tablename__ = 'folders'
+class FolderForFile(db.Model):
+    __tablename__ = 'foldersforfile'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    kind = db.Column(db.Boolean, default=False) # false==folder of file true==folder of md
-    name = db.Column(db.String(30), nullable=False) # add unique = True
-    father_id = db.Column(db.Integer, db.ForeignKey('folders.id'))
-    # father = db.relationship('Folder', backref=db.backref('children'))
+    name = db.Column(db.String(30), nullable=False, unique = True)
+    create_time = db.Column(db.String(30))
+    create_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
     re = db.Column(db.Boolean, default=False)
-    # project = db.relationship('Project', backref=db.backref('folders'))
-    files = db.relationship('File', backref='folder', lazy='dynamic')
 
+
+class FolderForMd(db.Model):
+    __tablename__ = 'foldersformd'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(30), nullable=False, unique = True)
+    create_time = db.Column(db.String(30))
+    create_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
+    re = db.Column(db.Boolean, default=False)
 
 class File(db.Model):
     __tablename__ = 'files'
     id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String(150)) # add unique = True
+    url = db.Column(db.String(150), unique = True)
     filename = db.Column(db.String(150))
-    kind = db.Column(db.Boolean, default=False)# false==file true==md
     re = db.Column(db.Boolean, default=False)
-    time = db.Column(db.String(30))
-    editor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    # editor = db.relationship('User', backref=db.backref('efiles'))
+    top = db.Column(db.Boolean, default=False)
+    create_time = db.Column(db.String(30))
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    # creator = db.relationship('User', backref=db.backref('cfiles'))
-    folder_id = db.Column(db.Integer, db.ForeignKey('folders.id'))
-    # folder = db.relationship('Folder', backref=db.backref('ffiles'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
-    # project = db.relationship(Project, backref=db.backref('pfiles'))
-    # comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
     comments = db.relationship('Comment', backref='file', lazy='dynamic')
+
+
+class Doc(db.Model):
+    __tablename__ = 'docs'
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(150))
+    content = db.Column(db.Text)
+    re = db.Column(db.Boolean, default=False)
+    top = db.Column(db.Boolean, default=False)
+    create_time = db.Column(db.String(30))
+    editor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
+    comments = db.relationship('Comment', backref='md', lazy='dynamic')
 
 
 class Comment(db.Model):
@@ -118,7 +130,8 @@ class Comment(db.Model):
     time = db.Column(db.String(50))
     creator = db.Column(db.Integer)
     file_id=db.Column(db.Integer,db.ForeignKey('files.id'))
-    statu_id=db.Column(db.Integer,db.ForeignKey('status.id', ondelete='cascade'),default=1)
+    md_id=db.Column(db.Integer,db.ForeignKey('mds.id'))
+    statu_id=db.Column(db.Integer,db.ForeignKey('status.id', ondelete='cascade'))
 
     
 class Message(db.Model):
