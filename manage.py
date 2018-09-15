@@ -3,7 +3,7 @@ import importlib
 import os
 import time
 import pika
-from work_muxixyz_app import create_app,db
+from work_muxixyz_app import create_app, db
 from work_muxixyz_app.models import Team,Group,User,Project,Message,Statu,File,Comment,Feed
 from flask_script import Manager,Shell,Command
 from flask_migrate import Migrate,MigrateCommand

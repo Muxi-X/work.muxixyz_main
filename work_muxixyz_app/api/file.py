@@ -12,16 +12,16 @@ import requests
 import time
 from ..mq import newfeed
 
-access_key = app.config['ACCESS_KEY']
-secret_key = app.config['SECRET_KEY']
-url = app.config['URL']
+access_key = os.environ.get('ACCESS_KEY')
+secret_key = os.environ.get('SECRET_KEY')
+url = os.environ.get('URL')
 bucket_name = 'test-work'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
 
 
 @api.route('/folder/file/', methods=['POST'], endpoint='FolderFilePost')
-@login_required(role = 1)
+@login_required(role=1)
 def folder_file_post(uid):
     try:
         foldername = request.get_json().get('foldername')
@@ -31,7 +31,7 @@ def folder_file_post(uid):
             name=foldername,
             create_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
             create_id = uid,
-            project_id=pid
+            project_id=project_id
         )
         db.session.add(folderforfile)
         db.session.commit()
@@ -40,14 +40,14 @@ def folder_file_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "create" + folderforfile.name, 6, folder.id)
+    newfeed(uid, "create" + folderforfile.name, 6, folderforfile.id)
     return jsonify({
         "id": str(folderforfile.id)
     }), 201
 
 
 @api.route('/folder/file/<int:id>/', methods=['PUT'], endpoint='FolderFileIdPut')
-@login_required(role = 1)
+@login_required(role=1)
 def folder_file_id_put(uid, id):
     try:
         foldername = request.get_json().get('foldername')
@@ -60,12 +60,12 @@ def folder_file_id_put(uid, id):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "revise" + folderforfile.name, 6, folder.id)
+    newfeed(uid, "revise" + folderforfile.name, 6, folderforfile.id)
     return jsonify({}), 200
 
 
 @api.route('/folder/file/<int:id>/', methods=['DELETE'], endpoint='FolderFileIdDelete')
-@login_required(role = 1)
+@login_required(role=1)
 def folder_file_id_delete(uid, id):
     name = FolderForFile.query.filter_by(id=id).first().name
 
@@ -95,7 +95,7 @@ def folder_file_id_delete(uid, id):
 
 
 @api.route('/folder/file/children/', methods=['POST'], endpoint='FolderFileChrildrenPost')
-@login_required(role = 1)
+@login_required(role=1)
 def folder_file_chrildren_post(uid):
     folder = request.get_json().get('folder')
     file = request.get_json().get('file')
@@ -130,7 +130,7 @@ def folder_file_chrildren_post(uid):
 
 
 @api.route('/folder/doc/', methods=['POST'], endpoint='FolderDocPost')
-@login_required(role = 1)
+@login_required(role=1)
 def folder_doc_post(uid):
     try:
         foldername = request.get_json().get('foldername')
@@ -138,9 +138,9 @@ def folder_doc_post(uid):
 
         folderformd = FolderForMd(
             name=foldername,
-            create_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-            create_id = uid,
-            project_id=pid
+            create_time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            create_id=uid,
+            project_id=project_id
         )
         db.session.add(folderformd)
         db.session.commit()
@@ -149,14 +149,14 @@ def folder_doc_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "create" + folderformd.name, 6, folder.id)
+    newfeed(uid, "create" + folderformd.name, 6, folderformd.id)
     return jsonify({
         "id": str(folderformd.id)
     }), 201
 
 
 @api.route('/folder/doc/<int:id>/', methods=['PUT'], endpoint='FolderDocIdPut')
-@login_required(role = 1)
+@login_required(role=1)
 def folder_doc_id_put(uid, id):
     try:
         foldername = request.get_json().get('foldername')
@@ -169,7 +169,7 @@ def folder_doc_id_put(uid, id):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "revise" + folderformd.name, 6, folder.id)
+    newfeed(uid, "revise" + folderformd.name, 6, folderformd.id)
     return jsonify({}), 200
 
 
@@ -204,7 +204,7 @@ def folder_doc_id_delete(uid, id):
 
 
 @api.route('/folder/doc/children/', methods=['POST'], endpoint='FolderDocChrildrenPost')
-@login_required(role = 1)
+@login_required(role=1)
 def folder_doc_chrildren_post(uid):
     folder = request.get_json().get('folder')
     doc = request.get_json().get('doc')
@@ -281,33 +281,34 @@ def file_file_id_delete(uid, id):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, "delete" + file.filename, 6, newfile.id)
+    newfeed(uid, "delete" + file.filename, 6, file.id)
     return jsonify({}), 200
 
 
 @api.route('/file/doc/', methods=['POST'], endpoint='FileDocPost')
 @login_required(role=1)
 def file_doc_post(uid):
+    print("connect")
     mdname = request.get_json().get('mdname')
-    content = request.get_json().get('content')
+    mycontent = request.get_json().get('content')
     project_id = request.get_json().get('project_id')
     try:
         newdoc = Doc(
-            content=content,
+            content=mycontent,
             filename=mdname,
             create_time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-            create_id=uid,
+            creator_id=uid,
             editor_id=uid,
             project_id=project_id,
         )
         db.session.add(newdoc)
         db.session.commit()
+        newfeed(uid, "create" + mdname, 6, newdoc.id)
     except Exception as e:
             db.session.rollback()
             return jsonify({
                 "errmsg": str(e)
             }), 500
-    newfeed(uid, "create" + mdname, 6, newdoc.id)
     return jsonify({
         "fid": str(newdoc.id)
     }), 201
@@ -324,7 +325,7 @@ def file_doc_id_delete(uid, id):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, "delete" + doc.filename, 6, newdoc.id)
+    newfeed(uid, "delete" + doc.filename, 6, doc.id)
     return jsonify({}), 200
 
 
@@ -362,7 +363,7 @@ def file_doc_id_put(uid, id):
         })
     newfeed(uid, "update" + doc.filename, 6, newdoc.id)
     return jsonify({}), 200
-
+'''
     elif request.method == 'GET':
         fList = []
         mList = []
@@ -679,3 +680,4 @@ def project_re(uid, pid):
             "fList": fList,
             "mList": mList
         })
+'''

@@ -9,9 +9,9 @@ from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
 import os
 
-access_key = app.config['ACCESS_KEY']
-secret_key = app.config['SECRET_KEY']
-url = app.config['URL']
+access_key = os.environ.get('ACCESS_KEY')
+secret_key = os.environ.get('SECRET_KEY')
+url = os.environ.get('URL')
 bucket_name = 'test-work'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
@@ -27,7 +27,7 @@ def project_new(uid):
 
     localtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     count = len(userlist)
-    user = User.query.filter_by(name=username).first()
+    user = User.query.filter_by(id=uid).first()
     team_id = user.team_id
 
     project = Project(name=projectname,
@@ -57,7 +57,7 @@ def project_new(uid):
         }), 500
     newfeed(uid, "create" + projectname, 1, project.id)
     return jsonify({
-        'project_id': str(project.id)
+        "project_id": str(project.id)
     }), 201
 
 
@@ -75,6 +75,7 @@ def project_pid_post(uid, pid):
         db.session.add(project)
         db.session.commit()
     except Exception as e:
+        print(e)
         return jsonify({
             "errormesage": str(e)
         }), 500
@@ -206,10 +207,10 @@ def project_member_get(uid, pid):
     return jsonify({
     }), 200
 
-
-@api.route('/project/<int:pid>/file/<int:fid>/comments/', methods=['POST'], endpoint='ProjectFileCommentsPost')
+# --------/------------------------------
+@api.route('/project/<int:pid>/doc/<int:fid>/comments/', methods=['POST'], endpoint='ProjectDocCommentsPost')
 @login_required(role=1)
-def project_file_comments_post(uid, pid, fid):
+def project_doc_comments_post(uid, pid, fid):
     import time
     content = request.get_json().get('content')
     localtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -218,7 +219,7 @@ def project_file_comments_post(uid, pid, fid):
         content=content,
         time=localtime,
         creator=uid,
-        file_id=fid
+        doc_id=fid
     )
     try:
         db.session.add(comment)
@@ -304,7 +305,7 @@ def project_file_comment_delete(uid, pid, fid, cid):
     }), 200
 
 
-@api.route('/file/filetree/<int:pid>/', methods=['PUT'], endpoint='FileTreePut')
+@api.route('/folder/filetree/<int:pid>/', methods=['PUT'], endpoint='FileTreePut')
 @login_required(role=1)
 def file_tree_put(uid, pid):
     filetree = request.get_json().get('filetree')
@@ -319,12 +320,42 @@ def file_tree_put(uid, pid):
         })
     return jsonify({}), 200
 
-@api.route('file/filetree/<int:pid>/', methods=['GET'], endpoint='FileTreeGet')
+
+@api.route('/folder/filetree/<int:pid>/', methods=['GET'], endpoint='FileTreeGet')
 @login_required(role=1)
 def file_tree_get(uid, pid):
     try:
         return jsonify({
             "filetree": Project.query.filter_by(id=pid).first().filetree
+        })
+    except Exception as e:
+        return jsonify({
+            'errmsg': str(e)
+        })
+
+
+@api.route('/folder/doctree/<int:pid>/', methods=['PUT'], endpoint='DocTreePut')
+@login_required(role=1)
+def file_tree_put(uid, pid):
+    doctree = request.get_json().get('doctree')
+    try:
+        project = Project.query.filter_by(id=pid).first()
+        project.doctree = doctree
+        db.session.add(project)
+        db.session.commit()
+    except Exception as e:
+        return jsonify({
+            'errmsg': str(e)
+        })
+    return jsonify({}), 200
+
+
+@api.route('/folder/doctree/<int:pid>/', methods=['GET'], endpoint='DocTreeGet')
+@login_required(role=1)
+def file_tree_get(uid, pid):
+    try:
+        return jsonify({
+            "filetree": Project.query.filter_by(id=pid).first().doctree
         })
     except Exception as e:
         return jsonify({

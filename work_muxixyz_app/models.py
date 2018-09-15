@@ -8,26 +8,26 @@ from flask import current_app
 
 class User(db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(20), unique = True)
-    email = db.Column(db.String(35), unique = True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), unique=True)
+    email = db.Column(db.String(35), unique=True)
     avatar = db.Column(db.String(50))
     tel = db.Column(db.String(15))
-    role = db.Column(db.Integer, default = 0)
+    role = db.Column(db.Integer, default=0)
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
     status = db.relationship('Statu', backref='user', lazy='dynamic')
     receiveMsgs = db.relationship('Message', backref='user', lazy='dynamic')
-    feeds = db.relationship('Feed',backref='user',lazy='dynamic')
+    feeds = db.relationship('Feed', backref='user', lazy='dynamic')
 
     def generate_confirmation_token(self, expiration=3600):
-        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        s = Serializer(current_app.config['SECRET_KEY'])
         return s.dumps({'confirm': self.id}).decode('utf-8')
 
 class Team(db.Model):
     __tablename__ = 'teams'
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(10), unique = True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(10), unique=True)
     count = db.Column(db.Integer)
     time = db.Column(db.String(50))
     creator = db.Column(db.Integer)
@@ -35,31 +35,32 @@ class Team(db.Model):
 
 class Group(db.Model):
     __tablename__ = 'groups'
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(10), unique = True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(10), unique=True)
     count = db.Column(db.Integer)
     leader = db.Column(db.Integer)
     time = db.Column(db.String(30))
-    users = db.relationship('User',backref='group',lazy='dynamic')
+    users = db.relationship('User', backref='group', lazy='dynamic')
 
 class Project(db.Model):
     __tablename__ = 'projects'
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(10), unique = True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), unique=True)
     intro = db.Column(db.String(100))
     time = db.Column(db.String(50))
     count = db.Column(db.Integer, default=0)
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
-    filetree = db.Column(db.Text, default = '')
+    filetree = db.Column(db.Text, default='')
+    doctree = db.Column(db.Text, default='')
 
 class Apply(db.Model):
     __tablename__ = 'applys'
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 class User2Project(db.Model):
     __tablename__ = 'user2projects'
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     project_id = db.Column(db.Integer)
 
@@ -77,9 +78,9 @@ class Statu(db.Model):
 
 
 class FolderForFile(db.Model):
-    __tablename__ = 'foldersforfile'
+    __tablename__ = 'foldersforfiles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(30), nullable=False, unique = True)
+    name = db.Column(db.String(30), nullable=False, unique=True)
     create_time = db.Column(db.String(30))
     create_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
@@ -87,13 +88,14 @@ class FolderForFile(db.Model):
 
 
 class FolderForMd(db.Model):
-    __tablename__ = 'foldersformd'
+    __tablename__ = 'foldersformds'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(30), nullable=False, unique = True)
+    name = db.Column(db.String(30), nullable=False, unique=True)
     create_time = db.Column(db.String(30))
     create_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
     re = db.Column(db.Boolean, default=False)
+
 
 class File(db.Model):
     __tablename__ = 'files'
@@ -105,7 +107,6 @@ class File(db.Model):
     create_time = db.Column(db.String(30))
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
-    comments = db.relationship('Comment', backref='file', lazy='dynamic')
 
 
 class Doc(db.Model):
@@ -119,7 +120,7 @@ class Doc(db.Model):
     editor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
-    comments = db.relationship('Comment', backref='md', lazy='dynamic')
+    comments = db.relationship('Comment', backref='doc', lazy='dynamic')
 
 
 class Comment(db.Model):
@@ -129,9 +130,8 @@ class Comment(db.Model):
     content = db.Column(db.Text)
     time = db.Column(db.String(50))
     creator = db.Column(db.Integer)
-    file_id=db.Column(db.Integer,db.ForeignKey('files.id'))
-    md_id=db.Column(db.Integer,db.ForeignKey('mds.id'))
-    statu_id=db.Column(db.Integer,db.ForeignKey('status.id', ondelete='cascade'))
+    doc_id = db.Column(db.Integer, db.ForeignKey('docs.id'))
+    statu_id = db.Column(db.Integer, db.ForeignKey('status.id', ondelete='cascade'))
 
     
 class Message(db.Model):
