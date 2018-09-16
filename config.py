@@ -2,14 +2,14 @@ import os
 
 DIALECT = 'mysql'
 DRIVER = 'pymysql'
-USERNAME = os.getenv("USERNAME")
-PASSWORD = os.getenv("PASSWORD")
-HOST = os.getenv("HOST")
+USERNAME = os.getenv("WORKBENCH_USERNAME")
+PASSWORD = os.getenv("WORKBENCH_PASSWORD")
+HOST = os.getenv("WORKBENCH_HOST")
 PORT = 3306
-DATABASE = os.getenv("DBNAME")
+DATABASE = os.getenv("WORKBENCH_DBNAME")
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_WORK_KEY")
+    SECRET_KEY = os.getenv("WORKBENCH_SECRET_WORK_KEY")
     SESSION_TYPE = 'filesystem'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_RECORD_QUERIES = True
