@@ -13,7 +13,6 @@ import requests
 
 #role: 000
 @api.route('/user/2bSuperuser/', methods = ['POST'], endpoint = '2BSuperUser')
-#@login_required(role = 0)
 def user_2b_super_user():
     username = request.get_json().get("name")
     usr = User.query.filter_by(name = username).first()
@@ -73,8 +72,6 @@ def group_user_list(uid, gid):
     pageSize = 10
     if request.args.get('page') is not None:
         page = int(request.args.get('page'))
-#    counter = 0
-#    usrs = list([None, None, None, None, None, None, None, None, None, None, None])
     if gid  ==  0 :
         data = get_rows(User, User.team_id, 1, page, pageSize)
     else:
@@ -151,28 +148,29 @@ def group_list(uid):
 @login_required(role = 1)
 def project_user_list(uid, pid):
     page = 1
+    pageSize = 10
     if request.args.get('page') is not None:
         page = int(request.args.get('page'))
-    user = User2Project.query.filter_by(project_id = pid).all()
-    counter = 0
-    usrs = list([None, None, None, None, None, None, None, None, None, None, None])
-    for U in user:
-        c = int(counter)//10
-        if (c+1)  == page:
-            u = User.query.filter_by(id = U.user_id).first()
-            usrs[counter%10]  =  {
-                "username": u.name, 
-                "userID": u.id, 
-                "avatar": u.avatar, 
-                }
-        counter += 1
+    data = get_rows(User2Project, User2Project.project_id, pid, page, pageSize)
+    l = list([])
+    for record in data['datalist']:
+        uid = record.user_id
+        usr = User.query.filter_by(id = uid).first()
+        l.append({
+            "username": usr.name,
+            "userID": uid,
+            "avatar": usr.avatar,
+        })
     pjc = Project.query.filter_by(id = pid).first()
-    pjc.count = counter
+    pjc.count = data['rowsNum']
     db.session.add(pjc)
     db.session.commit()
     response = jsonify({
-                 "count": counter, 
-                 "list": usrs, 
+                 "count": data['rowsNum'],
+                 "pageMax": data['pageMax'],
+                 "pageNow": data['pageNum'],
+                 "hasNext"L data['hasNext'],
+                 "list": l,
              })
     response.status_code = 200
     return response
@@ -182,45 +180,39 @@ def project_user_list(uid, pid):
 @login_required(role = 1)
 def user_project_list(uid):
     page = 1
+    pageSize = 10
     if request.args.get('page') is not None:
         page = int(request.args.get('page'))
-    counter = 0
-    pjcs = list([None, None, None, None, None, None, None, None, None, None, None])
-# page
     usr = User.query.filter_by(id = uid).first()
-    if usr.role > 1: # 111 superuser 7
-        pid = 1        # 011 admin     3
-        l = list([])   # 001 user      1
-        while True:
-            pjc = Project.query.filter_by(id = pid).first()
-            if pjc is None:
-                break
+    l = list([])
+    if usr.role >  1:
+        data = get_rows(Project, None, None, page, pageSize)
+        pjcs = data['dataList']
+        for pjc in pjcs:
             l.append({
-                "projectID": pid, 
-                "projectName": pjc.name, 
+                "projectID": pjc.id,
+                "projectName": pjc.name,
                 "intro": pjc.intro,
-                "userCount": pjc.count, 
+                "userCount": pjc.count,
             })
-            counter += 1
-            pid += 1
-        response = jsonify({
-        	"count": counter, 
-            "projectList": l, 
-        })
-        response.status_code = 200
-        return response
-    for p in usr.projects:
-        c = int(counter)//10
-        if (c+1)  == page:
-            usrs[counter%10] = {
-                "projectID": p.id, 
-                "projectName": p.name, 
-                "userCount": p.count, 
-            }
-        counter += 1
+    else:
+        data = get_rows(User2Project, User2Project.user_id, uid, page, pageSize)
+        records = data['dataList']
+        for record in records:
+            pid = record.project_id
+            pjc = Project.query.filter_by(id = pid).first()
+            l.append({
+                "projectID": pjc.id,
+                "projectName": pjc.name,
+                "intro": pjc.intro,
+                "userCount": pjc.count,
+            })
     response = jsonify({
-        "count": counter, 
-        "projectList": pjcs, 
+        "count": data['rowsNum'],
+        "pageMax": data['pageMax'],
+        "pageNow": data['pageNum'],
+        "hasNext": data['hasNext'],
+        "list": l,
     })
     response.status_code = 200
     return response
