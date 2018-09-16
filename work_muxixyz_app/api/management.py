@@ -10,7 +10,6 @@ import time
 
 import requests
 
-
 #role: 000
 @api.route('/user/2bSuperuser/', methods = ['POST'], endpoint = '2BSuperUser')
 def user_2b_super_user():
@@ -31,7 +30,8 @@ def new_group(uid):
     ulist = request.get_json().get('userlist')
     group = Group(
         time = to_readable_time(str(int(time.time()))),
-        name = gname, count = 0
+        name = gname, 
+        count = 0
     )
     db.session.add(group)
     db.session.commit()
@@ -125,20 +125,16 @@ def group_manage_user(uid, gid):
 @api.route('/group/list/', methods = ['GET'], endpoint = 'GroupList')
 @login_required(role = 1)
 def group_list(uid):
-    gid = 1
+    grps = db.session.query(Group).all()
     l = list([])
-    while True:
-        grp = Group.query.filter_by(id = gid).first()
-        if grp is None:
-            break
+    for grp in grps:
         l.append({
-            "groupID": gid, 
-            "groupName": grp.name, 
-            "userCount": grp.count, 
+            "groupID": grp.id,
+            "groupName": grp.name,
+            "userCount": grp.count,
         })
-        gid += 1
     response = jsonify({
-        "groupList": l, 
+        "groupList": l,
     })
     response.status_code = 200
     return response
@@ -153,7 +149,7 @@ def project_user_list(uid, pid):
         page = int(request.args.get('page'))
     data = get_rows(User2Project, User2Project.project_id, pid, page, pageSize)
     l = list([])
-    for record in data['datalist']:
+    for record in data['dataList']:
         uid = record.user_id
         usr = User.query.filter_by(id = uid).first()
         l.append({
@@ -169,7 +165,7 @@ def project_user_list(uid, pid):
                  "count": data['rowsNum'],
                  "pageMax": data['pageMax'],
                  "pageNow": data['pageNum'],
-                 "hasNext"L data['hasNext'],
+                 "hasNext": data['hasNext'],
                  "list": l,
              })
     response.status_code = 200

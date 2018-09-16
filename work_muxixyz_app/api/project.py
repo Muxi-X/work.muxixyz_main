@@ -7,16 +7,17 @@ import time
 from ..mq import newfeed
 from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
+import os
 
-access_key = 'YCdnGHp2tRa7V0KDisHqXehlny0eVNM5vQow1cQV'  # os.environ.get('ACCESS_KEY)
-secret_key = 'ZGgkaNPunh6Y32FcsAtvhOd61rnlcKeeXPZ-qIlr'  # os.environ.get('SECRET_KEY)
-url = 'pdw7hnao1.bkt.clouddn.com'                        # os.environ.get('URL')
+access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
+secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
+url = os.environ.get('WORKBENCH_URL')
 bucket_name = 'test-work'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
 
 
-@api.route('project/new/', methods=['POST'], endpoint='ProjectNew')
+@api.route('/project/new/', methods=['POST'], endpoint='ProjectNew')
 @login_required(role = 2)
 def project_new(uid):
     username = request.get_json().get('username')
@@ -63,7 +64,7 @@ def project_new(uid):
     }), 201
 
 
-@api.route('project/<int:pid>/', methods=['POST', 'DELETE'], endpoint='ProjectPid')
+@api.route('/project/<int:pid>/', methods=['POST', 'DELETE'], endpoint='ProjectPid')
 @login_required(role = 2)
 def project_pid(uid, pid):
     if request.method == 'POST':
@@ -133,7 +134,7 @@ def project_pid(uid, pid):
         }), 200
 
 
-@api.route('project/<int:pid>/', methods=['GET'], endpoint='ProjectPidGet')
+@api.route('/project/<int:pid>/', methods=['GET'], endpoint='ProjectPidGet')
 @login_required(role = 1)
 def project_pid_get(uid, pid):
     u2ps = User2Project.query.filter_by(user_id=uid).all()
@@ -160,7 +161,7 @@ def project_pid_get(uid, pid):
         }), 500
 
 
-@api.route('project/<int:pid>/member/', methods=['PUT'], endpoint='ProjectMemberPut')
+@api.route('/project/<int:pid>/member/', methods=['PUT'], endpoint='ProjectMemberPut')
 @login_required(role = 2)
 def project_member_put(uid, pid):
     userlist = request.get_json().get('userList')
@@ -197,7 +198,7 @@ def project_member_put(uid, pid):
     }), 200
 
 
-@api.route('project/<int:pid>/member/', methods=['GET'], endpoint='ProjectMemberGet')
+@api.route('/project/<int:pid>/member/', methods=['GET'], endpoint='ProjectMemberGet')
 @login_required(role = 1)
 def project_member_get(uid, pid):
     try:
@@ -220,7 +221,7 @@ def project_member_get(uid, pid):
     }), 200
 
 
-@api.route('project/<int:pid>/file/<int:fid>/comments/', methods=['POST', 'GET'], endpoint='ProjectFileComments')
+@api.route('/project/<int:pid>/file/<int:fid>/comments/', methods=['POST', 'GET'], endpoint='ProjectFileComments')
 @login_required(role = 1)
 def project_file_comments(uid, pid, fid):
     if request.method == 'POST':
@@ -279,7 +280,7 @@ def project_file_comments(uid, pid, fid):
         }), 403
 
 
-@api.route('project/<int:pid>/file/<int:fid>/comment/<int:cid>/', methods=['GET', 'DELETE'], endpoint='ProjectFileComment')
+@api.route('/project/<int:pid>/file/<int:fid>/comment/<int:cid>/', methods=['GET', 'DELETE'], endpoint='ProjectFileComment')
 @login_required(role = 1)
 def project_file_comment_get(uid, pid, fid, cid):
     if request.method == 'GET':

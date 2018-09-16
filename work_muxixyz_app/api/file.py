@@ -12,14 +12,14 @@ import requests
 import time
 from ..mq import newfeed
 
-access_key = 'YCdnGHp2tRa7V0KDisHqXehlny0eVNM5vQow1cQV'  # os.environ.get('ACCESS_KEY)
-secret_key = 'ZGgkaNPunh6Y32FcsAtvhOd61rnlcKeeXPZ-qIlr'  # os.environ.get('SECRET_KEY)
-url = 'pdw7hnao1.bkt.clouddn.com'                        # os.environ.get('URL')
+access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
+secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
+url = os.environ.get('WORKBENCH_URL')
 bucket_name = 'test-work'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
 
-@api.route('project/<int:pid>/folder/<int:foid>/', methods=['POST', 'GET', 'PUT', 'DELETE'], endpoint='ProjectFolder')
+@api.route('/project/<int:pid>/folder/<int:foid>/', methods=['POST', 'GET', 'PUT', 'DELETE'], endpoint='ProjectFolder')
 @login_required(role = 1)
 def project_folder(uid, pid, foid):
     if request.method == 'POST':
@@ -144,7 +144,7 @@ def project_folder(uid, pid, foid):
         return jsonify({
         }), 200
 
-@api.route('froject/<int:pid>/file/<int:foid>/<int:fid>/', methods=['POST', 'GET', 'PUT', 'DELETE'], endpoint='ProjectFile')
+@api.route('/project/<int:pid>/file/<int:foid>/<int:fid>/', methods=['POST', 'GET', 'PUT', 'DELETE'], endpoint='ProjectFile')
 @login_required(role = 1)
 def project_file(uid, pid, foid, fid):
 
@@ -283,7 +283,7 @@ def project_file(uid, pid, foid, fid):
         }), 403
 
 
-@api.route('project/<int:pid>/f<int:foid>/<int:toid>/', methods=['PUT'], endpoint='ProjectF')
+@api.route('/project/<int:pid>/f<int:foid>/<int:toid>/', methods=['PUT'], endpoint='ProjectF')
 @login_required(role = 1)
 def project_f(uid, pid, foid, toid):
     kind = request.get_json().get('kind')
@@ -313,7 +313,7 @@ def project_f(uid, pid, foid, toid):
     }), 200
 
 
-@api.route('project/<int:pid>/re/',  methods=['POST', 'GET', 'PUT'], endpoint='ProjectRe')
+@api.route('/project/<int:pid>/re/',  methods=['POST', 'GET', 'PUT'], endpoint='ProjectRe')
 @login_required(role = 1)
 def project_re(uid, pid):
     if request.method == 'POST':
