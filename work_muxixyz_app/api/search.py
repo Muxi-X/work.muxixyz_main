@@ -20,7 +20,7 @@ def search(uid):
     pattern = request.get_json().get('pattern')
     projectID = request.get_json().get('projectID')
     files = File.filename.like('%'+pattern+'%')
-    docs = Doc.filename.like('%'+pattern)+'%')
+    docs = Doc.filename.like('%'+pattern+'%')
     l = list([])
     if projectID > 0:
         projectName = Project.query.filter_by(id = projectID).first().name
