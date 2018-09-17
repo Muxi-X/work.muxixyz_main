@@ -1,14 +1,12 @@
 from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
-from ..models import Team, Group, User, Project, User2Project, Message, Statu, File, Comment, Apply
+from ..models import Team, Group, User, Project, User2Project, Message, Statu, File, Comment, Apply, Doc
 from ..decorator import login_required
 from ..timetools import to_readable_time
 from ..page import get_rows
 from ..mq import newfeed
 import time
-
-import requests
 
 #role: 000
 @api.route('/user/2bSuperuser/', methods = ['POST'], endpoint = '2BSuperUser')

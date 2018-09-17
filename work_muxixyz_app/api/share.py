@@ -5,7 +5,7 @@ import base64
 from flask import jsonify, request, current_app, url_for, Flask
 from . import api
 from .. import db
-from ..models import User, File, Comment
+from ..models import User, File, Comment, Doc
 from ..decorator import login_required
 from work_muxixyz_app import db
 from flask_sqlalchemy import SQLAlchemy

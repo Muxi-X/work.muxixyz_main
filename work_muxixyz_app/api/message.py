@@ -2,7 +2,7 @@ from flask import jsonify, request, current_app, url_for
 from functools import cmp_to_key
 from . import api
 from .. import db
-from ..models import Team, Group, User, Project, User2Project, Message, Statu, File, Comment, User2File
+from ..models import Team, Group, User, Project, User2Project, Message, Statu, File, Comment, User2File, Doc
 from ..decorator import login_required
 from ..timetools import to_readable_time
 from operator import lt
