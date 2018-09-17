@@ -24,34 +24,36 @@ def search(uid):
     l = list([])
     if projectID > 0:
         projectName = Project.query.filter_by(id = projectID).first().name
-    for file in files:
-        if projectID == 0:
-            continue
-        elif file.project_id == projectID:
-            projectName = Project.query.filter_by(id = projectID).first().name
-            l.append({
-                "kind": 1,
-                "sourceID": file.id,
-                "recordName": file.filename,
-                "projectID": projectID,
-                "projectName": projectName,
-                "creator": User.query.filter_by(id = file.creator_id).first().name,
-                "time": file.create_time,
-            })
-    for doc in docs:
-        if projectID == 0:
-            continue
-        elif doc.project_id == projectID:
-            projectName = Project.query.filter_by(id = projectID).first().name
-            l.append({
-                "kind": 1,
-                "sourceID": doc.id,
-                "recordName": doc.filename,
-                "projectID": projectID,
-                "projectName": projectName,
-                "creator": User.query.filter_by(id = doc.creator_id).first().name,
-                "time": doc.create_time,
-            })
+    if files is not None:
+        for file in files:
+            if projectID == 0:
+                continue
+            elif file.project_id == projectID:
+                projectName = Project.query.filter_by(id = projectID).first().name
+                l.append({
+                    "kind": 1,
+                    "sourceID": file.id,
+                    "recordName": file.filename,
+                    "projectID": projectID,
+                    "projectName": projectName,
+                    "creator": User.query.filter_by(id = file.creator_id).first().name,
+                    "time": file.create_time,
+                })
+    if docs is not None:
+        for doc in docs:
+            if projectID == 0:
+                continue
+            elif doc.project_id == projectID:
+                projectName = Project.query.filter_by(id = projectID).first().name
+                l.append({
+                    "kind": 1,
+                    "sourceID": doc.id,
+                    "recordName": doc.filename,
+                    "projectID": projectID,
+                    "projectName": projectName,
+                    "creator": User.query.filter_by(id = doc.creator_id).first().name,
+                    "time": doc.create_time,
+                })
     l.sort(key = takeKey, reverse = True)
     recordNum = len(l)
     pageMax = recordNum / pageSize
