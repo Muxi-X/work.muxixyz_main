@@ -1,7 +1,7 @@
 from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
-from ..models import Team, Group, User, Project, User2Project, Messgae, Statu, File, Doc, Comment, Apply
+from ..models import Team, Group, User, Project, User2Project, Message, Statu, File, Doc, Comment, Apply
 from ..decorator import login_required
 from ..timetools import to_readable_time
 from ..mq import newfeed
