@@ -9,16 +9,16 @@ from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
 import os
 
-access_key = os.environ.get('ACCESS_KEY')
-secret_key = os.environ.get('SECRET_KEY')
-url = os.environ.get('URL')
+access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
+secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
+url = os.environ.get('WORKBENCH_URL')
 bucket_name = 'test-work'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
 
 
 @api.route('/project/new/', methods=['POST'], endpoint='ProjectNew')
-@login_required(role=2)
+@login_required(role = 2)
 def project_new(uid):
     username = request.get_json().get('username')
     projectname = request.get_json().get('projectname')
@@ -66,7 +66,6 @@ def project_new(uid):
 def project_pid_post(uid, pid):
     intro = request.get_json().get('intro')
     name = request.get_json().get('name')
-
     try:
         project = Project.query.filter_by(id=pid).first()
         project.name = name
@@ -131,7 +130,7 @@ def project_pid_delete(uid, pid):
 
 
 @api.route('/project/<int:pid>/', methods=['GET'], endpoint='ProjectPidGet')
-@login_required(role=1)
+@login_required(role = 1)
 def project_pid_get(uid, pid):
     u2ps = User2Project.query.filter_by(user_id=uid).all()
     flag = True
@@ -158,7 +157,7 @@ def project_pid_get(uid, pid):
 
 
 @api.route('/project/<int:pid>/member/', methods=['PUT'], endpoint='ProjectMemberPut')
-@login_required(role=2)
+@login_required(role = 2)
 def project_member_put(uid, pid):
     userlist = request.get_json().get('userList')
     try:
@@ -192,7 +191,7 @@ def project_member_put(uid, pid):
 
 
 @api.route('/project/<int:pid>/member/', methods=['GET'], endpoint='ProjectMemberGet')
-@login_required(role=1)
+@login_required(role = 1)
 def project_member_get(uid, pid):
     try:
         memberList = []

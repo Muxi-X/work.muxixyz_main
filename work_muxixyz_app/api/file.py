@@ -13,13 +13,12 @@ import requests
 import time
 from ..mq import newfeed
 
-access_key = os.environ.get('ACCESS_KEY')
-secret_key = os.environ.get('SECRET_KEY')
-url = os.environ.get('URL')
+access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
+secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
+url = os.environ.get('WORKBENCH_URL')
 bucket_name = 'test-work'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
-
 
 def qiniu_upload(key, localfile):
     token = q.upload_token(bucket_name, key, 3600)
@@ -138,7 +137,6 @@ def folder_file_chrildren_post(uid):
         "FolderList": FolderList,
         "FileList": FileList
     }), 200
-
 
 @api.route('/folder/doc/', methods=['POST'], endpoint='FolderDocPost')
 @login_required(role=1)

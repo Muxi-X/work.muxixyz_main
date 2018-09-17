@@ -12,9 +12,9 @@ from flask_sqlalchemy import SQLAlchemy
 from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
 
-access_key = 'YCdnGHp2tRa7V0KDisHqXehlny0eVNM5vQow1cQV'  # os.environ.get('ACCESS_KEY)
-secret_key = 'ZGgkaNPunh6Y32FcsAtvhOd61rnlcKeeXPZ-qIlr'  # os.environ.get('SECRET_KEY)
-url = 'pdw7hnao1.bkt.clouddn.com'                        # os.environ.get('URL')
+access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
+secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
+url = os.environ.get('WORKBENCH_URL')
 bucket_name = 'test-work'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
