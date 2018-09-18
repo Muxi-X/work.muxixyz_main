@@ -13,12 +13,13 @@ import requests
 import time
 from ..mq import newfeed
 
-access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
-secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
-url = os.environ.get('WORKBENCH_URL')
+access_key = os.environ.get('ACCESS_KEY')
+secret_key = os.environ.get('SECRET_KEY')
+url = os.environ.get('URL')
 bucket_name = 'test-work'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
+
 
 def qiniu_upload(key, localfile):
     token = q.upload_token(bucket_name, key, 3600)
@@ -108,7 +109,7 @@ def folder_file_id_delete(uid, id):
 @login_required(role=1)
 def folder_file_chrildren_post(uid):
     folder = request.get_json().get('folder')
-    file = request.get_json().get('file')
+    file_list = request.get_json().get('file')
 
     FolderList = []
     FileList = []
@@ -120,7 +121,7 @@ def folder_file_chrildren_post(uid):
                 "name": folderforfile.name
             })
 
-        for file_id in file:
+        for file_id in file_list:
             file = File.query.filter_by(id=file_id).first()
             FileList.append({
                 "id": file.id,
@@ -137,6 +138,7 @@ def folder_file_chrildren_post(uid):
         "FolderList": FolderList,
         "FileList": FileList
     }), 200
+
 
 @api.route('/folder/doc/', methods=['POST'], endpoint='FolderDocPost')
 @login_required(role=1)
@@ -214,20 +216,20 @@ def folder_doc_id_delete(uid, id):
 @api.route('/folder/doc/children/', methods=['POST'], endpoint='FolderDocChrildrenPost')
 @login_required(role=1)
 def folder_doc_chrildren_post(uid):
-    folder = request.get_json().get('folder')
-    doc = request.get_json().get('doc')
+    folder_list = request.get_json().get('folder')
+    doc_list = request.get_json().get('doc')
 
     FolderList = []
     DocList = []
     try:
-        for folder_id in folder:
+        for folder_id in folder_list:
             folderformd = FolderForMd.query.filter_by(id=folder_id).first()
             FolderList.append({
                 "id": folderformd.id,
                 "name": folderformd.name
             })
 
-        for doc_id in doc:
+        for doc_id in doc_list:
             doc = Doc.query.filter_by(id=doc_id).first()
             DocList.append({
                 "id": doc.id,
@@ -370,3 +372,88 @@ def file_doc_id_put(uid, id):
         })
     newfeed(uid, "update" + doc.filename, 6, doc.id)
     return jsonify({}), 200
+
+
+@api.route('/project/re/', methods=['POST'], endpoint='ProjectRePost')
+@login_required(role=1)
+def project_re_post(uid):
+    doc_list = request.get_json().get('doc')
+    file_list = request.get_json().get('file')
+
+    DocList = []
+    FileList = []
+    try:
+        for doc_id in doc_list:
+            doc = Doc.query.filter_by(id=doc_id).first()
+            DocList.append({
+                "id": doc.id,
+                "name": doc.filename,
+                "lastcontent": doc.content[:100]
+            })
+
+        for file_id in file_list:
+            file = File.query.filter_by(id=file_id).first()
+            FileList.append({
+                "id": file.id,
+                "name": file.filename,
+                "creator": User.query.filter_by(id=uid).first().name,
+                "url": file.url,
+                "create_time": file.create_time
+            })
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        })
+    return jsonify({
+        "FolderList": DocList,
+        "FileList": FileList
+    }), 200
+
+
+@api.route('/project/re/', methods=['PUT'], endpoint='ProjectRePut')
+@login_required(role=1)
+def project_re_put(uid):
+    doc_list = request.get_json().get('doc')
+    file_list = request.get_json().get('file')
+
+    try:
+        for doc_id in doc_list:
+            doc = Doc.query.filter_by(id=doc_id).first()
+            doc.re = False
+            db.session.commit()
+
+        for file_id in file_list:
+            file = File.query.filter_by(id=file_id).first()
+            file.re = False
+            db.session.commit()
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        })
+    return jsonify({
+    }), 200
+
+
+@api.route('/project/re/', methods=['DELETE'], endpoint='ProjectReDelete')
+@login_required(role=1)
+def project_re_put(uid):
+    doc_list = request.get_json().get('doc')
+    file_list = request.get_json().get('file')
+
+    try:
+        for doc_id in doc_list:
+            doc = Doc.query.filter_by(id=doc_id).first()
+            db.session.delete(doc)
+        db.session.commit()
+
+        for file_id in file_list:
+            file = File.query.filter_by(id=file_id).first()
+            ret, info = bucket.delete(bucket_name, file.filename)
+            db.session.delete(file)
+        db.session.commit()
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        })
+    return jsonify({
+    }), 200
