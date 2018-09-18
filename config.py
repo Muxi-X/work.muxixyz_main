@@ -14,14 +14,14 @@ class Config:
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_RECORD_QUERIES = True
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    ACCESS_KEY = os.environ.get('ACCESS_KEY')
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-    URL = os.environ.get('URL')
+    ACCESS_KEY = os.environ.get('WORKBENCH_ACCESS_KEY')
+    FILE_SECRET_KEY = os.environ.get('WORKBENCH_SECRET_KEY')
+    URL = os.environ.get('WORKBENCH_URL')
 
     @staticmethod
     def init_app(app):
         pass
-    
+
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = \

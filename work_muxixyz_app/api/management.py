@@ -75,19 +75,31 @@ def group_user_list(uid, gid):
     else:
         data = get_rows(User, User.group_id, gid, page, pageSize)
         grp = Group.query.filter_by(id = gid).first()
-
+        groupName = grp.name
     l = list([])
     for u in data['dataList']:
         if gid == 0:
             grp = Group.query.filter_by(id = u.group_id).first()
+            if grp is None:
+                groupName = 'NoneGroup'
+            else:
+                groupName = grp.name
         l.append({
+            'teamID': u.team_id,
             'username': u.name,
             'userID': u.id,
-            'groupName': grp.name,
+            'groupName': groupName,
+            'groupID': u.group_id,
             'role': u.role,
             'email': u.email,
             'avatar': u.avatar
         })
+    userCount = len(l)
+    if gid != 0:
+        grp = Group.query.filter_by(id = gid).first()
+        grp.count = userCount
+        db.session.add(grp)
+        db.session.commit()
 
     response = jsonify({
                  "count": data['rowsNum'],
@@ -224,6 +236,7 @@ def user_2b_member(uid):
         response.status_code = 402
         return response
     usr.role = 1
+    usr.team_id = 1
     db.session.add(usr)
     db.session.commit()
     action = 'User: ' + usr.name + 'is a member of MUXI!'
