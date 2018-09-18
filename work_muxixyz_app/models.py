@@ -119,7 +119,7 @@ class Doc(db.Model):
     editor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
-    comments = db.relationship('Comment', backref='doc', lazy='dynamic')
+    comments = db.relationship('Comment', backref='doc', passive_deletes=True, cascade='delete', lazy='dynamic')
 
 
 class Comment(db.Model):
@@ -129,7 +129,7 @@ class Comment(db.Model):
     content = db.Column(db.Text)
     time = db.Column(db.String(50))
     creator = db.Column(db.Integer)
-    doc_id = db.Column(db.Integer, db.ForeignKey('docs.id'))
+    doc_id = db.Column(db.Integer, db.ForeignKey('docs.id', ondelete='cascade'))
     statu_id = db.Column(db.Integer, db.ForeignKey('status.id', ondelete='cascade'))
 
     
