@@ -374,25 +374,25 @@ def file_doc_id_put(uid, id):
     return jsonify({}), 200
 
 
-@api.route('/project/re/', methods=['POST'], endpoint='ProjectRePost')
+@api.route('/project/re/', methods=['GET'], endpoint='ProjectReGet')
 @login_required(role=1)
-def project_re_post(uid):
-    doc_list = request.get_json().get('doc')
-    file_list = request.get_json().get('file')
+def project_re_get(uid):
+    id = request.get_json().get('id')
+
+    docs = Doc.query.filter_by(project_id=id, re=True).all()
+    files = File.query.filter_by(project_id=id, re=True).all()
 
     DocList = []
     FileList = []
     try:
-        for doc_id in doc_list:
-            doc = Doc.query.filter_by(id=doc_id).first()
+        for doc in docs:
             DocList.append({
                 "id": doc.id,
                 "name": doc.filename,
                 "lastcontent": doc.content[:100]
             })
 
-        for file_id in file_list:
-            file = File.query.filter_by(id=file_id).first()
+        for file in files:
             FileList.append({
                 "id": file.id,
                 "name": file.filename,
