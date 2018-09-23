@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
@@ -224,26 +225,31 @@ def user_project_list(uid):
     return response
 
 #role: 110
-@api.route('/user/2bmember/', methods = ['POST'], endpoint = 'User2bMember')
+@api.route('/user/2bMember/', methods = ['POST'], endpoint = 'User2bMember')
 @login_required(role = 2)
 def user_2b_member(uid):
     user_id = request.get_json().get('userID')
     usr = User.query.filter_by(id = user_id).first()
-    if usr.role !=  0:
+    if (usr.role !=  0) and (usr.team_id is not None):
         response = jsonify({
             "msg": 'user already be a member!', 
         })
         response.status_code = 402
         return response
-    usr.role = 1
+    if usr.role == 0:
+        usr.role = 1
     usr.team_id = 1
+    print ("1")
     db.session.add(usr)
+    print ("2")
     db.session.commit()
-    action = 'User: ' + usr.name + 'is a member of MUXI!'
+    print ("3")
+    action = '用户: ' + usr.name + '是木犀的一员啦！'
     newfeed(uid, action, 5, user_id)
     response = jsonify({
-        "msg": 'successful!', 
+        "msg": 'successful!',
     })
+    print ("4")
     response.status_code = 200
     return response
 
@@ -277,7 +283,7 @@ def add_admin(uid):
     luckydog.role = 3
     db.session.add(luckydog)
     db.session.commit()
-    action = 'User: ' + luckydog.name + 'is ADMINISTRATOR now!'
+    action = '用户: ' + luckydog.name + '现在是管理员啦！'
     newfeed(uid, action, 5, lid)
     response = jsonify({})
     response.status_code = 200
@@ -387,14 +393,16 @@ def apply_list(uid):
         })
         response.status_code = 201
         return response
-    for u in usrs:
+    for a in usrs:
+        print (a.user_id)
+        user = User.query.filter_by(id = a.user_id).first()
         l.append({
-            "userID": u.id,
-            "userName": u.name,
-            "userEmail": u.email,
+            "userID": user.id,
+            "userName": user.name,
+            "userEmail": user.email,
         })
     response = jsonify({
-        "msg": "successful",
+        "list": l,
     })
     response.status_code = 200
     return response

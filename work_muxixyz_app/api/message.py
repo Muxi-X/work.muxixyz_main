@@ -106,6 +106,7 @@ def message_list(uid):
             "sourceID": m.file_id,
             "fromName": usr.name,
             "fromAvatar": usr.avatar,
+            "action": m.action,
             "time": m.time,
             "readed": m.readed,
         })
