@@ -13,50 +13,79 @@ import time
 def user_attention(uid):
     if request.method  ==  'POST':
         fileID = request.get_json().get('fileID')
-        f = File.query.filter_by(id = fileID).first()
-        if f is None:
-            response = jsonify({})
+        fileKind = requests.getjson().get('fileKind')
+        if kind is 1:
+            f = File.query.filter_by(id = fileID).first()
+        if kind is 0:
+            f = Doc.query.filter_by(id = fileID).first()
+        if kind is None:
+            response = jsonify({
+                "msg": 'file kind not found!',
+            })
             response.status_code = 402
             return response
-        rela = User2File(user_id = uid,file_id = fileID)
+
+        if f is None:
+            response = jsonify({
+                "msg": 'file not found',
+            })
+            response.status_code = 402
+            return response
+
+        rela = User2File(user_id = uid, file_id = fileID, file_kind = kind)
         db.session.add(rela)
         db.session.commit()
-        response = jsonify({})
+        response = jsonify({
+            "msg": 'successful!',
+        })
         response.status_code = 200
         return response
+
     if request.method  ==  'GET':
         l = list([])
         files = User2File.query.filter_by(user_id = uid).all()
         for f_id in files:
-            f = File.query.filter_by(id = f_id.file_id).first()
-            editor = User.query.filter_by(id = f.editor_id).first()
+            if f_id.file_kind is 1:
+                f = File.query.filter_by(id = f_id.file_id).first()
+                editor = User.query.filter_by(id = f.creator_id).first()
+            if f_id.file_kind is 0:
+                f = Doc.query.filter_by(id = f_id.file_id).first()
+                editor = User.query.filter_by(id = f.editor_id).first()
             if editor is None:
                 editor = User.query.filter_by(id = f.creator_id).first()
+
             project = Project.query.filter_by(id = f.project_id).first()
             l.append({
                 "fileName": f.filename,
                 "userName": editor.name,
                 "projectName": project.name,
-                "date": f.time,
+                "date": f.create_time,
             })
         response = jsonify({
             "list": l,
         })
         response.status_code = 200
         return response
+
     if request.method == 'DELETE':
         fileName = request.args.get('fileName')
-        f = File.query.filter_by(filename = fileName).first()
+        fileKind = request.args.get('fileKind')
+        if fileKind is 1:
+            f = File.query.filter_by(filename = fileName).first()
+        if fileKind is 0:
+            f = Doc.query.filter_by(filename = fileName).first()
         if f is None:
             response = jsonify({
                 "fileName": fileName,
             })
             response.status_code = 403
             return response
-        record = User2File.query.filter_by(file_id = f.id).first()
+        record = User2File.query.filter_by(file_id = f.id, file_kind = fileKind).first()
         db.session.delete(record)
         db.session.commit()
-        response = jsonify({})
+        response = jsonify({
+            "msg": 'successful!',
+        })
         response.status_code = 200
         return response
 
@@ -67,15 +96,19 @@ def message_new(uid):
     maker = request.get_json().get('maker')
     action = request.get_json().get('action')
     sourceID = request.get_json().get('sourceID')
+    sourceKind = request.get_json().get('sourceKind')
     Mer = User.query.filter_by(name = maker).first()
     Rer = User.query.filter_by(name = receiver).first()
     if uid !=  Rer.id:
-        response = jsonify({})
+        response = jsonify({
+            "msg": 'you are not the real one!',
+        })
         response.status_code = 401
         return response
     msg = Message(
         time = to_readable_time(time.time()),
-        action = action,from_id = Mer.id,receive_id = Rer.id,file_id = sourceID)
+        action = action,from_id = Mer.id,receive_id = Rer.id,
+        file_id = sourceID, file_kind = sourceKind)
     db.session.add(msg)
     db.session.commit()
     response = jsonify({})
@@ -103,6 +136,7 @@ def message_list(uid):
             response.status_code = 401
             return response
         l.append({
+            "sourceKind": m.file_kind,
             "sourceID": m.file_id,
             "fromName": usr.name,
             "fromAvatar": usr.avatar,
@@ -161,6 +195,7 @@ def message_info(uid,username,mid):
         "time": msg.time,
         "action": msg.action,
         "sourceID": msg.file_id,
+        "sourceKind": msg.file_kind,
     })
     response.status_code = 200
     return response
