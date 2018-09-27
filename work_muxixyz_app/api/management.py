@@ -183,14 +183,23 @@ def project_user_list(uid, pid):
     return response
 
 #role: 001
-@api.route('/user/project/list/', methods = ['GET'], endpoint = 'UserProjectList')
+@api.route('/user/<int:id>/project/list/', methods = ['GET'], endpoint = 'UserProjectList')
 @login_required(role = 1)
-def user_project_list(uid):
+def user_project_list(uid, id):
+    if uid != id:
+        request_user = User.query.filter_by(id = uid).first()
+        got_user = User.query.filter_by(id = id).first()
+        if request_user.role < got_user.role:
+            response = jsonify({
+                "msg": 'you should get yourself information!',
+            })
+            response.status_code = 402
+            return response
     page = 1
     pageSize = 10
     if request.args.get('page') is not None:
         page = int(request.args.get('page'))
-    usr = User.query.filter_by(id = uid).first()
+    usr = User.query.filter_by(id = id).first()
     l = list([])
     if usr.role >  1:
         data = get_rows(Project, None, None, page, pageSize)
@@ -203,7 +212,7 @@ def user_project_list(uid):
                 "userCount": pjc.count,
             })
     else:
-        data = get_rows(User2Project, User2Project.user_id, uid, page, pageSize)
+        data = get_rows(User2Project, User2Project.user_id, id, page, pageSize)
         records = data['dataList']
         for record in records:
             pid = record.project_id
