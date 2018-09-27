@@ -40,7 +40,7 @@ def user_attention(uid):
         })
         response.status_code = 200
         return response
-
+    
     if request.method  ==  'GET':
         l = list([])
         files = User2File.query.filter_by(user_id = uid).all()

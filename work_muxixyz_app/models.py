@@ -20,7 +20,7 @@ class User(db.Model):
     status = db.relationship('Statu', backref='user', lazy='dynamic')
     receiveMsgs = db.relationship('Message', backref='user', lazy='dynamic')
     feeds = db.relationship('Feed', backref='user', lazy='dynamic')
-
+    
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'])
         return s.dumps({'confirm': self.id}).decode('utf-8')
