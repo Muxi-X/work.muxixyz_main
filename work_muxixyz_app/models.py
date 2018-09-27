@@ -13,6 +13,8 @@ class User(db.Model):
     avatar = db.Column(db.String(50))
     tel = db.Column(db.String(15))
     role = db.Column(db.Integer, default=0)
+    email_service = db.Column(db.Boolean, default = False)
+    message = db.Column(db.Boolean, default = False)
     team_id = db.Column(db.Integer, db.ForeignKey('teams.id'))
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
     status = db.relationship('Statu', backref='user', lazy='dynamic')

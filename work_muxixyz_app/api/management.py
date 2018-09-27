@@ -336,6 +336,41 @@ def set_role(uid, id):
     return response
 
 #role: 001
+@api.route('/user/<int:id>/setting/', methods = ['GET'], endpoint = 'GetSetting')
+@login_required(role = 1)
+def get_setting(uid, id):
+    if id == uid:
+        user = User.query.filter_by(id = uid).first()
+        response = jsonify({
+            "name": user.name,
+            "email": user.email,
+            "tel": user.tel,
+            "email_service": user.email_service,
+            "message": user.message,
+        })
+        response.status_code = 200
+        return response
+    else:
+        request_user = User.query.filter_by(id = uid).first()
+        got_user = User.query.filter_by(id = id).first()
+        if request_user.role < got_user.role:
+            response = jsonify({
+                "msg": 'please get yourself information!',
+            })
+            response.status_cocde = 402
+            return response
+        else:
+            response = jsonify({
+                "name": got_user.name,
+                "email": got_user.email,
+                "tel": got_user.tel,
+                "email_service": got_user.email_service,
+                "message": got_user.message,
+            })
+        response.status_code = 200
+        return response
+
+#role: 001
 @api.route('/user/<int:id>/setting/', methods = ['POST'], endpoint = 'EditSetting')
 @login_required(role = 1)
 def editsetting(uid, id):
