@@ -11,7 +11,7 @@ from work_muxixyz_app import db
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql.expression import func
 from ..mq import newfeed
-from ..page import get_rows
+
 
 #KIND = ['Statu', 'Project', 'Doc', 'Comment', 'Team', 'User', 'File']
 num = 0
@@ -39,7 +39,11 @@ def newstatus(uid):
     action = 'create '+ user.name + '\'s status'
     kind = 0
     sourceID = 0
-    newfeed(uid, action, kind, sourceID)
+    newfeed(
+        uid,
+        action,
+        kind,
+        sourceID)
     response = jsonify({"message":"statu create successfully"})
     response.status_code = 200
     return response
@@ -105,7 +109,11 @@ def editstatu(uid, sid):
          action = 'update '+ user.name + '\'s status'
          kind = 0
          sourceID = 0
-         newfeed(uid, action, kind, sourceID)
+         newfeed(
+              uid,
+              action,
+              kind,
+              sourceID)
          response = jsonify({"message":"statu edit successfully"})
          response.status_code = 200
          return response
@@ -129,32 +137,37 @@ def deletestatu(uid,sid):
 @api.route('/status/list/<int:page>/', methods=['GET'], endpoint='statulist')
 @login_required(1)
 def statulist(uid, page):
+    status = Statu.query.all()
     statuList = []
     a_statu = {}
     iflike = 0
-    data = get_rows(Statu,1,1,page,20)
-    for statu in data['dataList']:
-        if statu.like is not 0:
-            likelen = redis_statu.llen(statu.id)
-            likeList = redis_statu.lrange(statu.id,0,likelen)
-            if uid in likeList:
-                iflike = 1
-        user = User.query.filter_by(id=statu.user_id).first()
-        a_statu['sid'] = statu.id
-        a_statu['username'] = user.name
-        a_statu['time'] = statu.time
-        a_statu['avatar'] = user.avatar
-        a_statu['title'] = statu.title
-        a_statu['content'] = statu.content
-        a_statu['likeCount'] = statu.like
-        a_statu['iflike'] = iflike
-        a_statu['commentCount'] = statu.comment
-        c_statu = a_statu.copy()
-        statuList.append(c_statu)
+    for statu in status:
+        global num
+        num += 1
+        if num > (page-1)*20 and num <= page*20:
+            if statu.like is not 0:
+                likelen = redis_statu.llen(statu.id)
+                likeList = redis_statu.lrange(statu.id,0,likelen)
+                if uid in likeList:
+                    iflike = 1
+            user = User.query.filter_by(id=statu.user_id).first()
+            a_statu['sid'] = statu.id
+            a_statu['username'] = user.name
+            a_statu['time'] = statu.time
+            a_statu['avatar'] = user.avatar
+            a_statu['title'] = statu.title
+            a_statu['content'] = statu.content
+            a_statu['likeCount'] = statu.like
+            a_statu['iflike'] = iflike
+            a_statu['commentCount'] = statu.comment
+            c_statu = a_statu.copy()
+            statuList.append(c_statu)
+        elif num > page * 20:
+            break
     response = jsonify({
         "statuList": statuList,
         "page": page,
-        "count": data['rowsNum']})
+        "count": len(status)})
     response.status_code = 200
     return response
 
@@ -162,11 +175,14 @@ def statulist(uid, page):
 @api.route('/status/<int:userid>/list/<int:page>/', methods=['GET'], endpoint='user_statulist')
 @login_required(1)
 def user_statulist(uid, userid, page):
+    status = Statu.query.filter_by(user_id=userid).all()
     statuList = []
     a_statu = {}
     iflike = 0
-    data = get_rows(Statu,Statu.user_id,userid,page,20)
-    for statu in data['dataList']:
+    for statu in status:
+        global num
+        num += 1
+        if num > (page-1)*20 and num <= page*20:
             if statu.like is not 0:
                 likelen = redis_statu.llen(statu.id)
                 likeList = redis_statu.lrange(statu.id,0,likelen)
@@ -180,14 +196,13 @@ def user_statulist(uid, userid, page):
             a_statu['commentCount'] = statu.comment
             c_statu = a_statu.copy()
             statuList.append(c_statu)
-    if uid == userid:
-        response = jsonify({
-            "statuList": statuList,
-            "page": page,
-            "count": data['rowsNum']})
-        response.status_code = 200
-    else: 
-        response = jsonify({'message':'it\'s not the right user'}),401
+        elif num > page * 20:
+            break
+    response = jsonify({
+        "statuList": statuList,
+        "page": page,
+        "count": len(status)})
+    response.status_code = 200
     return response
 
 
@@ -211,6 +226,8 @@ def like(uid, sid):
 @api.route('/status/<int:sid>/comments/', methods=['POST'], endpoint='newcomments')
 @login_required(1)
 def newcomments(uid, sid):
+    statu = Statu.query.filter_by(id=sid).first()
+    statu.comment += 1
     content = request.get_json().get('content')
     time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     comment = Comment(
@@ -218,16 +235,19 @@ def newcomments(uid, sid):
         time=time1,
         kind = 0,
         creator = uid,
-        file_id = 1,
         statu_id = sid)
-    db.session.add(comment)
+    db.session.add(comment, statu)
     db.session.commit()
     user = User.query.filter_by(id=uid).first()
     avatar_url = user.avatar
     action = 'comment '+ user.name + '\'s status'
     kind = 3
     sourceID = comment.id
-    newfeed(uid, action, kind, sourceID)
+    newfeed(
+        uid,
+        action,
+        kind,
+        sourceID)
     response = jsonify({"message":"feed add successfully"})
     response.status_code = 200
     return response
@@ -261,6 +281,10 @@ def deletecomment(uid, sid, cid):
     if Comment.query.filter_by(id=cid).first() is not None:
         comment = Comment.query.filter_by(id=cid).first()
         if comment.creator == uid:
+            statu = Statu.query.filter_by(id=sid).first()
+            statu.comment -= 1
+            db.session.add(statu)
+            db.session.commit()
             Comment.query.filter_by(id=cid).delete()
             response = jsonify({"message":"ok"})
             response.status_code = 200
