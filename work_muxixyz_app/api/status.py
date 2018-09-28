@@ -226,6 +226,8 @@ def like(uid, sid):
 @api.route('/status/<int:sid>/comments/', methods=['POST'], endpoint='newcomments')
 @login_required(1)
 def newcomments(uid, sid):
+    statu = Statu.query.filter_by(id=sid).first()
+    statu.comment += 1
     content = request.get_json().get('content')
     time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     comment = Comment(
@@ -233,9 +235,8 @@ def newcomments(uid, sid):
         time=time1,
         kind = 0,
         creator = uid,
-        file_id = 1,
         statu_id = sid)
-    db.session.add(comment)
+    db.session.add(comment, statu)
     db.session.commit()
     user = User.query.filter_by(id=uid).first()
     avatar_url = user.avatar
@@ -251,28 +252,28 @@ def newcomments(uid, sid):
     response.status_code = 200
     return response
 
-
-#@api.route('/status/<int:sid>/comment/<int:cid>/', methods=['GET'], endpoint='getcomment')
-#@login_required(1)
-#def getcomment(uid, sid, cid):
-#    comment = Comment.query.filter_by(id=cid).first()
-#    if comment is not None:
-#        user = User.query.filter_by(id=comment.creator).first()
-#        username = user.name
-#        time1 = comment.time
-#        avatar = user.avatar
-#        content = comment.content
-#        response = jsonify({
-#            "username": username,
-#            "avatar": avatar,
-#            "time": time1,
-#            "content": content})
-#        response.status_code = 200
-#    else:
-#        response = jsonify({"message": "can't find comment"})
-#        response.status_code = 402
-#    return response
-
+'''
+@api.route('/status/<int:sid>/comment/<int:cid>/', methods=['GET'], endpoint='getcomment')
+@login_required(1)
+def getcomment(uid, sid, cid):
+    comment = Comment.query.filter_by(id=cid).first()
+    if comment is not None:
+        user = User.query.filter_by(id=comment.creator).first()
+        username = user.name
+        time1 = comment.time
+        avatar = user.avatar
+        content = comment.content
+        response = jsonify({
+            "username": username,
+            "avatar": avatar,
+            "time": time1,
+            "content": content})
+        response.status_code = 200
+    else:
+        response = jsonify({"message": "can't find comment"})
+        response.status_code = 402
+    return response
+'''
 
 @api.route('/status/<int:sid>/comment/<int:cid>/', methods=['DELETE'], endpoint='deletecomment')
 @login_required(1)
@@ -280,6 +281,10 @@ def deletecomment(uid, sid, cid):
     if Comment.query.filter_by(id=cid).first() is not None:
         comment = Comment.query.filter_by(id=cid).first()
         if comment.creator == uid:
+            statu = Statu.query.filter_by(id=sid).first()
+            statu.comment -= 1
+            db.session.add(statu)
+            db.session.commit()
             Comment.query.filter_by(id=cid).delete()
             response = jsonify({"message":"ok"})
             response.status_code = 200
