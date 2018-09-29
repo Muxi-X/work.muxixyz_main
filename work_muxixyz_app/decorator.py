@@ -27,3 +27,26 @@ def login_required(role):
             return rv
         return decorated_function
     return deco
+
+class login_re(object):
+    def __init__(self, role=1):
+        self.role = role
+
+    def __call__(self, func):
+        @wraps(func)
+        def decorated_function(*args, **kwargs):
+            if not 'token' in request.headers:
+                abort(401)
+            t=request.headers['token'].encode('utf-8')
+            s=Serializer(current_app.config['SECRET_KEY'])
+            try:
+                data=s.loads(t)
+            except:
+                abort(401)
+            uid=data.get('confirm')
+            usr=User.query.filter_by(id=uid).first()
+            if self.role&usr.role != role:
+                abort(401)
+            rv=func(uid, *args, **kwargs)
+            return rv
+        return decorated_function
