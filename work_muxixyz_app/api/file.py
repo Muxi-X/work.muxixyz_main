@@ -52,7 +52,7 @@ def folder_file_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "create" + folderforfile.name, 6, folderforfile.id)
+    newfeed(uid, "创建" + folderforfile.name, 6, folderforfile.id)
     return jsonify({
         "id": str(folderforfile.id)
     }), 201
@@ -72,7 +72,7 @@ def folder_file_id_put(uid, id):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "revise" + folderforfile.name, 6, folderforfile.id)
+    newfeed(uid, "编辑" + folderforfile.name, 6, folderforfile.id)
     return jsonify({}), 200
 
 
@@ -101,7 +101,7 @@ def folder_file_id_delete(uid, id):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, "delete" + name, 6, id)
+    newfeed(uid, "删除" + name, 6, id)
     return jsonify({}), 200
 
 
@@ -160,7 +160,7 @@ def folder_doc_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "create" + folderformd.name, 6, folderformd.id)
+    newfeed(uid, "创建" + folderformd.name, 6, folderformd.id)
     return jsonify({
         "id": str(folderformd.id)
     }), 201
@@ -180,7 +180,7 @@ def folder_doc_id_put(uid, id):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "revise" + folderformd.name, 6, folderformd.id)
+    newfeed(uid, "编辑" + folderformd.name, 6, folderformd.id)
     return jsonify({}), 200
 
 
@@ -209,7 +209,7 @@ def folder_doc_id_delete(uid, id):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, "delete" + name, 6, id)
+    newfeed(uid, "删除" + name, 6, id)
     return jsonify({}), 200
 
 
@@ -274,7 +274,7 @@ def file_file_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "create" + filename, 6, newfile.id)
+    newfeed(uid, "创建" + filename, 6, newfile.id)
     return jsonify({
         "fid": str(newfile.id)
     }), 201
@@ -291,7 +291,7 @@ def file_file_id_delete(uid, id):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, "delete" + file.filename, 6, file.id)
+    newfeed(uid, "删除" + file.filename, 6, file.id)
     return jsonify({}), 200
 
 
@@ -312,7 +312,7 @@ def file_doc_post(uid):
         )
         db.session.add(newdoc)
         db.session.commit()
-        newfeed(uid, "create" + mdname, 6, newdoc.id)
+        newfeed(uid, "创建" + mdname, 6, newdoc.id)
     except Exception as e:
         db.session.rollback()
         return jsonify({
@@ -334,7 +334,7 @@ def file_doc_id_delete(uid, id):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, "delete" + doc.filename, 6, doc.id)
+    newfeed(uid, "删除" + doc.filename, 6, doc.id)
     return jsonify({}), 200
 
 
@@ -370,7 +370,7 @@ def file_doc_id_put(uid, id):
         return jsonify({
             'errmsg': str(e)
         })
-    newfeed(uid, "update" + doc.filename, 6, doc.id)
+    newfeed(uid, "编辑" + doc.filename, 6, doc.id)
     return jsonify({}), 200
 
 
