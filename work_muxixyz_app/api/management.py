@@ -7,7 +7,26 @@ from ..decorator import login_required
 from ..timetools import to_readable_time
 from ..page import get_rows
 from ..mq import newfeed
+from qiniu import Auth, put_file, etag, BucketManager
+import qiniu.config
 import time
+
+access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
+secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
+url = os.environ.get('WORKBENCH_URL')
+bucket_name = 'test-work'
+q = qiniu.Auth(access_key, secret_key)
+bucket = BucketManager(q)
+
+def qiniu_upload(key, localfile):
+    token = q.upload_token(bucket_name, key, 3600)
+
+    ret, info = qiniu.put_file(token, key, localfile)
+
+    if ret:
+        return '{0}{1}'.format(url, ret['key'])
+    else:
+        raise UploadError('上传失败，请重试')
 
 #role: 000
 @api.route('/user/2bSuperuser/', methods = ['POST'], endpoint = '2BSuperUser')
@@ -368,6 +387,7 @@ def get_setting(uid, id):
         else:
             response = jsonify({
                 "name": got_user.name,
+                "avatar": got_user.avatar,
                 "email": got_user.email,
                 "tel": got_user.tel,
                 "email_service": got_user.email_service,
@@ -402,6 +422,35 @@ def editsetting(uid, id):
     db.session.commit()
     response = jsonify({})
     response.status_code = 200
+    return response
+
+#role: 001
+@api.route('/user/uploadAvatar/', methods = ['POST', endpoint = 'UploadAvatar'])
+@login_required(role = 1)
+def upload_avatar(uid):
+    usr = User.query.filter_by(id = uid).first()
+    image = request.files.get('image')
+    try:
+        image.save(os.path.join(os.getcwd(), image.filename).encode('utf-8').strip())
+        filename = image.filename
+        key = filename
+        localfile = os.path.join(os.getcwd(), image.filename)
+        res = qiniu_upload(key, localfile)
+        i = res.find('com')
+        res = 'http://' + res[:i + 3] + '/' + res[i + 3:]
+        os.remove(localfile)
+        usr.avatar = res
+        db.session.add(usr)
+        db.session.commit()
+        response = jsonify({
+            "url": res,
+        })
+        response.status_code = 200
+    except:
+        response = jsonify({
+            "msg": "upload failed",
+        })
+        response.status_code = 403
     return response
 
 # role 110
