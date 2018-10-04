@@ -104,6 +104,7 @@ class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     url = db.Column(db.String(150))
     filename = db.Column(db.String(150))
+    realname = db.Column(db.String(150))
     re = db.Column(db.Boolean, default=False)
     top = db.Column(db.Boolean, default=False)
     create_time = db.Column(db.String(30))
