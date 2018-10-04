@@ -249,11 +249,11 @@ def folder_doc_chrildren_post(uid):
 @api.route('/file/file/', methods=['POST'], endpoint='FileFilePost')
 @login_required(role=1)
 def file_file_post(uid):
-    file = request.files.get('file')
+    myfile = request.files.get('file')
     project_id = request.form.get('project_id')
     try:
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(os.getcwd(), filename))
+        filename = secure_filename(myfile.filename)
+        myfile.save(os.path.join(os.getcwd(), filename))
         key = filename
         localfile = os.path.join(os.getcwd(), filename)
         res = qiniu_upload(key, localfile)
@@ -262,7 +262,7 @@ def file_file_post(uid):
         os.remove(localfile)
         newfile = File(
             url=res,
-            realname = file.filename,
+            realname = myfile.filename,
             filename=filename,
             create_time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
             creator_id=uid,
@@ -275,10 +275,10 @@ def file_file_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, u"创建" + filename, 6, newfile.id)
+    newfeed(uid, u"创建" + myfile.filenamee, 6, newfile.id)
     return jsonify({
         "fid": str(newfile.id),
-        "name": realname
+        "name": myfile.filename
     }), 201
 
 
