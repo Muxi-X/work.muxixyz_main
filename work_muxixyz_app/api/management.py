@@ -423,7 +423,7 @@ def editsetting(uid, id):
     response = jsonify({})
     response.status_code = 200
     return response
-
+    
 #role: 001
 @api.route('/user/uploadAvatar/', methods = ['POST', endpoint = 'UploadAvatar'])
 @login_required(role = 1)
