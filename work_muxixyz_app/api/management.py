@@ -10,6 +10,7 @@ from ..mq import newfeed
 from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
 import time
+import os
 
 access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
 secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
