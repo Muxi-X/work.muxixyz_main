@@ -125,7 +125,7 @@ def folder_file_chrildren_post(uid):
             file = File.query.filter_by(id=file_id).first()
             FileList.append({
                 "id": file.id,
-                "name": file.filename,
+                "name": file.realname,
                 "creator": User.query.filter_by(id=uid).first().name,
                 "url": file.url,
                 "create_time": file.create_time
@@ -278,7 +278,7 @@ def file_file_post(uid):
     newfeed(uid, u"创建" + filename, 6, newfile.id)
     return jsonify({
         "fid": str(newfile.id),
-        "name": filename
+        "name": realname
     }), 201
 
 
