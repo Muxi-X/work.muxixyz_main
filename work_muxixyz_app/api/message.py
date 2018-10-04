@@ -58,7 +58,7 @@ def user_attention(uid):
             l.append({
                 "fileName": f.filename,
                 "userName": editor.name,
-                "projectID": project.id
+                "projectID": project.id,
                 "projectName": project.name,
                 "date": f.create_time,
             })
