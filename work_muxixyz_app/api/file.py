@@ -254,7 +254,9 @@ def file_file_post(uid):
     filename = file.filename
     key = filename
     localfile = os.path.join(os.getcwd(), file.filename)
-    res = qiniu_upload(key, localfile)
+    token = q.upload_token(bucket_name, key, 3600)
+    res, info = put_file(token, key, localfile)
+    print(res)
     i = res.find('com')
     res = 'http://' + res[:i + 3] + '/' + res[i + 3:]
     os.remove(localfile)
