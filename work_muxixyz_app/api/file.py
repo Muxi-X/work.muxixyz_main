@@ -12,6 +12,7 @@ import os
 import requests
 import time
 from ..mq import newfeed
+from werkzeug import secure_filename
 
 access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
 secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
@@ -251,10 +252,10 @@ def file_file_post(uid):
     file = request.files.get('file')
     project_id = request.form.get('project_id')
     try:
-        file.save(os.path.join(os.getcwd(), file.filename).encode('utf-8').strip())
-        filename = file.filename
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(os.getcwd(), filename).encode('utf-8').strip())
         key = filename
-        localfile = os.path.join(os.getcwd(), file.filename)
+        localfile = os.path.join(os.getcwd(), filename)
         res = qiniu_upload(key, localfile)
         i = res.find('com')
         res = 'http://' + res[:i + 3] + '/' + res[i + 3:]
