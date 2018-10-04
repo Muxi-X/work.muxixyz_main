@@ -20,7 +20,6 @@ bucket_name = 'tets'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
 
-
 def qiniu_upload(key, localfile):
     token = q.upload_token(bucket_name, key, 3600)
 
