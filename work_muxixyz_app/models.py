@@ -82,7 +82,7 @@ class Statu(db.Model):
 class FolderForFile(db.Model):
     __tablename__ = 'foldersforfiles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(30), nullable=False, unique=True)
+    name = db.Column(db.String(30), nullable=False)
     create_time = db.Column(db.String(30))
     create_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
@@ -92,7 +92,7 @@ class FolderForFile(db.Model):
 class FolderForMd(db.Model):
     __tablename__ = 'foldersformds'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(30), nullable=False, unique=True)
+    name = db.Column(db.String(30), nullable=False)
     create_time = db.Column(db.String(30))
     create_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
@@ -102,7 +102,7 @@ class FolderForMd(db.Model):
 class File(db.Model):
     __tablename__ = 'files'
     id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String(150), unique = True)
+    url = db.Column(db.String(150))
     filename = db.Column(db.String(150))
     re = db.Column(db.Boolean, default=False)
     top = db.Column(db.Boolean, default=False)
