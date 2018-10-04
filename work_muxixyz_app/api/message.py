@@ -140,7 +140,7 @@ def message_list(uid):
         if m.file_kind is 0:
             f = Doc.query.filter_by(id=m.file_id).first()
         if m.file_kind is 1:
-            f = FIle.query.filter_by(id=m.file_id).first()
+            f = File.query.filter_by(id=m.file_id).first()
         pjc = None
         if f is not None:
             pjc = Project.query.filter_by(id=f.project_id).first()
