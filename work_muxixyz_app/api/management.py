@@ -371,7 +371,7 @@ def get_setting(uid, id):
             "name": user.name,
             "email": user.email,
             "tel": user.tel,
-            "avatar": user.avatar
+            "avatar": user.avatar,
             "email_service": user.email_service,
             "message": user.message,
         })
