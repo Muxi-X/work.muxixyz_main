@@ -10,7 +10,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True)
     email = db.Column(db.String(35), unique=True)
-    avatar = db.Column(db.String(50))
+    avatar = db.Column(db.Text)
     tel = db.Column(db.String(15))
     role = db.Column(db.Integer, default=0)
     email_service = db.Column(db.Boolean, default = False)
