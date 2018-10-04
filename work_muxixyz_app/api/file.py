@@ -275,7 +275,7 @@ def file_file_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, u"创建" + myfile.filenamee, 6, newfile.id)
+    newfeed(uid, u"创建" + myfile.filename, 6, newfile.id)
     return jsonify({
         "fid": str(newfile.id),
         "name": myfile.filename
