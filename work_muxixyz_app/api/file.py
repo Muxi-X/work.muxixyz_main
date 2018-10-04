@@ -16,7 +16,7 @@ from ..mq import newfeed
 access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
 secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
 url = os.environ.get('WORKBENCH_URL')
-bucket_name = 'test-work'
+bucket_name = 'tets'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
 
@@ -249,7 +249,7 @@ def folder_doc_chrildren_post(uid):
 @login_required(role=1)
 def file_file_post(uid):
     file = request.files.get('file')
-    project_id = request.get_json().get('project_id')
+    project_id = request.form.get('project_id')
     try:
         file.save(os.path.join(os.getcwd(), file.filename).encode('utf-8').strip())
         filename = file.filename
@@ -263,7 +263,7 @@ def file_file_post(uid):
             url=res,
             filename=filename,
             create_time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-            create_id=uid,
+            creator_id=uid,
             project_id=project_id,
         )
         db.session.add(newfile)

@@ -13,7 +13,7 @@ import os
 access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
 secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
 url = os.environ.get('WORKBENCH_URL')
-bucket_name = 'test-work'
+bucket_name = 'tets'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
 
