@@ -14,7 +14,7 @@ import time
 access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
 secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
 url = os.environ.get('WORKBENCH_URL')
-bucket_name = 'test-work'
+bucket_name = 'ossworkbench'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
 
@@ -425,7 +425,7 @@ def editsetting(uid, id):
     return response
     
 #role: 001
-@api.route('/user/uploadAvatar/', methods = ['POST', endpoint = 'UploadAvatar'])
+@api.route('/user/uploadAvatar/', methods = ['POST'], endpoint = 'UploadAvatar')
 @login_required(role = 1)
 def upload_avatar(uid):
     usr = User.query.filter_by(id = uid).first()
