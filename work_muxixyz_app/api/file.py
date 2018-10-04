@@ -275,7 +275,8 @@ def file_file_post(uid):
         }), 500
     newfeed(uid, u"创建" + filename, 6, newfile.id)
     return jsonify({
-        "fid": str(newfile.id)
+        "fid": str(newfile.id),
+        "name": filename
     }), 201
 
 
