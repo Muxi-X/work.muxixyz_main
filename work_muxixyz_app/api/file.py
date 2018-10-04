@@ -250,25 +250,29 @@ def folder_doc_chrildren_post(uid):
 def file_file_post(uid):
     file = request.files.get('file')
     project_id = request.form.get('project_id')
-    file.save(os.path.join(os.getcwd(), file.filename).encode('utf-8').strip())
-    filename = file.filename
-    key = filename
-    localfile = os.path.join(os.getcwd(), file.filename)
-    token = q.upload_token(bucket_name, key, 3600)
-    res, info = put_file(token, key, localfile)
-    print(res)
-    i = res.find('com')
-    res = 'http://' + res[:i + 3] + '/' + res[i + 3:]
-    os.remove(localfile)
-    newfile = File(
-        url=res,
-        filename=filename,
-        create_time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-        creator_id=uid,
-        project_id=project_id,
-    )
-    db.session.add(newfile)
-    db.session.commit()
+    try:
+        file.save(os.path.join(os.getcwd(), file.filename).encode('utf-8').strip())
+        filename = file.filename
+        key = filename
+        localfile = os.path.join(os.getcwd(), file.filename)
+        res = qiniu_upload(key, localfile)
+        i = res.find('com')
+        res = 'http://' + res[:i + 3] + '/' + res[i + 3:]
+        os.remove(localfile)
+        newfile = File(
+            url=res,
+            filename=filename,
+            create_time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            creator_id=uid,
+            project_id=project_id,
+        )
+        db.session.add(newfile)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "errmsg": str(e)
+        }), 500
     newfeed(uid, u"创建" + filename, 6, newfile.id)
     return jsonify({
         "fid": str(newfile.id),
