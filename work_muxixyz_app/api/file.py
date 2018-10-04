@@ -52,7 +52,7 @@ def folder_file_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "创建" + folderforfile.name, 6, folderforfile.id)
+    # newfeed(uid, "创建" + folderforfile.name, 6, folderforfile.id)
     return jsonify({
         "id": str(folderforfile.id)
     }), 201
