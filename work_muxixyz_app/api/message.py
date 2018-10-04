@@ -58,6 +58,7 @@ def user_attention(uid):
             l.append({
                 "fileName": f.filename,
                 "userName": editor.name,
+                "projectID": project.id
                 "projectName": project.name,
                 "date": f.create_time,
             })
@@ -68,8 +69,8 @@ def user_attention(uid):
         return response
 
     if request.method == 'DELETE':
-        fileName = request.args.get('fileName')
-        fileKind = request.args.get('fileKind')
+        fileName = request.get_json().get('fileName')
+        fileKind = request.get_json().get('fileKind')
         if fileKind is 1:
             f = File.query.filter_by(filename = fileName).first()
         if fileKind is 0:
@@ -119,7 +120,7 @@ def message_new(uid):
 @login_required(role = 1)
 def message_list(uid):
     kind = request.args.get('kind')
-    msgs = Message.query.filter_by(receive_id = uid,readed = False).order_by(Message.id).all()
+    msgs = Message.query.filter_by(receive_id = uid).order_by(Message.id).all()
     l = list([])
     limit = 0
     if kind  ==  1: #hover
@@ -135,9 +136,21 @@ def message_list(uid):
             })
             response.status_code = 401
             return response
+        f = None
+        if m.file_kind is 0:
+            f = Doc.query.filter_by(id=m.file_id).first()
+        if m.file_kind is 1:
+            f = FIle.query.filter_by(id=m.file_id).first()
+        pjc = None
+        if f is not None:
+            pjc = Project.query.filter_by(id=f.project_id).first()
+        else:
+            pjc = Project(id=None, name=None)
         l.append({
             "sourceKind": m.file_kind,
             "sourceID": m.file_id,
+            "projectName": pjc.name,
+            "projectID": pjc.id,
             "fromName": usr.name,
             "fromAvatar": usr.avatar,
             "action": m.action,

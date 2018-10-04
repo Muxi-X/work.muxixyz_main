@@ -248,11 +248,8 @@ def user_2b_member(uid):
     if usr.role == 0:
         usr.role = 1
     usr.team_id = 1
-    print ("1")
     db.session.add(usr)
-    print ("2")
     db.session.commit()
-    print ("3")
     action = '用户: ' + usr.name + '是木犀的一员啦！'
     newfeed(uid, action, 5, user_id)
     response = jsonify({
@@ -419,6 +416,14 @@ def delete_member(uid,id):
         return response
     usr = User.query.filter_by(id=id).first()
     usr.role = 0
+    grp = Group.query.filter_by(id=usr.group_id).first()
+    team = Group.query.filter_by(id=usr.team_id).first()
+    if grp is not None:
+        grp.count -= 1
+        db.session.add(grp)
+    if team is not None:
+        team.count -= 1
+        db.session.add(team)
     db.session.add(usr)
     db.session.commit()
     response = jsonify({})
