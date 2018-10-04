@@ -448,11 +448,11 @@ def upload_avatar(uid):
             "url": res,
         })
         response.status_code = 200
-    except:
-        response = jsonify({
-            "msg": "upload failed",
-        })
-        response.status_code = 403
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "errmsg": str(e)
+        }), 403
     return response
 
 # role 110
