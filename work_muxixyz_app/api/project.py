@@ -56,7 +56,7 @@ def project_new(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "创建" + projectname, 1, project.id)
+    newfeed(uid, u"创建" + projectname, 1, project.id)
     return jsonify({
         "project_id": str(project.id)
     }), 201
@@ -79,7 +79,7 @@ def project_pid_post(uid, pid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "编辑" + name, 1, project.id)
+    newfeed(uid, u"编辑" + name, 1, project.id)
     return jsonify({
     }), 201
 
@@ -125,7 +125,7 @@ def project_pid_delete(uid, pid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "删除" + name, 1, id)
+    newfeed(uid, u"删除" + name, 1, id)
     return jsonify({
     }), 200
 
@@ -186,7 +186,7 @@ def project_member_put(uid, pid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "编辑" + project.name + '的成员', 1, project.id)
+    newfeed(uid, u"编辑" + project.name + '的成员', 1, project.id)
     return jsonify({
     }), 200
 
@@ -236,7 +236,7 @@ def project_doc_comments_post(uid, pid, fid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, "创建评论", 1, comment.id)
+    newfeed(uid, u"创建评论", 1, fid)
     return jsonify({
         "cid": str(comment.id)
     }), 201
@@ -307,7 +307,7 @@ def project_file_comment_delete(uid, pid, fid, cid):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, "删除评论", 1, id)
+    newfeed(uid, u"删除评论", 1, id)
     return jsonify({
     }), 200
 
