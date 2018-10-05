@@ -252,10 +252,10 @@ def file_file_post(uid):
     myfile = request.files.get('file')
     project_id = request.form.get('project_id')
     try:
-        filename = secure_filename(myfile.filename) + '/' + str(time.time())
-        myfile.save(os.path.join(os.getcwd(), myfile.filename))
+        filename = secure_filename(myfile.filename) + str(time.time())
+        myfile.save(os.path.join(os.getcwd(), filename))
         key = filename
-        localfile = os.path.join(os.getcwd(), myfile.filename)
+        localfile = os.path.join(os.getcwd(), filename)
         res = qiniu_upload(key, localfile)
         i = res.find('com')
         res = 'http://' + res[:i + 3] + '/' + res[i + 3:]

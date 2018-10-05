@@ -434,10 +434,10 @@ def upload_avatar(uid):
     usr = User.query.filter_by(id = uid).first()
     image = request.files.get('image')
     try:
-        filename = secure_filename(image.filename) + '/' + str(time.time())
-        image.save(os.path.join(os.getcwd(), image.filename))
+        filename = secure_filename(image.filename) + str(time.time())
+        image.save(os.path.join(os.getcwd(), filename))
         key = filename
-        localfile = os.path.join(os.getcwd(), image.filename)
+        localfile = os.path.join(os.getcwd(), filename)
         res = qiniu_upload(key, localfile)
         i = res.find('com')
         res = 'http://' + res[:i + 3] + '/' + res[i + 3:]
