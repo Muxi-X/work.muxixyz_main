@@ -476,6 +476,8 @@ def delete_member(uid,id):
     if team is not None:
         team.count -= 1
         db.session.add(team)
+    usr.team_id = None
+    usr.group_id = None
     db.session.add(usr)
     db.session.commit()
     response = jsonify({})
