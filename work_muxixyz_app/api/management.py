@@ -441,7 +441,7 @@ def upload_avatar(uid):
         res = qiniu_upload(key, localfile)
         i = res.find('com')
         res = 'http://' + res[:i + 3] + '/' + res[i + 3:]
-        os.remove(localfile)
+        os.system('rm -rf '+ filename)
         usr.avatar = res
         db.session.add(usr)
         db.session.commit()
