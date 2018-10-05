@@ -433,7 +433,7 @@ def upload_avatar(uid):
     usr = User.query.filter_by(id = uid).first()
     image = request.files.get('image')
     try:
-        image.save(os.path.join(os.getcwd(), image.filename).encode('utf-8').strip())
+        image.save(os.path.join(os.getcwd(), image.filename))
         filename = image.filename
         key = filename
         localfile = os.path.join(os.getcwd(), image.filename)

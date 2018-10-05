@@ -254,7 +254,7 @@ def file_file_post(uid):
     try:
         filename = secure_filename(myfile.filename) + str(time.time())
         myfile.save(os.path.join(os.getcwd(), filename))
-        key = filename
+        key = 'download/' + filename
         localfile = os.path.join(os.getcwd(), filename)
         res = qiniu_upload(key, localfile)
         i = res.find('com')
