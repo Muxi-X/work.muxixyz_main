@@ -17,7 +17,7 @@ def newfeed(uid, action, kind, sourceID):
             virtual_host='/',
             credentials=credentials))
     channel = connection.channel()
-    time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    time1 = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
     user = User.query.filter_by(id=uid).first()
     username = user.name
     avatar_url = user.avatar

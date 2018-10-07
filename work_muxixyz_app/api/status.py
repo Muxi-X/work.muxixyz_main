@@ -38,7 +38,7 @@ def newstatus(uid):
     avatar_url = user.avatar
     action = 'create '+ user.name + '\'s status'
     kind = 0
-    sourceID = 0
+    sourceID = statu.id
     newfeed(
         uid,
         action,
