@@ -284,17 +284,18 @@ def user_2b_member(uid):
 @api.route('/user/admins/', methods = ['GET'], endpoint = 'AdminList')
 @login_required(role = 4)
 def admin_list(uid):
-    admins = User.query.filter_by(role = 3).all()
+    admins = db.session.query(User).all()
     if admins is None:
         response = jsonify({})
         response.status_code = 201
         return response
     l=list([])
     for admin in admins:
-        l.append({
-            "userID": admin.id,
-            "userName": admin.name,
-        })
+        if admin.role > 1:
+            l.append({
+                "userID": admin.id,
+                "userName": admin.name,
+            })
     response = jsonify({
         "list": l,
     })
