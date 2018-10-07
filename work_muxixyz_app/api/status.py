@@ -24,7 +24,7 @@ redis_statu = redis.Redis(host='localhost', port=6379, decode_responses=True)
 def newstatus(uid):
     content = request.get_json().get('content')
     title = request.get_json().get('title')
-    time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    time1 = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
     statu =  Statu(
         content=content,
         title=title,
