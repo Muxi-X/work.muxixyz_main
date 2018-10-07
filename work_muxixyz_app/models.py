@@ -158,7 +158,6 @@ class Feed(db.Model):
     sourceid = db.Column(db.Integer)
     divider = db.Column(db.Boolean)
     user_id = db.Column(db.Integer,db.ForeignKey('users.id'))
-    file_id = db.Column(db.Integer, db.ForeignKey('files.id'), default=0)
 
 
 class User2File(db.Model):

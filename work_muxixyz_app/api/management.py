@@ -448,6 +448,7 @@ def upload_avatar(uid):
         response = jsonify({
             "url": res,
         })
+        print (res)
         response.status_code = 200
     except Exception as e:
         db.session.rollback()
