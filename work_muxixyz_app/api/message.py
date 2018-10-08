@@ -40,8 +40,10 @@ def user_attention(uid):
         })
         response.status_code = 200
         return response
-    
+
     if request.method  ==  'GET':
+        if request.args.get('id') is not None:
+            uid=request.args.get('id')
         l = list([])
         files = User2File.query.filter_by(user_id = uid).all()
         for f_id in files:
