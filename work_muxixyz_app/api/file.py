@@ -52,7 +52,6 @@ def folder_file_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, u"创建" + folderforfile.name, 6, folderforfile.id)
     return jsonify({
         "id": str(folderforfile.id)
     }), 201
@@ -72,7 +71,6 @@ def folder_file_id_put(uid, id):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, u"编辑" + folderforfile.name, 6, folderforfile.id)
     return jsonify({}), 200
 
 
@@ -101,7 +99,6 @@ def folder_file_id_delete(uid, id):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, u"删除" + name, 6, id)
     return jsonify({}), 200
 
 
@@ -160,7 +157,6 @@ def folder_doc_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, u"创建" + folderformd.name, 6, folderformd.id)
     return jsonify({
         "id": str(folderformd.id)
     }), 201
@@ -180,7 +176,6 @@ def folder_doc_id_put(uid, id):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, u"编辑" + folderformd.name, 6, folderformd.id)
     return jsonify({}), 200
 
 
@@ -209,7 +204,6 @@ def folder_doc_id_delete(uid, id):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, u"删除" + name, 6, id)
     return jsonify({}), 200
 
 
@@ -314,7 +308,7 @@ def file_doc_post(uid):
         )
         db.session.add(newdoc)
         db.session.commit()
-        newfeed(uid, u"创建" + mdname, 6, newdoc.id)
+        newfeed(uid, u"创建" + mdname, 2, newdoc.id)
     except Exception as e:
         db.session.rollback()
         return jsonify({
@@ -336,7 +330,7 @@ def file_doc_id_delete(uid, id):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, u"删除" + doc.filename, 6, doc.id)
+    newfeed(uid, u"删除" + doc.filename, 2, doc.id)
     return jsonify({}), 200
 
 
@@ -372,7 +366,7 @@ def file_doc_id_put(uid, id):
         return jsonify({
             'errmsg': str(e)
         })
-    newfeed(uid, u"编辑" + doc.filename, 6, doc.id)
+    newfeed(uid, u"编辑" + doc.filename, 2, doc.id)
     return jsonify({}), 200
 
 
