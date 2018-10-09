@@ -11,7 +11,10 @@ from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
 import time
 import os
+from flask import current_app
 from werkzeug import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
 secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
@@ -524,5 +527,43 @@ def refuse_apply(uid,id):
     db.session.delete(record)
     db.session.commit()
     response = jsonify({})
+    response.status_code = 200
+    return response
+
+# role: 001
+@api.route('/team/invite/', methods = ['GET'], endpoint = 'GetInviteLink')
+@login_required(role = 1)
+def get_invite_link(uid):
+    usr = User.query.filter_by(id = uid).first()
+    teamID = usr.team_id
+    team = Team.query.filter_by(id = teamID).first()
+    s = Serializer(current_app.config['SECRET_KEY'])
+    hash_id = s.dumps({'teamID': team.id}).decode('utf-8')
+    response = jsonify({
+        "hash_id": hash_id,
+    })
+    response.status_code = 200
+    return response
+
+# role: 000
+@api.route('/team/getID/', methods = ['GET'], endpoint = 'GetTeamID')
+def get_team_id():
+    hash_id = request.args.get('hash_id')
+    if hash_id is None:
+        response = jsonify({
+            'msg': 'Your hash_id ??? Where??',
+        })
+        response.status_code = 403
+        return response
+    t = hash_id.encode('utf-8')
+    s=Serializer(current_app.config['SECRET_KEY'])
+    try:
+        data=s.loads(t)
+    except:
+        abort(402)
+    tid=data.get('teamID')
+    response = jsonify({
+        'teamID': tid,
+    })
     response.status_code = 200
     return response
