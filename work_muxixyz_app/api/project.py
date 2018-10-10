@@ -319,7 +319,6 @@ def file_tree_put(uid, pid):
     try:
         project = Project.query.filter_by(id=pid).first()
         project.filetree = filetree
-        db.session.add(project)
         db.session.commit()
     except Exception as e:
         return jsonify({
@@ -348,7 +347,6 @@ def file_tree_put(uid, pid):
     try:
         project = Project.query.filter_by(id=pid).first()
         project.doctree = doctree
-        db.session.add(project)
         db.session.commit()
     except Exception as e:
         return jsonify({
