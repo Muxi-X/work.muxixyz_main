@@ -61,8 +61,8 @@ def getstatu(uid,sid):
     if statu.like is not 0:
         likelen = redis_statu.llen(statu.id)
         likeList = redis_statu.lrange(statu.id,0,likelen)
-        print (likeList)
-        if uid in likeList:
+        if str(uid) in likeList:
+            print(1)
             iflike = 1
     user =  User.query.filter_by(id=uid).first()
     username = user.name
