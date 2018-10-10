@@ -36,7 +36,7 @@ def newstatus(uid):
     db.session.commit()
     user = User.query.filter_by(id=uid).first()
     avatar_url = user.avatar
-    action = 'create '+ user.name + '\'s status'
+    action = '创建'+ user.name + '的进度'
     kind = 0
     sourceID = statu.id
     newfeed(
@@ -106,7 +106,7 @@ def editstatu(uid, sid):
          db.session.add(statu)
          db.session.commit()
          user = User.query.filter_by(id=uid).first()
-         action = 'update '+ user.name + '\'s status'
+         action = '更新'+ user.name + '的进度'
          kind = 0
          sourceID = 0
          newfeed(
@@ -244,7 +244,7 @@ def newcomments(uid, sid):
         db.session.commit()
         user = User.query.filter_by(id=uid).first()
         avatar_url = user.avatar
-        action = 'comment '+ user.name + '\'s status'
+        action = '评论'+ user.name + '的进度'
         kind = 3
         sourceID = comment.id
         newfeed(
