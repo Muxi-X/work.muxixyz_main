@@ -227,29 +227,33 @@ def like(uid, sid):
 @login_required(1)
 def newcomments(uid, sid):
     statu = Statu.query.filter_by(id=sid).first()
-    statu.comment += 1
-    content = request.get_json().get('content')
-    time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    comment = Comment(
-        content=content,
-        time=time1,
-        kind = 0,
-        creator = uid,
-        statu_id = sid)
-    db.session.add(comment, statu)
-    db.session.commit()
-    user = User.query.filter_by(id=uid).first()
-    avatar_url = user.avatar
-    action = 'comment '+ user.name + '\'s status'
-    kind = 3
-    sourceID = comment.id
-    newfeed(
-        uid,
-        action,
-        kind,
-        sourceID)
-    response = jsonify({"message":"feed add successfully"})
-    response.status_code = 200
+    if statu is not None:
+        statu.comment += 1
+        content = request.get_json().get('content')
+        time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        comment = Comment(
+            content=content,
+            time=time1,
+            kind = 0,
+            creator = uid,
+            statu_id = sid)
+        db.session.add(comment, statu)
+        db.session.commit()
+        user = User.query.filter_by(id=uid).first()
+        avatar_url = user.avatar
+        action = 'comment '+ user.name + '\'s status'
+        kind = 3
+        sourceID = comment.id
+        newfeed(
+            uid,
+            action,
+            kind,
+            sourceID)
+        response = jsonify({"message":"comments add successfully"})
+        response.status_code = 200
+    else:
+        response = jsonify({"message":"the status is already deleted"})
+        response.status_code = 405
     return response
 
 '''
