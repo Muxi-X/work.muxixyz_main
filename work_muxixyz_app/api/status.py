@@ -186,6 +186,7 @@ def user_statulist(uid, userid, page):
             if statu.like is not 0:
                 likelen = redis_statu.llen(statu.id)
                 likeList = redis_statu.lrange(statu.id,0,likelen)
+                print (likeList)
                 if uid in likeList:
                     iflike = 1
             a_statu['sid'] = statu.id
@@ -212,11 +213,13 @@ def like(uid, sid):
     iflike = request.get_json().get("iflike")
     statu = Statu.query.filter_by(id=sid).first()
     if iflike == 1:
-        redis_statu.rpush(sid, uid)
-        statu.like += 1
+        if statu.like == 0:
+            redis_statu.rpush(sid, uid)
+            statu.like += 1
     if iflike == 0:
-        redis_statu.lrem(sid, uid, 0)
-        statu.like -= 1
+        if statu.like == 1:
+            redis_statu.lrem(sid, uid, 0)
+            statu.like -= 1
     db.session.add(statu)
     db.session.commit() 
     response = jsonify({"message":"change like number"})
