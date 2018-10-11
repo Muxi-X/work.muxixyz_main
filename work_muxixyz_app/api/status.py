@@ -179,8 +179,8 @@ def user_statulist(uid, userid, page):
     statuList = []
     a_statu = {}
     iflike = 0
+    num = 0
     for statu in status:
-        global num
         num += 1
         if num > (page-1)*20 and num <= page*20:
             if statu.like is not 0:
@@ -227,39 +227,34 @@ def like(uid, sid):
 @login_required(1)
 def newcomments(uid, sid):
     statu = Statu.query.filter_by(id=sid).first()
-    try:
-        if statu is not None:
-            statu.comment += 1
-            content = request.get_json().get('content')
-            time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            comment = Comment(
-                content=content,
-                time=time1,
-                kind = 0,
-                creator = uid,
-                statu_id = sid)
-            db.session.add(comment, statu)
-            db.session.commit()
-            user = User.query.filter_by(id=uid).first()
-            avatar_url = user.avatar
-            action = '评论'+ user.name + '的进度'
-            kind = 3
-            sourceID = comment.id
-            newfeed(
-                uid,
-                action,
-                kind,
-                sourceID)
-            response = jsonify({"message":"comments add successfully"})
-            response.status_code = 200
-        else:
-            response = jsonify({"message":"the status is already deleted"})
-            response.status_code = 405
-        return response
-    except Exception as e:
-        return jsonify({
-            "errmsg": e
-        }), 500
+    if statu is not None:
+        statu.comment += 1
+        content = request.get_json().get('content')
+        time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        comment = Comment(
+            content=content,
+            time=time1,
+            kind = 0,
+            creator = uid,
+            statu_id = sid)
+        db.session.add(comment, statu)
+        db.session.commit()
+        user = User.query.filter_by(id=uid).first()
+        avatar_url = user.avatar
+        action = '评论'+ user.name + '的进度'
+        kind = 3
+        sourceID = comment.id
+        newfeed(
+            uid,
+            action,
+            kind,
+            sourceID)
+        response = jsonify({"message":"comments add successfully"})
+        response.status_code = 200
+    else:
+        response = jsonify({"message":"the status is already deleted"})
+        response.status_code = 405
+    return response
 
 '''
 @api.route('/status/<int:sid>/comment/<int:cid>/', methods=['GET'], endpoint='getcomment')
