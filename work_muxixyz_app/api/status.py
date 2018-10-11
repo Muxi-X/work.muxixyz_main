@@ -187,6 +187,7 @@ def user_statulist(uid, userid, page):
                 likelen = redis_statu.llen(statu.id)
                 likeList = redis_statu.lrange(statu.id,0,likelen)
                 if str(uid) in likeList:
+                    print(uid,likeList)
                     iflike = 1
             a_statu['sid'] = statu.id
             a_statu['time'] = statu.time
@@ -211,10 +212,12 @@ def user_statulist(uid, userid, page):
 def like(uid, sid):
     iflike = request.get_json().get("iflike")
     statu = Statu.query.filter_by(id=sid).first()
-    if iflike == 1:
+    likelen = redis_statu.llen(sid)
+    likeList = redis_statu.lrange(sid,0,likelen)
+    if iflike == 1 and str(uid) not in likeList:
         redis_statu.rpush(sid, uid)
         statu.like += 1
-    if iflike == 0:
+    if iflike == 0 and str(uid) in likeList:
         redis_statu.lrem(sid, uid, 0)
         statu.like -= 1
     db.session.add(statu)
