@@ -141,8 +141,8 @@ def statulist(uid, page):
     statuList = []
     a_statu = {}
     iflike = 0
+    num = 0
     for statu in status:
-        global num
         num += 1
         if num > (page-1)*20 and num <= page*20:
             if statu.like is not 0:
