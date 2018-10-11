@@ -140,9 +140,9 @@ def statulist(uid, page):
     status = Statu.query.all()
     statuList = []
     a_statu = {}
-    iflike = 0
     num = 0
     for statu in status:
+        iflike = 0
         num += 1
         if num > (page-1)*20 and num <= page*20:
             if statu.like is not 0:
@@ -178,16 +178,15 @@ def user_statulist(uid, userid, page):
     status = Statu.query.filter_by(user_id=userid).all()
     statuList = []
     a_statu = {}
-    iflike = 0
     num = 0
     for statu in status:
+        iflike = 0
         num += 1
         if num > (page-1)*20 and num <= page*20:
             if statu.like is not 0:
                 likelen = redis_statu.llen(statu.id)
                 likeList = redis_statu.lrange(statu.id,0,likelen)
                 if str(uid) in likeList:
-                    print(uid,likeList)
                     iflike = 1
             a_statu['sid'] = statu.id
             a_statu['time'] = statu.time
