@@ -68,7 +68,7 @@ def getstatu(uid,sid):
     comments = Comment.query.filter_by(statu_id=sid).all()
     commentList = []
     a_comment = {}
-    for comment in comments:
+    for comment in comments[::-1]:
         user_c = User.query.filter_by(id=comment.creator).first()
         a_comment['cid'] = comment.id
         a_comment['username'] = user_c.name
@@ -141,7 +141,7 @@ def statulist(uid, page):
     statuList = []
     a_statu = {}
     num = 0
-    for statu in status:
+    for statu in status[::-1]:
         iflike = 0
         num += 1
         if num > (page-1)*20 and num <= page*20:
@@ -179,7 +179,7 @@ def user_statulist(uid, userid, page):
     statuList = []
     a_statu = {}
     num = 0
-    for statu in status:
+    for statu in status[::-1]:
         iflike = 0
         num += 1
         if num > (page-1)*20 and num <= page*20:
