@@ -244,8 +244,8 @@ def newcomments(uid, sid):
         user = User.query.filter_by(id=uid).first()
         avatar_url = user.avatar
         action = '评论'+ user.name + '的进度'
-        kind = 3
-        sourceID = comment.id
+        kind = 0
+        sourceID = comment.statu_id
         newfeed(
             uid,
             action,
