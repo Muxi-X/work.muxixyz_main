@@ -175,7 +175,6 @@ def statulist(uid, page):
 @api.route('/status/<int:userid>/list/<int:page>/', methods=['GET'], endpoint='user_statulist')
 @login_required(1)
 def user_statulist(uid, userid, page):
-    print(uid,userid)
     status = Statu.query.filter_by(user_id=userid).all()
     statuList = []
     a_statu = {}
