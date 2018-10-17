@@ -214,6 +214,7 @@ def project_member_get(uid, pid):
         "memberList": memberList
     }), 200
 
+# 文档评论
 
 @api.route('/project/<int:pid>/doc/<int:fid>/comments/', methods=['POST'], endpoint='ProjectDocCommentsPost')
 @login_required(role=1)
@@ -242,9 +243,9 @@ def project_doc_comments_post(uid, pid, fid):
     }), 201
 
 
-@api.route('/project/<int:pid>/doc/<int:fid>/comments/', methods=['GET'], endpoint='ProjectFileCommentsGet')
+@api.route('/project/<int:pid>/doc/<int:fid>/comments/', methods=['GET'], endpoint='ProjectDocCommentsGet')
 @login_required(role=1)
-def project_file_comments_get(uid, pid, fid):
+def project_doc_comments_get(uid, pid, fid):
     comments = Comment.query.filter_by(doc_id=fid).all()
     commentList = []
     try:
@@ -271,7 +272,104 @@ def project_file_comments_get(uid, pid, fid):
     })
 
 
-@api.route('/project/<int:pid>/doc/<int:fid>/comment/<int:cid>/', methods=['GET'], endpoint='ProjectFileCommentGet')
+@api.route('/project/<int:pid>/doc/<int:fid>/comment/<int:cid>/', methods=['GET'], endpoint='ProjectDocCommentGet')
+@login_required(role=1)
+def project_doc_comment_get(uid, pid, fid, cid):
+    try:
+        comment = Comment.query.filter_by(id=cid).first()
+        creator = User.query.filter_by(id=comment.creator).first()
+        username = creator.name
+        avatar = creator.avatar
+        mtime = Comment.time
+        content = comment.content
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        })
+    return jsonify({
+        "username": username,
+        "avatar": avatar,
+        "time": mtime,
+        "content": content
+    }), 200
+
+
+@api.route('/project/<int:pid>/doc/<int:fid>/comment/<int:cid>/', methods=['DELETE'], endpoint='ProjectDocCommentDelete')
+@login_required(role=1)
+def project_doc_comment_delete(uid, pid, fid, cid):
+    try:
+        comment = Comment.query.filter_by(id=cid).first()
+        id = comment.id
+        if comment.creator != uid:
+            return jsonify({}), 401
+        db.session.delete(comment)
+        db.session.commit()
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        })
+    newfeed(uid, u"删除评论", 1, id)
+    return jsonify({
+    }), 200
+
+# 文件评论
+@api.route('/project/<int:pid>/file/<int:fid>/comments/', methods=['POST'], endpoint='ProjectFileCommentsPost')
+@login_required(role=1)
+def project_file_comments_post(uid, pid, fid):
+    import time
+    content = request.get_json().get('content')
+    localtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    comment = Comment(
+        kind=1,
+        content=content,
+        time=localtime,
+        creator=uid,
+        file_id=fid
+    )
+    try:
+        db.session.add(comment)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "errmsg": str(e)
+        }), 500
+    newfeed(uid, u"创建评论", 1, fid)
+    return jsonify({
+        "cid": str(comment.id)
+    }), 201
+
+
+@api.route('/project/<int:pid>/file/<int:fid>/comments/', methods=['GET'], endpoint='ProjectFileCommentsGet')
+@login_required(role=1)
+def project_file_comments_get(uid, pid, fid):
+    comments = Comment.query.filter_by(file_id=fid).all()
+    commentList = []
+    try:
+        for comment in comments:
+            creator = User.query.filter_by(id=comment.creator).first()
+            username = creator.name
+            avatar = creator.avatar
+            mtime = comment.time
+            content = comment.content
+            commentList.append(
+                {
+                    "username": username,
+                    "avatar": avatar,
+                    "time": mtime,
+                    "content": content
+                }
+            )
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        }), 500
+    return jsonify({
+        "commentList": commentList
+    })
+
+
+@api.route('/project/<int:pid>/file/<int:fid>/comment/<int:cid>/', methods=['GET'], endpoint='ProjectFileCommentGet')
 @login_required(role=1)
 def project_file_comment_get(uid, pid, fid, cid):
     try:
@@ -310,7 +408,6 @@ def project_file_comment_delete(uid, pid, fid, cid):
     newfeed(uid, u"删除评论", 1, id)
     return jsonify({
     }), 200
-
 
 @api.route('/folder/filetree/<int:pid>/', methods=['PUT'], endpoint='FileTreePut')
 @login_required(role=1)
