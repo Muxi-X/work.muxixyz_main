@@ -110,6 +110,7 @@ class File(db.Model):
     create_time = db.Column(db.String(30))
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
+    comments = db.relationship('Comment', backref='file', passive_deletes=True, cascade='delete', lazy='dynamic')
 
 
 class Doc(db.Model):
@@ -134,6 +135,7 @@ class Comment(db.Model):
     time = db.Column(db.String(50))
     creator = db.Column(db.Integer)
     doc_id = db.Column(db.Integer, db.ForeignKey('docs.id', ondelete='cascade'))
+    file_id = db.Column(db.Integer, db.ForeignKey('files.id', ondelete='cascade'))
     statu_id = db.Column(db.Integer, db.ForeignKey('status.id', ondelete='cascade'))
 
     
