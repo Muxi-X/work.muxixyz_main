@@ -276,6 +276,22 @@ def file_file_post(uid):
     }), 201
 
 
+@api.route('/file/file/<int:id>/', methods=['PUT'], endpoint='FileFileIdPut')
+@login_required(role=1)
+def file_doc_id_put(uid, id):
+    file = File.query.filter_by(id=id).first()
+    FileName = request.get_json().get('FileName')
+    try:
+        file.filename = FileName
+        db.session.commit()
+    except Exception as e:
+        return jsonify({
+            'errmsg': str(e)
+        })
+    newfeed(uid, u"编辑" + file.filename, 6, doc.id)
+    return jsonify({}), 200
+
+
 @api.route('/file/file/<int:id>/', methods=['DELETE'], endpoint='FileFileIdDelete')
 @login_required(role=2)
 def file_file_id_delete(uid, id):
