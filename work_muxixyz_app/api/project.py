@@ -261,7 +261,7 @@ def project_doc_comments_get(uid, pid, fid):
                     "username": username,
                     "avatar": avatar,
                     "time": mtime,
-                    "content": content
+                    "content": content,
                     "id": cid
                 }
             )
@@ -360,7 +360,7 @@ def project_file_comments_get(uid, pid, fid):
                     "username": username,
                     "avatar": avatar,
                     "time": mtime,
-                    "content": content
+                    "content": content,
                     "id": cid
                 }
             )
