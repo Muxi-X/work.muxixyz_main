@@ -261,6 +261,7 @@ def project_doc_comments_get(uid, pid, fid):
                     "avatar": avatar,
                     "time": mtime,
                     "content": content
+                    "id": comment.id
                 }
             )
     except Exception as e:
@@ -358,6 +359,7 @@ def project_file_comments_get(uid, pid, fid):
                     "avatar": avatar,
                     "time": mtime,
                     "content": content
+                    "id": comment.id
                 }
             )
     except Exception as e:
