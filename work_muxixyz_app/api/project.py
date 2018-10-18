@@ -255,13 +255,14 @@ def project_doc_comments_get(uid, pid, fid):
             avatar = creator.avatar
             mtime = comment.time
             content = comment.content
+            cid = comment.id
             commentList.append(
                 {
                     "username": username,
                     "avatar": avatar,
                     "time": mtime,
                     "content": content
-                    "id": comment.id
+                    "id": cid
                 }
             )
     except Exception as e:
@@ -353,13 +354,14 @@ def project_file_comments_get(uid, pid, fid):
             avatar = creator.avatar
             mtime = comment.time
             content = comment.content
+            cid = comment.id
             commentList.append(
                 {
                     "username": username,
                     "avatar": avatar,
                     "time": mtime,
                     "content": content
-                    "id": comment.id
+                    "id": cid
                 }
             )
     except Exception as e:
