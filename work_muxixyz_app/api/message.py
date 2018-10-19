@@ -7,6 +7,7 @@ from ..decorator import login_required
 from ..timetools import to_readable_time
 from operator import lt
 import time
+from ..timetools import to_readable_time as TRT
 
 @api.route('/user/attention/',methods = ['POST', 'GET', 'DELETE'],endpoint = 'UserAttention')
 @login_required(role = 1)
@@ -32,7 +33,11 @@ def user_attention(uid):
             response.status_code = 402
             return response
 
-        rela = User2File(user_id = uid, file_id = fileID, file_kind = kind)
+        rela = User2File(   time = TRT(time.time()), 
+                            user_id = uid, 
+                            file_id = fileID, 
+                            file_kind = kind)
+                            
         db.session.add(rela)
         db.session.commit()
         response = jsonify({
@@ -91,32 +96,6 @@ def user_attention(uid):
         })
         response.status_code = 200
         return response
-
-@api.route('/message/new/',methods = ['POST'],endpoint = 'MessageNew')
-@login_required(role = 1)
-def message_new(uid):
-    receiver = request.get_json().get('receiver')
-    maker = request.get_json().get('maker')
-    action = request.get_json().get('action')
-    sourceID = request.get_json().get('sourceID')
-    sourceKind = request.get_json().get('sourceKind')
-    Mer = User.query.filter_by(name = maker).first()
-    Rer = User.query.filter_by(name = receiver).first()
-    if uid !=  Rer.id:
-        response = jsonify({
-            "msg": 'you are not the real one!',
-        })
-        response.status_code = 401
-        return response
-    msg = Message(
-        time = to_readable_time(time.time()),
-        action = action,from_id = Mer.id,receive_id = Rer.id,
-        file_id = sourceID, file_kind = sourceKind)
-    db.session.add(msg)
-    db.session.commit()
-    response = jsonify({})
-    response.status_code = 200
-    return response
 
 @api.route('/message/list/',methods = ['GET'],endpoint = 'MessageList')
 @login_required(role = 1)
