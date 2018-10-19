@@ -108,7 +108,7 @@ def editstatu(uid, sid):
          user = User.query.filter_by(id=uid).first()
          action = '更新'+ user.name + '的进度'
          kind = 0
-         sourceID = 0
+         sourceID = statu.id
          newfeed(
               uid,
               action,
