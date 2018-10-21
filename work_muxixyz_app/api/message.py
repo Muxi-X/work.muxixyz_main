@@ -14,7 +14,7 @@ from ..timetools import to_readable_time as TRT
 def user_attention(uid):
     if request.method  ==  'POST':
         fileID = request.get_json().get('fileID')
-        fileKind = requests.getjson().get('fileKind')
+        fileKind = request.get_json().get('fileKind')
         if kind is 1:
             f = File.query.filter_by(id = fileID).first()
         if kind is 0:
