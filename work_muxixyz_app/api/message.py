@@ -62,7 +62,7 @@ def user_attention(uid):
                 editor = User.query.filter_by(id = f.creator_id).first()
 
             project = Project.query.filter_by(id = f.project_id).first()
-            if "doc" in file.__tablename__:
+            if "doc" in f.__tablename__:
                 type = 0
             else:
                 type = 1
