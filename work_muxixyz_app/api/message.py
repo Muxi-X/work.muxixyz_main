@@ -15,11 +15,11 @@ def user_attention(uid):
     if request.method  ==  'POST':
         fileID = request.get_json().get('fileID')
         fileKind = request.get_json().get('fileKind')
-        if kind is 1:
+        if fileKind is 1:
             f = File.query.filter_by(id = fileID).first()
-        if kind is 0:
+        if fileKind is 0:
             f = Doc.query.filter_by(id = fileID).first()
-        if kind is None:
+        if fileKind is None:
             response = jsonify({
                 "msg": 'file kind not found!',
             })
