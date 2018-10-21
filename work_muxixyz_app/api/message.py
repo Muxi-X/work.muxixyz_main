@@ -36,8 +36,8 @@ def user_attention(uid):
         rela = User2File(   time = TRT(time.time()),
                             user_id = uid,
                             file_id = fileID,
-                            file_kind = kind)
-                            
+                            file_kind = fileKind)
+
         db.session.add(rela)
         db.session.commit()
         response = jsonify({
