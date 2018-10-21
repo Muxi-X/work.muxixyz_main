@@ -129,18 +129,26 @@ def message_list(uid):
         if m.file_kind is 1:
             f = File.query.filter_by(id=m.file_id).first()
         if f is None:
-            continue
-
-        l.append({
-            "sourceKind": m.file_kind,
-            "sourceID": m.file_id,
-            "projectID": f.project_id,
-            "fromName": usr.name,
-            "fromAvatar": usr.avatar,
-            "action": m.action,
-            "time": m.time,
-            "readed": m.readed,
-        })
+            l.append({
+                "sourceKind": m.file_kind,
+                "sourceID": m.file_id,
+                "projectID": 0,
+                "fromName": usr.name,
+                "action": m.action,
+                "time": m.time,
+                "readed": m.readed,
+            })
+        else:
+            l.append({
+                "sourceKind": m.file_kind,
+                "sourceID": m.file_id,
+                "projectID": f.project_id,
+                "fromName": usr.name,
+                "fromAvatar": usr.avatar,
+                "action": m.action,
+                "time": m.time,
+                "readed": m.readed,
+            })
         c += 1
         if limit is None:
             continue
