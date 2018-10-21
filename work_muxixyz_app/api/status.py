@@ -139,7 +139,6 @@ def deletestatu(uid,sid):
 def statulist(uid, page):
     status = Statu.query.all()
     statuList = []
-    a_statu = {}
     num = 0
     for statu in status[::-1]:
         iflike = 0
@@ -150,9 +149,12 @@ def statulist(uid, page):
                 likeList = redis_statu.lrange(statu.id,0,likelen)
                 if str(uid) in likeList:
                     iflike = 1
+
             user = User.query.filter_by(id=statu.user_id).first()
+            a_statu = {}
             a_statu['sid'] = statu.id
             a_statu['username'] = user.name
+            a_statu['uid'] = statu.user_id
             a_statu['time'] = statu.time
             a_statu['avatar'] = user.avatar
             a_statu['title'] = statu.title
@@ -160,8 +162,8 @@ def statulist(uid, page):
             a_statu['likeCount'] = statu.like
             a_statu['iflike'] = iflike
             a_statu['commentCount'] = statu.comment
-            c_statu = a_statu.copy()
-            statuList.append(c_statu)
+            statuList.append(a_statu)
+
         elif num > page * 20:
             break
     response = jsonify({
