@@ -34,3 +34,4 @@ SQLAlchemy==1.2.10
 urllib3==1.23
 Werkzeug==0.14.1
 WTForms==2.2.1
+redis
