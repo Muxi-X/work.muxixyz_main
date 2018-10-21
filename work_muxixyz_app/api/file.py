@@ -288,7 +288,7 @@ def file_doc_id_put(uid, id):
         return jsonify({
             'errmsg': str(e)
         })
-    newfeed(uid, u"编辑" + file.filename, 6, doc.id)
+    newfeed(uid, u"编辑" + file.filename, 6, file.id)
     return jsonify({}), 200
 
 
