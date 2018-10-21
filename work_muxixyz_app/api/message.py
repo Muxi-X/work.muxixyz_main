@@ -128,6 +128,8 @@ def message_list(uid):
             f = Doc.query.filter_by(id=m.file_id).first()
         if m.file_kind is 1:
             f = File.query.filter_by(id=m.file_id).first()
+        if f is None:
+            continue
 
         l.append({
             "sourceKind": m.file_kind,
