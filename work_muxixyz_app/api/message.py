@@ -33,9 +33,9 @@ def user_attention(uid):
             response.status_code = 402
             return response
 
-        rela = User2File(   time = TRT(time.time()), 
-                            user_id = uid, 
-                            file_id = fileID, 
+        rela = User2File(   time = TRT(time.time()),
+                            user_id = uid,
+                            file_id = fileID,
                             file_kind = kind)
                             
         db.session.add(rela)
@@ -58,11 +58,18 @@ def user_attention(uid):
             if f_id.file_kind is 0:
                 f = Doc.query.filter_by(id = f_id.file_id).first()
                 editor = User.query.filter_by(id = f.editor_id).first()
+
             if editor is None:
                 editor = User.query.filter_by(id = f.creator_id).first()
 
             project = Project.query.filter_by(id = f.project_id).first()
+            if "doc" in file.__tablename__:
+                type = 0
+            else:
+                type = 1
             l.append({
+                "fileID": f.id,
+                "fileKind": type,
                 "fileName": f.filename,
                 "userName": editor.name,
                 "projectID": project.id,
@@ -113,7 +120,7 @@ def message_list(uid):
         usr = User.query.filter_by(id = m.from_id).first()
         if usr is None:
             response = jsonify({
-                "msg": 'user is gone.',
+                "msg": 'from user is gone.',
             })
             response.status_code = 401
             return response
@@ -122,16 +129,11 @@ def message_list(uid):
             f = Doc.query.filter_by(id=m.file_id).first()
         if m.file_kind is 1:
             f = File.query.filter_by(id=m.file_id).first()
-        pjc = None
-        if f is not None:
-            pjc = Project.query.filter_by(id=f.project_id).first()
-        else:
-            pjc = Project(id=None, name=None)
+
         l.append({
             "sourceKind": m.file_kind,
             "sourceID": m.file_id,
-            "projectName": pjc.name,
-            "projectID": pjc.id,
+            "projectID": f.project_id,
             "fromName": usr.name,
             "fromAvatar": usr.avatar,
             "action": m.action,
