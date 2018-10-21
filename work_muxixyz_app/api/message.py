@@ -33,8 +33,7 @@ def user_attention(uid):
             response.status_code = 402
             return response
 
-        rela = User2File(   time = TRT(time.time()),
-                            user_id = uid,
+        rela = User2File(   user_id = uid,
                             file_id = fileID,
                             file_kind = fileKind)
 
