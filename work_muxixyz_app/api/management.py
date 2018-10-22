@@ -502,13 +502,13 @@ def apply_list(uid):
         response.status_code = 201
         return response
     for a in usrs:
-        print (a.user_id)
         user = User.query.filter_by(id = a.user_id).first()
-        l.append({
-            "userID": user.id,
-            "userName": user.name,
-            "userEmail": user.email,
-        })
+        if user.role == 0:
+            l.append({
+                "userID": user.id,
+                "userName": user.name,
+                "userEmail": user.email,
+            })
     response = jsonify({
         "list": l,
     })
