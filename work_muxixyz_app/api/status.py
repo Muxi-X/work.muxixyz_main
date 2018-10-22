@@ -13,37 +13,38 @@ from sqlalchemy.sql.expression import func
 from ..mq import newfeed
 
 
-#KIND = ['Statu', 'Project', 'Doc', 'Comment', 'Team', 'User', 'File']
 num = 0
 page = 1
 redis_statu = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
+
+actions = ["加入", "创建", "编辑", "删除", "评论", "移动"]
+sourceidmap = {
+            "团队": 1,
+            "项目": 2,
+            "文档": 3,
+            "文件": 4,
+            "文件夹": 5,
+            "进度": 6
+        }
 
 @api.route('/status/new/', methods=['POST'], endpoint='newstatus')
 @login_required(1)
 def newstatus(uid):
     content = request.get_json().get('content')
     title = request.get_json().get('title')
+
     time1 = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
-    statu =  Statu(
-        content=content,
-        title=title,
-        time=time1,
-        like=0,
-        comment=0,
-        user_id=uid)
+    statu =  Statu( content=content, title=title, time=time1,
+                    like=0, comment=0, user_id=uid)
     db.session.add(statu)
     db.session.commit()
-    user = User.query.filter_by(id=uid).first()
-    avatar_url = user.avatar
-    action = '创建'+ user.name + '的进度'
-    kind = 0
-    sourceID = statu.id
-    newfeed(
-        uid,
-        action,
-        kind,
-        sourceID)
+
+    action = actions[1]
+    kindid = sourceidmap["进度"]
+    objectid = statu.id
+    newfeed(uid, action, kindid, objectid)
+
     response = jsonify({"message":"statu create successfully"})
     response.status_code = 200
     return response
