@@ -43,7 +43,7 @@ def newstatus(uid):
     action = actions[1]
     kindid = sourceidmap["进度"]
     objectid = statu.id
-    newfeed(uid, action, kindid, objectid)
+    newfeed(uid, action, title, kindid, objectid)
 
     response = jsonify({"message":"statu create successfully"})
     response.status_code = 200

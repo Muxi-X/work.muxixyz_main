@@ -55,13 +55,14 @@ class MessageQueue:
             properties=pika.BasicProperties(delivery_mode=2))
 
 
-def newfeed(uid, action, source_kind_id, source_object_id, source_project_id=-1):
+def newfeed(uid, action, source_name, source_kind_id, source_object_id, source_project_id=-1):
     """
     uid: user id
     action: string in [["加入", "创建", "编辑", "删除", "评论", "移动"]]
-    source_kind_id: source_list = ["", "团队", "项目", "文档", "文件", "文件夹", "进度"]
+    source_kind_id: source_list = ["", "团队", "项目", "文档", "文件", "进度"]
     source_object_id: 资源在数据库中的id
     source_project_id: file or doc 所在项目的id
+    source_name: 团队，项目，的名字.文件, 文档，进度的标题.
 
     ***** a feed's structure *****
     {
@@ -74,7 +75,8 @@ def newfeed(uid, action, source_kind_id, source_object_id, source_project_id=-1)
         "source": {
             "kind_id": integer,
             "object_id": integer,
-            "project_id": integer // 没有为-1 
+            "project_id": integer, // 没有为-1 
+            "name": string
         },
         "time": "2018-10-21-23:15:56" // yyyy-mm-dd-HH:MM:SS  datetime.datetime.today().strftime('%Y-%m-%d-%H:%M:%S') 
         /* 在返回时扫描&添加
@@ -98,7 +100,8 @@ def newfeed(uid, action, source_kind_id, source_object_id, source_project_id=-1)
         "source": {
             "kind_id": source_kind_id,
             "object_id": source_object_id,
-            "project_id": source_project_id
+            "project_id": source_project_id,
+            "name": source_name
         },
         "time": time
     }
@@ -124,7 +127,8 @@ def check_feed(feed):
         "source": {
             "kind_id": 1,
             "object_id": 1,
-            "project_id": 1
+            "project_id": 1,
+            "name": "string"
         },
         "time": "string"
     }

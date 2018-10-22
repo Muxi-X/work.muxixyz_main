@@ -160,6 +160,7 @@ class Feed(db.Model):
     source_kindid = db.Column(db.Integer)
     source_objectid = db.Column(db.Integer)
     source_projectid = db.Column(db.Integer)
+    source_name = db.Column(db.String(100))
     time = db.Column(db.String(30))
 
 
