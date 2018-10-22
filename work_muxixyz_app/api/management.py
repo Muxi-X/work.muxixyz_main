@@ -11,7 +11,6 @@ from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
 import time
 import os
-from flask import current_app
 from werkzeug import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
