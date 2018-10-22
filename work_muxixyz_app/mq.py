@@ -80,10 +80,7 @@ def newfeed(uid, action, source_name, source_kind_id, source_object_id, source_p
         },
         "time": "2018-10-21-23:15:56" // yyyy-mm-dd-HH:MM:SS  datetime.datetime.today().strftime('%Y-%m-%d-%H:%M:%S') 
         /* 在返回时扫描&添加
-        "split": {
-            "ifsplit": boolean,
-            "kind_id": integer // 显示的kind_id
-        }
+        "split": boolean
         */
     }
     
