@@ -229,7 +229,9 @@ def folder_doc_chrildren_post(uid):
             DocList.append({
                 "id": doc.id,
                 "name": doc.filename,
-                "lastcontent": doc.content[:100]
+                "lastcontent": doc.content[:100],
+                "create_time": doc.create_time,
+                "creator": doc.editor_id
             })
     except Exception as e:
         return jsonify({
