@@ -12,6 +12,7 @@ import os
 import requests
 import time
 from ..mq import newfeed
+from ..GenerateMsg import MakeMsg
 from werkzeug import secure_filename
 
 access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
@@ -289,6 +290,7 @@ def file_doc_id_put(uid, id):
             'errmsg': str(e)
         })
     newfeed(uid, u"编辑" + file.filename, 6, file.id)
+    MakeMsg(file, uid, "Edit")
     return jsonify({}), 200
 
 
