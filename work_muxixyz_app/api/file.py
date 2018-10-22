@@ -124,7 +124,7 @@ def folder_file_chrildren_post(uid):
             FileList.append({
                 "id": file.id,
                 "name": file.realname,
-                "creator": User.query.filter_by(id=uid).first().name,
+                "creator": User.query.filter_by(id=file.create_id).first().name,
                 "url": file.url,
                 "create_time": file.create_time
             })
@@ -231,7 +231,7 @@ def folder_doc_chrildren_post(uid):
                 "name": doc.filename,
                 "lastcontent": doc.content[:100],
                 "create_time": doc.create_time,
-                "creator": doc.editor_id
+                "creator": User.query.filter_by(id=doc.create_id).first().name
             })
     except Exception as e:
         return jsonify({
