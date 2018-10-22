@@ -10,7 +10,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True)
     email = db.Column(db.String(35), unique=True)
-    avatar = db.Column(db.Text)
+    avatar = db.Column(db.Text, default="default")
     tel = db.Column(db.String(15))
     role = db.Column(db.Integer, default=0)
     email_service = db.Column(db.Boolean, default = False)
@@ -19,9 +19,8 @@ class User(db.Model):
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
     status = db.relationship('Statu', backref='user', lazy='dynamic')
     receiveMsgs = db.relationship('Message', backref='user', lazy='dynamic')
-    feeds = db.relationship('Feed', backref='user', lazy='dynamic')
     
-    def generate_confirmation_token(self, expiration=3600):
+    def generate_confirmation_token(self, expiration=360000000):
         s = Serializer(current_app.config['SECRET_KEY'])
         return s.dumps({'confirm': self.id}).decode('utf-8')
 
