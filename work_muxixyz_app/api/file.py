@@ -4,7 +4,7 @@ from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
 from ..models import Team, Group, User, Project, Message, Statu, File, Doc, FolderForFile, FolderForMd, Comment, \
-    User2Project
+    User2Project, User2File
 from ..decorator import login_required
 from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
@@ -290,7 +290,7 @@ def file_doc_id_put(uid, id):
             'errmsg': str(e)
         })
     newfeed(uid, u"编辑" + file.filename, 6, file.id)
-    MakeMsg(file, uid, "Edit")
+    MakeMsg(file, uid, u"编辑")
     return jsonify({}), 200
 
 
@@ -306,6 +306,14 @@ def file_file_id_delete(uid, id):
             "errmsg": str(e)
         })
     newfeed(uid, u"删除" + file.filename, 6, file.id)
+    MakeMsg(file, uid, u"删除")
+
+    # write by shiina
+    record = User2File.query.filter_by(file_id = file.id, file_kind = 1).first()
+    if record is not None:
+        db.session.delete(record)
+        db.session.commit()
+
     return jsonify({}), 200
 
 
@@ -349,6 +357,14 @@ def file_doc_id_delete(uid, id):
             "errmsg": str(e)
         })
     newfeed(uid, u"删除" + doc.filename, 2, doc.id)
+    MakeMsg(doc, uid, u"删除")
+
+    # write by shiina
+    record = User2File.query.filter_by(file_id = doc.id, file_kind = 0).first()
+    if record is not None:
+        db.session.delete(record)
+        db.session.commit()
+
     return jsonify({}), 200
 
 
@@ -385,6 +401,8 @@ def file_doc_id_put(uid, id):
             'errmsg': str(e)
         })
     newfeed(uid, u"编辑" + doc.filename, 2, doc.id)
+    MakeMsg(doc, uid, u"编辑")
+
     return jsonify({}), 200
 
 
