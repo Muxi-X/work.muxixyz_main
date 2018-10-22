@@ -148,17 +148,19 @@ class Message(db.Model):
     receive_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     file_kind = db.Column(db.Integer)
     file_id = db.Column(db.Integer)
-    
+   
+
 class Feed(db.Model):
     __tablename__ = 'feeds'
     id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.String(20))
-    avatar_url = db.Column(db.String(100))
-    action = db.Column(db.String(100))
-    kind = db.Column(db.Integer)
-    sourceid = db.Column(db.Integer)
-    divider = db.Column(db.Boolean)
-    user_id = db.Column(db.Integer,db.ForeignKey('users.id'))
+    userid = db.Column(db.Integer)
+    username = db.Column(db.String(100))
+    useravatar = db.Column(db.String(200))
+    action = db.Column(db.String(20))
+    source_kindid = db.Column(db.Integer)
+    source_objectid = db.Column(db.Integer)
+    source_projectid = db.Column(db.Integer)
+    time = db.Column(db.String(30))
 
 
 class User2File(db.Model):
