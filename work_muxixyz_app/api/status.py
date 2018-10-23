@@ -244,21 +244,15 @@ def newcomments(uid, sid):
             statu_id = sid)
         db.session.add(comment, statu)
         db.session.commit()
-        user = User.query.filter_by(id=uid).first()
-        avatar_url = user.avatar
-        action = '评论'+ user.name + '的进度'
-        kind = 0
-        sourceID = comment.statu_id
-        newfeed(
-            uid,
-            action,
-            kind,
-            sourceID)
+        
+        newfeed(uid, actions[4], statu.title, sourceidmap["进度"], statu.id)
         response = jsonify({"message":"comments add successfully"})
         response.status_code = 200
+
     else:
         response = jsonify({"message":"the status is already deleted"})
         response.status_code = 405
+
     return response
 
 '''
