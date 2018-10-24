@@ -10,6 +10,17 @@ from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
 import os
 
+actions = ["加入", "创建", "编辑", "删除", "评论", "移动"]
+sourceidmap = {
+            "团队": 1,
+            "项目": 2,
+            "文档": 3,
+            "文件": 4,
+            "文件夹": 5,
+            "进度": 6
+        }
+
+
 access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
 secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
 url = os.environ.get('WORKBENCH_URL')
@@ -56,7 +67,7 @@ def project_new(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, u"创建" + projectname, 1, project.id)
+    newfeed(uid, actions[0], projectname, sourceidmap["项目"], project.id, project.id)
     return jsonify({
         "project_id": str(project.id)
     }), 201
@@ -79,7 +90,7 @@ def project_pid_post(uid, pid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, u"编辑" + name, 1, project.id)
+    # newfeed(uid, actions[2], name, sourceidmap["项目"], project.id, project.id)
     return jsonify({
     }), 201
 
@@ -125,7 +136,7 @@ def project_pid_delete(uid, pid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, u"删除" + name, 1, id)
+    newfeed(uid, actions[3], project.name, sourceidmap["项目"], project.id, project.id)
     return jsonify({
     }), 200
 
@@ -180,13 +191,15 @@ def project_member_put(uid, pid):
                 user_id=user,
                 project_id=pid
             )
+            curuser = User.query.filter_by(id = user).first()
+            newfeed(uid, actions[0], curuser.name, sourceidmap["项目"], curuser.id, pid)
             db.session.add(nuser)
         db.session.commit()
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, u"编辑" + project.name + '的成员', 1, project.id)
+    # newfeed(uid, u"编辑" + project.name + '的成员', 1, project.id)
     return jsonify({
     }), 200
 
@@ -237,7 +250,8 @@ def project_doc_comments_post(uid, pid, fid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, u"创建评论", 1, fid)
+    curdoc = Doc.query.filter_by(id=fid).first();
+    newfeed(uid, actions[4], curdoc.filename, sourceidmap["文档"], curdoc.id, curdoc.project_id)
     return jsonify({
         "cid": str(comment.id)
     }), 201
@@ -316,7 +330,6 @@ def project_doc_comment_delete(uid, pid, fid, cid):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, u"删除评论", 1, id)
     return jsonify({
     }), 200
 
@@ -342,7 +355,8 @@ def project_file_comments_post(uid, pid, fid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, u"创建评论", 1, fid)
+    curfile = File.query.filter_by(id=fid).first()
+    newfeed(uid, actions[4], curfile.filename, sourceidmap["文件"], curfile.id, curfile.project_id)
     return jsonify({
         "cid": str(comment.id)
     }), 201
@@ -421,7 +435,6 @@ def project_file_comment_delete(uid, pid, fid, cid):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, u"删除评论", 1, id)
     return jsonify({
     }), 200
 
