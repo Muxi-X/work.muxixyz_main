@@ -346,7 +346,6 @@ def file_doc_post(uid):
         )
         db.session.add(newdoc)
         db.session.commit()
-        newfeed(uid, u"创建" + mdname, 2, newdoc.id)
     except Exception as e:
         db.session.rollback()
         return jsonify({
