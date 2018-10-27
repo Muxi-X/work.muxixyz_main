@@ -158,10 +158,13 @@ class Feed(db.Model):
     useravatar = db.Column(db.String(200))
     action = db.Column(db.String(20))
     source_kindid = db.Column(db.Integer)
+    source_objectname = db.Column(db.String(100))
     source_objectid = db.Column(db.Integer)
+    source_projectname = db.Column(db.String(100))
     source_projectid = db.Column(db.Integer)
-    source_name = db.Column(db.String(100))
-    time = db.Column(db.String(30))
+    timeday = db.Column(db.String(20))
+    timehm = db.Column(db.String(20))
+
 
 
 class User2File(db.Model):

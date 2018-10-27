@@ -2,7 +2,6 @@ import sys
 import importlib
 import os
 import time
-import pika
 from work_muxixyz_app import create_app, db
 from work_muxixyz_app.models import Team,Group,User,Project,Message,Statu,File,Comment,Doc
 from work_muxixyz_app.models import Feed

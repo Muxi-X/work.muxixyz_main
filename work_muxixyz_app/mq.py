@@ -129,9 +129,11 @@ def check_feed(feed):
             "kind_id": 1,
             "object_id": 1,
             "project_id": 1,
-            "name": "string"
+            "object_name": "string",
+            "project_name": "string"
         },
-        "time": "string"
+        "timeday": "string",
+        "timehm": "string"
     }
     
     jc = JsonCensor(feed_example, feed)
