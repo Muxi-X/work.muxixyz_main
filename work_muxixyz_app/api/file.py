@@ -258,6 +258,7 @@ def folder_doc_chrildren_post(uid):
 def file_file_post(uid):
     myfile = request.files.get('file')
     project_id = request.form.get('project_id')
+    project = Project.query.filter_by(id=project_id).first()
     try:
         filename = secure_filename(myfile.filename) + str(time.time())
         myfile.save(os.path.join(os.getcwd(), filename))
@@ -282,7 +283,7 @@ def file_file_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, actions[1], filename, sourceidmap["文件"], newfile.id, project_id)
+    newfeed(uid, actions[1], filename, sourceidmap["文件"], newfile.id, project_id, project.name)
     return jsonify({
         "fid": str(newfile.id),
         "name": myfile.filename
@@ -301,7 +302,9 @@ def file_doc_id_put(uid, id):
         return jsonify({
             'errmsg': str(e)
         })
-    newfeed(uid, actions[2], FileName, sourceidmap["文件"], id, file.project_id)
+    
+    project = Project.query.filter_by(id=file.project_id).first()
+    newfeed(uid, actions[2], FileName, sourceidmap["文件"], id, file.project_id, project.name)
     MakeMsg(file, uid, u"编辑")
     return jsonify({}), 200
 
@@ -317,7 +320,9 @@ def file_file_id_delete(uid, id):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, actions[3], file.filename, sourceidmap["文件"], id, file.project_id)
+
+    project = Project.query.filter_by(id=file.project_id).first()
+    newfeed(uid, actions[3], file.filename, sourceidmap["文件"], id, file.project_id, project.name)
     MakeMsg(file, uid, u"删除")
 
     # write by shiina
@@ -335,6 +340,7 @@ def file_doc_post(uid):
     mdname = request.get_json().get('mdname')
     mycontent = request.get_json().get('content')
     project_id = request.get_json().get('project_id')
+    project = Project.query.filter_by(id = project_id).first()
     try:
         newdoc = Doc(
             content=mycontent,
@@ -351,7 +357,7 @@ def file_doc_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, actions[1], mdname, sourceidmap["文档"], newdoc.id, newdoc.project_id)
+    newfeed(uid, actions[1], mdname, sourceidmap["文档"], newdoc.id, newdoc.project_id, project.name)
     return jsonify({
         "fid": str(newdoc.id)
     }), 201
@@ -368,7 +374,9 @@ def file_doc_id_delete(uid, id):
         return jsonify({
             "errmsg": str(e)
         })
-    newfeed(uid, actions[3], doc.filename, sourceidmap["文档"], doc.id, doc.project_id)
+
+    project = Project.query.filter_by(id=doc.project_id).first()
+    newfeed(uid, actions[3], doc.filename, sourceidmap["文档"], doc.id, doc.project_id, project.name)
     MakeMsg(doc, uid, u"删除")
 
     # write by shiina
@@ -412,7 +420,9 @@ def file_doc_id_put(uid, id):
         return jsonify({
             'errmsg': str(e)
         })
-    newfeed(uid, actions[2], doc.filename, sourceidmap["文档"], doc.id, doc.project_id)
+
+    project = Project.query.filter_by(id=doc.project_id).first()
+    newfeed(uid, actions[2], doc.filename, sourceidmap["文档"], doc.id, doc.project_id, project.name)
     MakeMsg(doc, uid, u"编辑")
 
     return jsonify({}), 200

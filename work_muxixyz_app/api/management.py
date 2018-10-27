@@ -22,6 +22,7 @@ bucket_name = 'ossworkbench'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
 
+
 def qiniu_upload(key, localfile):
     token = q.upload_token(bucket_name, key, 3600)
 
@@ -260,6 +261,17 @@ def user_project_list(uid, id):
 @api.route('/user/2bMember/', methods = ['POST'], endpoint = 'User2bMember')
 @login_required(role = 2)
 def user_2b_member(uid):
+    actions = ["加入", "创建", "编辑", "删除", "评论", "移动"]
+    sourceidmap = {
+            "团队": 1,
+            "项目": 2,
+            "文档": 3,
+            "文件": 4,
+            "文件夹": 5,
+            "进度": 6
+        }
+
+
     user_id = request.get_json().get('userID')
     usr = User.query.filter_by(id = user_id).first()
     if (usr.role !=  0) and (usr.team_id is not None):
@@ -271,10 +283,10 @@ def user_2b_member(uid):
     if usr.role == 0:
         usr.role = 1
     usr.team_id = 1
+    team = Team.query.filter_by(id=usr.team_id).first()
     db.session.add(usr)
     db.session.commit()
-    action = '用户: ' + usr.name + '是木犀的一员啦！'
-    newfeed(uid, action, 5, user_id)
+    newfeed(user_id, actions[0], team.name, sourceidmap["团队"], 1)
     response = jsonify({
         "msg": 'successful!',
     })
@@ -313,8 +325,6 @@ def add_admin(uid):
     luckydog.role = 3
     db.session.add(luckydog)
     db.session.commit()
-    action = '用户: ' + luckydog.name + '现在是管理员啦！'
-    newfeed(uid, action, 5, lid)
     response = jsonify({})
     response.status_code = 200
     return response

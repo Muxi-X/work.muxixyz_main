@@ -67,7 +67,7 @@ def project_new(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, actions[0], projectname, sourceidmap["项目"], project.id, project.id)
+    newfeed(uid, actions[0], projectname, sourceidmap["项目"], project.id, project.id, projectname)
     return jsonify({
         "project_id": str(project.id)
     }), 201
@@ -136,7 +136,7 @@ def project_pid_delete(uid, pid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, actions[3], project.name, sourceidmap["项目"], project.id, project.id)
+    newfeed(uid, actions[3], project.name, sourceidmap["项目"], project.id, project.id, project.name)
     return jsonify({
     }), 200
 
@@ -191,8 +191,8 @@ def project_member_put(uid, pid):
                 user_id=user,
                 project_id=pid
             )
-            curuser = User.query.filter_by(id = user).first()
-            newfeed(uid, actions[0], curuser.name, sourceidmap["项目"], curuser.id, pid)
+            # tam 这里之前写错了. 应为project name
+            newfeed(uid, actions[0], project.name, sourceidmap["项目"], project.id, project.id, project.name)
             db.session.add(nuser)
         db.session.commit()
     except Exception as e:
@@ -251,7 +251,8 @@ def project_doc_comments_post(uid, pid, fid):
             "errmsg": str(e)
         }), 500
     curdoc = Doc.query.filter_by(id=fid).first();
-    newfeed(uid, actions[4], curdoc.filename, sourceidmap["文档"], curdoc.id, curdoc.project_id)
+    project = Project.query.filter_by(id = curdoc.project_id).first()
+    newfeed(uid, actions[4], curdoc.filename, sourceidmap["文档"], curdoc.id, curdoc.project_id, project.name)
     return jsonify({
         "cid": str(comment.id)
     }), 201
@@ -356,7 +357,8 @@ def project_file_comments_post(uid, pid, fid):
             "errmsg": str(e)
         }), 500
     curfile = File.query.filter_by(id=fid).first()
-    newfeed(uid, actions[4], curfile.filename, sourceidmap["文件"], curfile.id, curfile.project_id)
+    project = Project.query.filter_by(id=curfile.project_id).first()
+    newfeed(uid, actions[4], curfile.filename, sourceidmap["文件"], curfile.id, curfile.project_id, project.name)
     return jsonify({
         "cid": str(comment.id)
     }), 201
