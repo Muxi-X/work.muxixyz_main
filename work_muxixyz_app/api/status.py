@@ -109,6 +109,8 @@ def editstatu(uid, sid):
          response = jsonify({"message":"statu edit successfully"})
          response.status_code = 200
          return response
+     else:
+         return jsonify({}),401
 
 
 @api.route('/status/<int:sid>/', methods=['DELETE'], endpoint='deletestatu')
