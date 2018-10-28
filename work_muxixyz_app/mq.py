@@ -138,6 +138,7 @@ def check_feed(feed):
     
     jc = JsonCensor(feed_example, feed)
     ret = jc.check()
+    print(ret)
     return ret['statu']
 
 class FeedFormatException(Exception):
