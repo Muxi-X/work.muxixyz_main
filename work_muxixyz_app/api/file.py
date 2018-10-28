@@ -257,7 +257,7 @@ def folder_doc_chrildren_post(uid):
 @login_required(role=1)
 def file_file_post(uid):
     myfile = request.files.get('file')
-    project_id = request.form.get('project_id')
+    project_id = int(request.form.get('project_id'))
     project = Project.query.filter_by(id=project_id).first()
     try:
         filename = secure_filename(myfile.filename) + str(time.time())

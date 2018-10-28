@@ -106,15 +106,6 @@ def editstatu(uid, sid):
          statu.time = time1
          db.session.add(statu)
          db.session.commit()
-         user = User.query.filter_by(id=uid).first()
-         action = '更新'+ user.name + '的进度'
-         kind = 0
-         sourceID = statu.id
-         newfeed(
-              uid,
-              action,
-              kind,
-              sourceID)
          response = jsonify({"message":"statu edit successfully"})
          response.status_code = 200
          return response
