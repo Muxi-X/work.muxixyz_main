@@ -2,7 +2,7 @@
 from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
-from ..models import User, Project, Comment, User2Project, FolderForFile, FolderForMd, Doc, File
+from ..models import User, Project, Comment, User2Project, FolderForFile, FolderForMd, Doc, File, Group
 from ..decorator import login_required
 import time
 from ..mq import newfeed
@@ -191,7 +191,6 @@ def project_member_put(uid, pid):
                 user_id=user,
                 project_id=pid
             )
-            # tam 这里之前写错了. 应为project name
             newfeed(uid, actions[0], project.name, sourceidmap["项目"], project.id, project.id, project.name)
             db.session.add(nuser)
         db.session.commit()
@@ -216,7 +215,9 @@ def project_member_get(uid, pid):
                 {
                     "userID": user.id,
                     "username": user.name,
-                    "avatar": user.avatar
+                    "avatar": user.avatar,
+                    "group": Group.query.filter_by(id=user.group_id).first().name,
+                    "role": user.role
                 }
             )
     except Exception as e:
