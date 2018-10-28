@@ -283,7 +283,7 @@ def file_file_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, actions[1], filename, sourceidmap["文件"], newfile.id, project_id, project.name)
+    newfeed(uid, actions[1], filename, sourceidmap["文件"], newfile.id, project_id)
     return jsonify({
         "fid": str(newfile.id),
         "name": myfile.filename
