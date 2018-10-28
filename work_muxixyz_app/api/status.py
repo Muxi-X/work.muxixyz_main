@@ -13,37 +13,38 @@ from sqlalchemy.sql.expression import func
 from ..mq import newfeed
 
 
-#KIND = ['Statu', 'Project', 'Doc', 'Comment', 'Team', 'User', 'File']
 num = 0
 page = 1
 redis_statu = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
+
+actions = ["加入", "创建", "编辑", "删除", "评论", "移动"]
+sourceidmap = {
+            "团队": 1,
+            "项目": 2,
+            "文档": 3,
+            "文件": 4,
+            "文件夹": 5,
+            "进度": 6
+        }
 
 @api.route('/status/new/', methods=['POST'], endpoint='newstatus')
 @login_required(1)
 def newstatus(uid):
     content = request.get_json().get('content')
     title = request.get_json().get('title')
-    time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    statu =  Statu(
-        content=content,
-        title=title,
-        time=time1,
-        like=0,
-        comment=0,
-        user_id=uid)
+
+    time1 = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
+    statu =  Statu( content=content, title=title, time=time1,
+                    like=0, comment=0, user_id=uid)
     db.session.add(statu)
     db.session.commit()
-    user = User.query.filter_by(id=uid).first()
-    avatar_url = user.avatar
-    action = 'create '+ user.name + '\'s status'
-    kind = 0
-    sourceID = 0
-    newfeed(
-        uid,
-        action,
-        kind,
-        sourceID)
+
+    action = actions[1]
+    kindid = sourceidmap["进度"]
+    objectid = statu.id
+    newfeed(uid, action, title, kindid, objectid)
+
     response = jsonify({"message":"statu create successfully"})
     response.status_code = 200
     return response
@@ -61,14 +62,14 @@ def getstatu(uid,sid):
     if statu.like is not 0:
         likelen = redis_statu.llen(statu.id)
         likeList = redis_statu.lrange(statu.id,0,likelen)
-        if uid in likeList:
+        if str(uid) in likeList:
             iflike = 1
     user =  User.query.filter_by(id=uid).first()
     username = user.name
     comments = Comment.query.filter_by(statu_id=sid).all()
     commentList = []
     a_comment = {}
-    for comment in comments:
+    for comment in comments[::-1]:
         user_c = User.query.filter_by(id=comment.creator).first()
         a_comment['cid'] = comment.id
         a_comment['username'] = user_c.name
@@ -130,20 +131,22 @@ def deletestatu(uid,sid):
 def statulist(uid, page):
     status = Statu.query.all()
     statuList = []
-    a_statu = {}
-    iflike = 0
-    for statu in status:
-        global num
+    num = 0
+    for statu in status[::-1]:
+        iflike = 0
         num += 1
         if num > (page-1)*20 and num <= page*20:
             if statu.like is not 0:
                 likelen = redis_statu.llen(statu.id)
                 likeList = redis_statu.lrange(statu.id,0,likelen)
-                if uid in likeList:
+                if str(uid) in likeList:
                     iflike = 1
+
             user = User.query.filter_by(id=statu.user_id).first()
+            a_statu = {}
             a_statu['sid'] = statu.id
             a_statu['username'] = user.name
+            a_statu['uid'] = statu.user_id
             a_statu['time'] = statu.time
             a_statu['avatar'] = user.avatar
             a_statu['title'] = statu.title
@@ -151,8 +154,8 @@ def statulist(uid, page):
             a_statu['likeCount'] = statu.like
             a_statu['iflike'] = iflike
             a_statu['commentCount'] = statu.comment
-            c_statu = a_statu.copy()
-            statuList.append(c_statu)
+            statuList.append(a_statu)
+
         elif num > page * 20:
             break
     response = jsonify({
@@ -169,15 +172,15 @@ def user_statulist(uid, userid, page):
     status = Statu.query.filter_by(user_id=userid).all()
     statuList = []
     a_statu = {}
-    iflike = 0
-    for statu in status:
-        global num
+    num = 0
+    for statu in status[::-1]:
+        iflike = 0
         num += 1
         if num > (page-1)*20 and num <= page*20:
             if statu.like is not 0:
                 likelen = redis_statu.llen(statu.id)
                 likeList = redis_statu.lrange(statu.id,0,likelen)
-                if uid in likeList:
+                if str(uid) in likeList:
                     iflike = 1
             a_statu['sid'] = statu.id
             a_statu['time'] = statu.time
@@ -202,10 +205,12 @@ def user_statulist(uid, userid, page):
 def like(uid, sid):
     iflike = request.get_json().get("iflike")
     statu = Statu.query.filter_by(id=sid).first()
-    if iflike == 1:
+    likelen = redis_statu.llen(sid)
+    likeList = redis_statu.lrange(sid,0,likelen)
+    if iflike == 1 and str(uid) not in likeList:
         redis_statu.rpush(sid, uid)
         statu.like += 1
-    if iflike == 0:
+    if iflike == 0 and str(uid) in likeList:
         redis_statu.lrem(sid, uid, 0)
         statu.like -= 1
     db.session.add(statu)
@@ -218,29 +223,27 @@ def like(uid, sid):
 @login_required(1)
 def newcomments(uid, sid):
     statu = Statu.query.filter_by(id=sid).first()
-    statu.comment += 1
-    content = request.get_json().get('content')
-    time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    comment = Comment(
-        content=content,
-        time=time1,
-        kind = 0,
-        creator = uid,
-        statu_id = sid)
-    db.session.add(comment, statu)
-    db.session.commit()
-    user = User.query.filter_by(id=uid).first()
-    avatar_url = user.avatar
-    action = 'comment '+ user.name + '\'s status'
-    kind = 3
-    sourceID = comment.id
-    newfeed(
-        uid,
-        action,
-        kind,
-        sourceID)
-    response = jsonify({"message":"feed add successfully"})
-    response.status_code = 200
+    if statu is not None:
+        statu.comment += 1
+        content = request.get_json().get('content')
+        time1 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        comment = Comment(
+            content=content,
+            time=time1,
+            kind = 0,
+            creator = uid,
+            statu_id = sid)
+        db.session.add(comment, statu)
+        db.session.commit()
+        
+        newfeed(uid, actions[4], statu.title, sourceidmap["进度"], statu.id)
+        response = jsonify({"message":"comments add successfully"})
+        response.status_code = 200
+
+    else:
+        response = jsonify({"message":"the status is already deleted"})
+        response.status_code = 405
+
     return response
 
 '''

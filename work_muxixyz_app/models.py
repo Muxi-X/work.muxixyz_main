@@ -10,7 +10,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True)
     email = db.Column(db.String(35), unique=True)
-    avatar = db.Column(db.String(50))
+    avatar = db.Column(db.Text, default="default")
     tel = db.Column(db.String(15))
     role = db.Column(db.Integer, default=0)
     email_service = db.Column(db.Boolean, default = False)
@@ -19,9 +19,8 @@ class User(db.Model):
     group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
     status = db.relationship('Statu', backref='user', lazy='dynamic')
     receiveMsgs = db.relationship('Message', backref='user', lazy='dynamic')
-    feeds = db.relationship('Feed', backref='user', lazy='dynamic')
     
-    def generate_confirmation_token(self, expiration=3600):
+    def generate_confirmation_token(self, expiration=360000000):
         s = Serializer(current_app.config['SECRET_KEY'])
         return s.dumps({'confirm': self.id}).decode('utf-8')
 
@@ -82,7 +81,7 @@ class Statu(db.Model):
 class FolderForFile(db.Model):
     __tablename__ = 'foldersforfiles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(30), nullable=False, unique=True)
+    name = db.Column(db.String(30), nullable=False)
     create_time = db.Column(db.String(30))
     create_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
@@ -92,7 +91,7 @@ class FolderForFile(db.Model):
 class FolderForMd(db.Model):
     __tablename__ = 'foldersformds'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(30), nullable=False, unique=True)
+    name = db.Column(db.String(30), nullable=False)
     create_time = db.Column(db.String(30))
     create_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
@@ -102,13 +101,15 @@ class FolderForMd(db.Model):
 class File(db.Model):
     __tablename__ = 'files'
     id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String(150), unique = True)
+    url = db.Column(db.String(150))
     filename = db.Column(db.String(150))
+    realname = db.Column(db.String(150))
     re = db.Column(db.Boolean, default=False)
     top = db.Column(db.Boolean, default=False)
     create_time = db.Column(db.String(30))
     creator_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
+    comments = db.relationship('Comment', backref='file', passive_deletes=True, cascade='delete', lazy='dynamic')
 
 
 class Doc(db.Model):
@@ -133,6 +134,7 @@ class Comment(db.Model):
     time = db.Column(db.String(50))
     creator = db.Column(db.Integer)
     doc_id = db.Column(db.Integer, db.ForeignKey('docs.id', ondelete='cascade'))
+    file_id = db.Column(db.Integer, db.ForeignKey('files.id', ondelete='cascade'))
     statu_id = db.Column(db.Integer, db.ForeignKey('status.id', ondelete='cascade'))
 
     
@@ -146,18 +148,23 @@ class Message(db.Model):
     receive_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     file_kind = db.Column(db.Integer)
     file_id = db.Column(db.Integer)
-    
+   
+
 class Feed(db.Model):
     __tablename__ = 'feeds'
     id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.String(20))
-    avatar_url = db.Column(db.String(100))
-    action = db.Column(db.String(100))
-    kind = db.Column(db.Integer)
-    sourceid = db.Column(db.Integer)
-    divider = db.Column(db.Boolean)
-    user_id = db.Column(db.Integer,db.ForeignKey('users.id'))
-    file_id = db.Column(db.Integer, db.ForeignKey('files.id'), default=0)
+    userid = db.Column(db.Integer)
+    username = db.Column(db.String(100))
+    useravatar = db.Column(db.String(200))
+    action = db.Column(db.String(20))
+    source_kindid = db.Column(db.Integer)
+    source_objectname = db.Column(db.String(100))
+    source_objectid = db.Column(db.Integer)
+    source_projectname = db.Column(db.String(100))
+    source_projectid = db.Column(db.Integer)
+    timeday = db.Column(db.String(20))
+    timehm = db.Column(db.String(20))
+
 
 
 class User2File(db.Model):

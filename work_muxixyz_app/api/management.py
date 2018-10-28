@@ -7,7 +7,31 @@ from ..decorator import login_required
 from ..timetools import to_readable_time
 from ..page import get_rows
 from ..mq import newfeed
+from qiniu import Auth, put_file, etag, BucketManager
+import qiniu.config
 import time
+import os
+from werkzeug import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+
+access_key = os.environ.get('WORKBENCH_ACCESS_KEY')
+secret_key = os.environ.get('WORKBENCH_SECRET_KEY')
+url = os.environ.get('WORKBENCH_URL')
+bucket_name = 'ossworkbench'
+q = qiniu.Auth(access_key, secret_key)
+bucket = BucketManager(q)
+
+
+def qiniu_upload(key, localfile):
+    token = q.upload_token(bucket_name, key, 3600)
+
+    ret, info = qiniu.put_file(token, key, localfile)
+
+    if ret:
+        return '{0}{1}'.format(url, ret['key'])
+    else:
+        raise UploadError('上传失败，请重试')
 
 #role: 000
 @api.route('/user/2bSuperuser/', methods = ['POST'], endpoint = '2BSuperUser')
@@ -237,6 +261,17 @@ def user_project_list(uid, id):
 @api.route('/user/2bMember/', methods = ['POST'], endpoint = 'User2bMember')
 @login_required(role = 2)
 def user_2b_member(uid):
+    actions = ["加入", "创建", "编辑", "删除", "评论", "移动"]
+    sourceidmap = {
+            "团队": 1,
+            "项目": 2,
+            "文档": 3,
+            "文件": 4,
+            "文件夹": 5,
+            "进度": 6
+        }
+
+
     user_id = request.get_json().get('userID')
     usr = User.query.filter_by(id = user_id).first()
     if (usr.role !=  0) and (usr.team_id is not None):
@@ -248,13 +283,10 @@ def user_2b_member(uid):
     if usr.role == 0:
         usr.role = 1
     usr.team_id = 1
-    print ("1")
+    team = Team.query.filter_by(id=usr.team_id).first()
     db.session.add(usr)
-    print ("2")
     db.session.commit()
-    print ("3")
-    action = '用户: ' + usr.name + '是木犀的一员啦！'
-    newfeed(uid, action, 5, user_id)
+    newfeed(user_id, actions[0], team.name, sourceidmap["团队"], 1)
     response = jsonify({
         "msg": 'successful!',
     })
@@ -266,17 +298,18 @@ def user_2b_member(uid):
 @api.route('/user/admins/', methods = ['GET'], endpoint = 'AdminList')
 @login_required(role = 4)
 def admin_list(uid):
-    admins = User.query.filter_by(role = 3).all()
+    admins = db.session.query(User).all()
     if admins is None:
         response = jsonify({})
         response.status_code = 201
         return response
     l=list([])
     for admin in admins:
-        l.append({
-            "userID": admin.id,
-            "userName": admin.name,
-        })
+        if admin.role > 1:
+            l.append({
+                "userID": admin.id,
+                "userName": admin.name,
+            })
     response = jsonify({
         "list": l,
     })
@@ -292,8 +325,6 @@ def add_admin(uid):
     luckydog.role = 3
     db.session.add(luckydog)
     db.session.commit()
-    action = '用户: ' + luckydog.name + '现在是管理员啦！'
-    newfeed(uid, action, 5, lid)
     response = jsonify({})
     response.status_code = 200
     return response
@@ -354,6 +385,7 @@ def get_setting(uid, id):
             "name": user.name,
             "email": user.email,
             "tel": user.tel,
+            "avatar": user.avatar,
             "email_service": user.email_service,
             "message": user.message,
         })
@@ -371,6 +403,7 @@ def get_setting(uid, id):
         else:
             response = jsonify({
                 "name": got_user.name,
+                "avatar": got_user.avatar,
                 "email": got_user.email,
                 "tel": got_user.tel,
                 "email_service": got_user.email_service,
@@ -406,6 +439,36 @@ def editsetting(uid, id):
     response = jsonify({})
     response.status_code = 200
     return response
+    
+#role: 001
+@api.route('/user/uploadAvatar/', methods = ['POST'], endpoint = 'UploadAvatar')
+@login_required(role = 1)
+def upload_avatar(uid):
+    usr = User.query.filter_by(id = uid).first()
+    image = request.files.get('image')
+    try:
+        filename = secure_filename(image.filename) + str(time.time())
+        image.save(os.path.join(os.getcwd(), filename))
+        key = filename
+        localfile = os.path.join(os.getcwd(), filename)
+        res = qiniu_upload(key, localfile)
+        i = res.find('com')
+        res = 'http://' + res[:i + 3] + '/' + res[i + 3:]
+        os.system('rm -rf '+ filename)
+        usr.avatar = res
+        db.session.add(usr)
+        db.session.commit()
+        response = jsonify({
+            "url": res,
+        })
+        print (res)
+        response.status_code = 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "errmsg": str(e)
+        }), 403
+    return response
 
 # role 110
 @api.route('/user/<int:id>/', methods = ['DELETE'], endpoint = 'DeleteMember')
@@ -419,6 +482,16 @@ def delete_member(uid,id):
         return response
     usr = User.query.filter_by(id=id).first()
     usr.role = 0
+    grp = Group.query.filter_by(id=usr.group_id).first()
+    team = Group.query.filter_by(id=usr.team_id).first()
+    if grp is not None:
+        grp.count -= 1
+        db.session.add(grp)
+    if team is not None:
+        team.count -= 1
+        db.session.add(team)
+    usr.team_id = None
+    usr.group_id = None
     db.session.add(usr)
     db.session.commit()
     response = jsonify({})
@@ -438,13 +511,13 @@ def apply_list(uid):
         response.status_code = 201
         return response
     for a in usrs:
-        print (a.user_id)
         user = User.query.filter_by(id = a.user_id).first()
-        l.append({
-            "userID": user.id,
-            "userName": user.name,
-            "userEmail": user.email,
-        })
+        if user.role == 0:
+            l.append({
+                "userID": user.id,
+                "userName": user.name,
+                "userEmail": user.email,
+            })
     response = jsonify({
         "list": l,
     })
@@ -463,5 +536,43 @@ def refuse_apply(uid,id):
     db.session.delete(record)
     db.session.commit()
     response = jsonify({})
+    response.status_code = 200
+    return response
+
+# role: 001
+@api.route('/team/invite/', methods = ['GET'], endpoint = 'GetInviteLink')
+@login_required(role = 1)
+def get_invite_link(uid):
+    usr = User.query.filter_by(id = uid).first()
+    teamID = usr.team_id
+    team = Team.query.filter_by(id = teamID).first()
+    s = Serializer(current_app.config['SECRET_KEY'])
+    hash_id = s.dumps({'teamID': team.id}).decode('utf-8')
+    response = jsonify({
+        "hash_id": hash_id,
+    })
+    response.status_code = 200
+    return response
+
+# role: 000
+@api.route('/team/getID/', methods = ['GET'], endpoint = 'GetTeamID')
+def get_team_id():
+    hash_id = request.args.get('hash_id')
+    if hash_id is None:
+        response = jsonify({
+            'msg': 'Your hash_id ??? Where??',
+        })
+        response.status_code = 403
+        return response
+    t = hash_id.encode('utf-8')
+    s=Serializer(current_app.config['SECRET_KEY'])
+    try:
+        data=s.loads(t)
+    except:
+        abort(402)
+    tid=data.get('teamID')
+    response = jsonify({
+        'teamID': tid,
+    })
     response.status_code = 200
     return response
