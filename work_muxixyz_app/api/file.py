@@ -430,7 +430,7 @@ def file_doc_id_put(uid, id):
 
 @api.route('/project/<int:id>/re/', methods=['GET'], endpoint='ProjectReGet')
 @login_required(role=1)
-def project_re_get(uid):
+def project_re_get(uid, id):
 
     docs = Doc.query.filter_by(project_id=id, re=True).all()
     files = File.query.filter_by(project_id=id, re=True).all()
