@@ -211,12 +211,17 @@ def project_member_get(uid, pid):
         u2plist = User2Project.query.filter_by(project_id=pid).all()
         for u2p in u2plist:
             user = User.query.filter_by(id=u2p.user_id).first()
+            group = Group.query.filter_by(id=user.group_id).first()
+            if group is not None:
+                group_name = group.name
+            else:
+                group_name = None
             memberList.append(
                 {
                     "userID": user.id,
                     "username": user.name,
                     "avatar": user.avatar,
-                    "group": Group.query.filter_by(id=user.group_id).first().name,
+                    "group": group_name,
                     "role": user.role
                 }
             )
