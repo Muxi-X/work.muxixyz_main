@@ -449,14 +449,14 @@ def project_re_get(uid):
             FileList.append({
                 "id": file.id,
                 "name": file.filename,
-                "creator": User.query.filter_by(id=uid).first().name,
+                "creator": User.query.filter_by(id=file.creator_id).first().name,
                 "url": file.url,
                 "create_time": file.create_time
             })
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 500
     return jsonify({
         "FolderList": DocList,
         "FileList": FileList
