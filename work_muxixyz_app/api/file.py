@@ -428,10 +428,9 @@ def file_doc_id_put(uid, id):
     return jsonify({}), 200
 
 
-@api.route('/project/re/', methods=['GET'], endpoint='ProjectReGet')
+@api.route('/project/<int:id>/re/', methods=['GET'], endpoint='ProjectReGet')
 @login_required(role=1)
 def project_re_get(uid):
-    id = request.get_json().get('id')
 
     docs = Doc.query.filter_by(project_id=id, re=True).all()
     files = File.query.filter_by(project_id=id, re=True).all()
