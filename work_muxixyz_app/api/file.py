@@ -104,6 +104,7 @@ def folder_file_id_delete(uid, id):
             file = File.query.filter_by(id=file_id).first()
             # ret, info = bucket.delete(bucket_name, file.filename)         # 用于彻底删除，但是这里应该只是移动到回收站
             file.re = True
+            file.delete_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         db.session.commit()
 
     except Exception as e:
@@ -315,6 +316,7 @@ def file_file_id_delete(uid, id):
     try:
         file = File.query.filter_by(id=id).first()
         file.re = True
+        file.delete_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         db.session.commit()
     except Exception as e:
         return jsonify({
@@ -451,7 +453,8 @@ def project_re_get(uid, id):
                 "name": file.realname,
                 "creator": User.query.filter_by(id=file.creator_id).first().name,
                 "url": file.url,
-                "create_time": file.create_time
+                "create_time": file.create_time,
+                "delete_time": file.delete_time
             })
     except Exception as e:
         return jsonify({
