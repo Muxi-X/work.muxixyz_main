@@ -448,7 +448,7 @@ def project_re_get(uid, id):
         for file in files:
             FileList.append({
                 "id": file.id,
-                "name": file.filename,
+                "name": file.realname,
                 "creator": User.query.filter_by(id=file.creator_id).first().name,
                 "url": file.url,
                 "create_time": file.create_time
