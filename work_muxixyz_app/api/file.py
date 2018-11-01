@@ -44,6 +44,7 @@ def qiniu_upload(key, localfile):
 
 def check(uid, C):
     pid = C.project_id
+    print("pid==", pid, "uid==", uid)
     u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
     if u2p is None:
         return jsonify({}), 401
