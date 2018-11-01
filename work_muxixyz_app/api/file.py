@@ -49,12 +49,12 @@ def check(uid, C):
     print(u2p)
     print("u2p is None?" + str(u2p is None))
     if u2p is None:
-        return jsonify({}), 401
+        return False
 
 def checkid(uid, pid):
     u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
     if u2p is None:
-        return jsonify({}), 401
+        return False
 
 
 @api.route('/folder/file/', methods=['POST'], endpoint='FolderFilePost')
@@ -64,7 +64,8 @@ def folder_file_post(uid):
         foldername = request.get_json().get('foldername')
         project_id = request.get_json().get('project_id')
 
-        checkid(uid, project_id)
+        if not checkid(uid, project_id):
+            return jsonify({}), 401
 
         folderforfile = FolderForFile(
             name=foldername,
@@ -91,7 +92,8 @@ def folder_file_id_put(uid, id):
         foldername = request.get_json().get('foldername')
         folderforfile = FolderForFile.query.filter_by(id=id).first()
 
-        check(uid, folderforfile)
+        if not check(uid, folderforfile):
+            return jsonify({}), 401
 
         folderforfile.name = foldername
         db.session.add(folderforfile)
@@ -116,13 +118,17 @@ def folder_file_id_delete(uid, id):
         for folder_id in folder:
             folderforfile = FolderForFile.query.filter_by(id=folder_id).first()
 
-            check(uid, folderforfile)
+            if not check(uid, folderforfile):
+                return jsonify({}), 401
 
             folderforfile.re = True
             # db.session.delete(folderforfile)
 
         for file_id in file:
             file = File.query.filter_by(id=file_id).first()
+
+            if not check(uid, file):
+                return jsonify({}), 401
             # ret, info = bucket.delete(bucket_name, file.filename)         # 用于彻底删除，但是这里应该只是移动到回收站
             file.re = True
             file.delete_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -157,7 +163,8 @@ def folder_file_chrildren_post(uid):
         for file_id in file_list:
             file = File.query.filter_by(id=file_id).first()
 
-            check(uid, file)
+            if not check(uid, file):
+                return jsonify({}), 401
 
             FileList.append({
                 "id": file.id,
@@ -183,7 +190,8 @@ def folder_doc_post(uid):
         foldername = request.get_json().get('foldername')
         project_id = request.get_json().get('project_id')
 
-        checkid(uid, project_id)
+        if not checkid(uid, project_id):
+            return jsonify({}), 401
 
         folderformd = FolderForMd(
             name=foldername,
@@ -210,7 +218,8 @@ def folder_doc_id_put(uid, id):
         foldername = request.get_json().get('foldername')
         folderformd = FolderForMd.query.filter_by(id=id).first()
 
-        check(uid, folderformd)
+        if not check(uid, folderformd):
+            return jsonify({}), 401
 
         folderformd.name = foldername
         db.session.add(folderformd)
@@ -235,7 +244,8 @@ def folder_doc_id_delete(uid, id):
         for folder_id in folder:
             folderformd = FolderForMd.query.filter_by(id=folder_id).first()
 
-            check(uid, folderformd)
+            if not check(uid, folderformd):
+                return jsonify({}), 401
 
             folderformd.re = True
             # db.session.delete(folderforfile)
@@ -243,7 +253,8 @@ def folder_doc_id_delete(uid, id):
         for doc_id in doc:
             doc = Doc.query.filter_by(id=doc_id).first()
 
-            check(uid, doc)
+            if not check(uid, doc):
+                return jsonify({}), 401
 
             # ret, info = bucket.delete(bucket_name, doc.filename)         # 用于彻底删除，但是这里应该只是移动到回收站
             doc.re = True
@@ -268,7 +279,8 @@ def folder_doc_chrildren_post(uid):
         for folder_id in folder_list:
             folderformd = FolderForMd.query.filter_by(id=folder_id).first()
 
-            check(uid, folderformd)
+            if not check(uid, folderformd):
+                return jsonify({}), 401
 
             FolderList.append({
                 "id": folderformd.id,
@@ -278,7 +290,8 @@ def folder_doc_chrildren_post(uid):
         for doc_id in doc_list:
             doc = Doc.query.filter_by(id=doc_id).first()
 
-            check(uid, doc)
+            if not check(uid, doc):
+                return jsonify({}), 401
 
             DocList.append({
                 "id": doc.id,
@@ -302,7 +315,8 @@ def folder_doc_chrildren_post(uid):
 def file_file_post(uid):
     project_id = int(request.form.get('project_id'))
 
-    checkid(uid, project_id)
+    if not checkid(uid, project_id):
+        return jsonify({}), 401
 
     myfile = request.files.get('file')
     project = Project.query.filter_by(id=project_id).first()
@@ -342,7 +356,8 @@ def file_file_post(uid):
 def file_doc_id_put(uid, id):
     file = File.query.filter_by(id=id).first()
 
-    check(uid, file)
+    if not check(uid, file):
+        return jsonify({}), 401
 
     FileName = request.get_json().get('FileName')
     try:
@@ -365,7 +380,8 @@ def file_file_id_delete(uid, id):
     try:
         file = File.query.filter_by(id=id).first()
 
-        check(uid, file)
+        if not check(uid, file):
+            return jsonify({}), 401
 
         file.re = True
         file.delete_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -395,7 +411,8 @@ def file_doc_post(uid):
     mycontent = request.get_json().get('content')
     project_id = request.get_json().get('project_id')
 
-    checkid(uid, project_id)
+    if not checkid(uid, project_id):
+        return jsonify({}), 401
 
     project = Project.query.filter_by(id = project_id).first()
     try:
@@ -426,7 +443,8 @@ def file_doc_id_delete(uid, id):
     try:
         doc = Doc.query.filter_by(id=id).first()
 
-        check(uid, doc)
+        if not check(uid, doc):
+            return jsonify({}), 401
 
         doc.re = True
         db.session.commit()
@@ -453,7 +471,8 @@ def file_doc_id_delete(uid, id):
 def file_doc_id_get(uid, id):
     doc = Doc.query.filter_by(id=id).first()
 
-    check(uid, doc)
+    if not check(uid, doc):
+        return jsonify({}), 401
 
     try:
         return jsonify({
@@ -474,7 +493,8 @@ def file_doc_id_get(uid, id):
 def file_doc_id_put(uid, id):
     doc = Doc.query.filter_by(id=id).first()
 
-    check(uid, doc)
+    if not check(uid, doc):
+        return jsonify({}), 401
 
     DocName = request.get_json().get('DocName')
     content = request.get_json().get('content')
@@ -498,7 +518,8 @@ def file_doc_id_put(uid, id):
 @login_required(role=1)
 def project_re_get(uid, id):
 
-    checkid(uid, id)
+    if not checkid(uid, id):
+        return jsonify({}), 401
 
     docs = Doc.query.filter_by(project_id=id, re=True).all()
     files = File.query.filter_by(project_id=id, re=True).all()
@@ -535,7 +556,8 @@ def project_re_get(uid, id):
 @api.route('/project/<int:id>/re/', methods=['PUT'], endpoint='ProjectRePut')
 @login_required(role=1)
 def project_re_put(uid, id):
-    checkid(uid, id)
+    if not checkid(uid, id):
+        return jsonify({}), 401
 
     doc_list = request.get_json().get('doc')
     file_list = request.get_json().get('file')
@@ -561,7 +583,8 @@ def project_re_put(uid, id):
 @api.route('/project/<int:id>/re/', methods=['DELETE'], endpoint='ProjectReDelete')
 @login_required(role=1)
 def project_re_put(uid, id):
-    checkid(uid, id)
+    if not checkid(uid, id):
+        return jsonify({}), 401
 
     doc_list = request.get_json().get('doc')
     file_list = request.get_json().get('file')
