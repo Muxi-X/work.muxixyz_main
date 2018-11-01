@@ -344,7 +344,7 @@ def file_file_post(uid):
         return jsonify({
             "errmsg": str(e)
         }), 500
-    newfeed(uid, actions[1], filename, sourceidmap["文件"], newfile.id, project_id, project.name)
+    newfeed(uid, actions[1], myfile.filename, sourceidmap["文件"], newfile.id, project_id, project.name)
     return jsonify({
         "fid": str(newfile.id),
         "name": myfile.filename
@@ -392,7 +392,7 @@ def file_file_id_delete(uid, id):
         })
 
     project = Project.query.filter_by(id=file.project_id).first()
-    newfeed(uid, actions[3], file.filename, sourceidmap["文件"], id, file.project_id, project.name)
+    newfeed(uid, actions[3], file.realname, sourceidmap["文件"], id, file.project_id, project.name)
     MakeMsg(file, uid, u"删除")
 
     # write by shiina
