@@ -43,15 +43,18 @@ def qiniu_upload(key, localfile):
         raise UploadError('上传失败，请重试')
 
 def check(uid, C):
+    user = User.query.filter_by(id=uid).first()
+    if user.role > 0:
+        return True
     pid = C.project_id
-    print("pid==", pid, "uid==", uid)
     u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
-    print(u2p)
-    print("u2p is None?" + str(u2p is None))
     if u2p is None:
         return False
 
 def checkid(uid, pid):
+    user = User.query.filter_by(id=uid).first()
+    if user.role > 0:
+        return True
     u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
     if u2p is None:
         return False
