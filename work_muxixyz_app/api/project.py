@@ -449,6 +449,9 @@ def project_file_comment_delete(uid, pid, fid, cid):
 @api.route('/folder/filetree/<int:pid>/', methods=['PUT'], endpoint='FileTreePut')
 @login_required(role=1)
 def file_tree_put(uid, pid):
+    u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
+    if u2p is None:
+        return jsonify({}), 401
     filetree = request.get_json().get('filetree')
     try:
         project = Project.query.filter_by(id=pid).first()
@@ -464,6 +467,9 @@ def file_tree_put(uid, pid):
 @api.route('/folder/filetree/<int:pid>/', methods=['GET'], endpoint='FileTreeGet')
 @login_required(role=1)
 def file_tree_get(uid, pid):
+    u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
+    if u2p is None:
+        return jsonify({}), 401
     try:
         return jsonify({
             "filetree": Project.query.filter_by(id=pid).first().filetree
@@ -477,6 +483,9 @@ def file_tree_get(uid, pid):
 @api.route('/folder/doctree/<int:pid>/', methods=['PUT'], endpoint='DocTreePut')
 @login_required(role=1)
 def file_tree_put(uid, pid):
+    u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
+    if u2p is None:
+        return jsonify({}), 401
     doctree = request.get_json().get('doctree')
     try:
         project = Project.query.filter_by(id=pid).first()
@@ -492,6 +501,9 @@ def file_tree_put(uid, pid):
 @api.route('/folder/doctree/<int:pid>/', methods=['GET'], endpoint='DocTreeGet')
 @login_required(role=1)
 def file_tree_get(uid, pid):
+    u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
+    if u2p is None:
+        return jsonify({}), 401
     try:
         return jsonify({
             "doctree": Project.query.filter_by(id=pid).first().doctree
