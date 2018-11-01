@@ -28,6 +28,13 @@ bucket_name = 'ossworkbench'
 q = qiniu.Auth(access_key, secret_key)
 bucket = BucketManager(q)
 
+def checkid(uid, pid):
+    user = User.query.filter_by(id=uid).first()
+    if user.role > 0:
+        return True
+    u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
+    if u2p is None:
+        return False
 
 @api.route('/project/new/', methods=['POST'], endpoint='ProjectNew')
 @login_required(role = 2)
@@ -449,10 +456,9 @@ def project_file_comment_delete(uid, pid, fid, cid):
 @api.route('/folder/filetree/<int:pid>/', methods=['PUT'], endpoint='FileTreePut')
 @login_required(role=1)
 def file_tree_put(uid, pid):
-    u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
-    if u2p is None:
+    if not checkid(uid, pid):
         return jsonify({}), 401
-    filetree = request.get_json().get('filetree')
+
     try:
         project = Project.query.filter_by(id=pid).first()
         project.filetree = filetree
@@ -501,6 +507,9 @@ def file_tree_put(uid, pid):
 @api.route('/folder/doctree/<int:pid>/', methods=['GET'], endpoint='DocTreeGet')
 @login_required(role=1)
 def file_tree_get(uid, pid):
+    if not checkid(uid, pid):
+        return jsonify({}), 401
+
     u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
     if u2p is None:
         return jsonify({}), 401
