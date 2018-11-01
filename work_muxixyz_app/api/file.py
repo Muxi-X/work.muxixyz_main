@@ -46,7 +46,8 @@ def check(uid, C):
     pid = C.project_id
     print("pid==", pid, "uid==", uid)
     u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
-    print(type(u2p))
+    print(u2p)
+    print("u2p is None?" + str(u2p is None))
     if u2p is None:
         return jsonify({}), 401
 
