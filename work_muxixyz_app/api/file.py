@@ -42,6 +42,17 @@ def qiniu_upload(key, localfile):
     else:
         raise UploadError('上传失败，请重试')
 
+def check(uid, C):
+    pid = C.project_id
+    u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
+    if u2p is None:
+        return jsonify({}), 401
+
+def checkid(uid, pid):
+    u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
+    if u2p is None:
+        return jsonify({}), 401
+
 
 @api.route('/folder/file/', methods=['POST'], endpoint='FolderFilePost')
 @login_required(role=1)
@@ -49,6 +60,8 @@ def folder_file_post(uid):
     try:
         foldername = request.get_json().get('foldername')
         project_id = request.get_json().get('project_id')
+
+        checkid(uid, project_id)
 
         folderforfile = FolderForFile(
             name=foldername,
@@ -74,6 +87,9 @@ def folder_file_id_put(uid, id):
     try:
         foldername = request.get_json().get('foldername')
         folderforfile = FolderForFile.query.filter_by(id=id).first()
+
+        check(uid, folderforfile)
+
         folderforfile.name = foldername
         db.session.add(folderforfile)
         db.session.commit()
@@ -96,9 +112,11 @@ def folder_file_id_delete(uid, id):
     try:
         for folder_id in folder:
             folderforfile = FolderForFile.query.filter_by(id=folder_id).first()
+
+            check(uid, folderforfile)
+
             folderforfile.re = True
             # db.session.delete(folderforfile)
-        db.session.commit()
 
         for file_id in file:
             file = File.query.filter_by(id=file_id).first()
@@ -125,6 +143,9 @@ def folder_file_chrildren_post(uid):
     try:
         for folder_id in folder:
             folderforfile = FolderForFile.query.filter_by(id=folder_id).first()
+
+            check(uid, folderforfile)
+
             FolderList.append({
                 "id": folderforfile.id,
                 "name": folderforfile.name
@@ -132,6 +153,9 @@ def folder_file_chrildren_post(uid):
 
         for file_id in file_list:
             file = File.query.filter_by(id=file_id).first()
+
+            check(uid, file)
+
             FileList.append({
                 "id": file.id,
                 "name": file.realname,
@@ -155,6 +179,8 @@ def folder_doc_post(uid):
     try:
         foldername = request.get_json().get('foldername')
         project_id = request.get_json().get('project_id')
+
+        checkid(uid, project_id)
 
         folderformd = FolderForMd(
             name=foldername,
@@ -180,6 +206,9 @@ def folder_doc_id_put(uid, id):
     try:
         foldername = request.get_json().get('foldername')
         folderformd = FolderForMd.query.filter_by(id=id).first()
+
+        check(uid, folderformd)
+
         folderformd.name = foldername
         db.session.add(folderformd)
         db.session.commit()
@@ -202,12 +231,17 @@ def folder_doc_id_delete(uid, id):
     try:
         for folder_id in folder:
             folderformd = FolderForMd.query.filter_by(id=folder_id).first()
+
+            check(uid, folderformd)
+
             folderformd.re = True
             # db.session.delete(folderforfile)
-        db.session.commit()
 
         for doc_id in doc:
             doc = Doc.query.filter_by(id=doc_id).first()
+
+            check(uid, doc)
+
             # ret, info = bucket.delete(bucket_name, doc.filename)         # 用于彻底删除，但是这里应该只是移动到回收站
             doc.re = True
         db.session.commit()
@@ -230,6 +264,9 @@ def folder_doc_chrildren_post(uid):
     try:
         for folder_id in folder_list:
             folderformd = FolderForMd.query.filter_by(id=folder_id).first()
+
+            check(uid, folderformd)
+
             FolderList.append({
                 "id": folderformd.id,
                 "name": folderformd.name
@@ -237,6 +274,9 @@ def folder_doc_chrildren_post(uid):
 
         for doc_id in doc_list:
             doc = Doc.query.filter_by(id=doc_id).first()
+
+            check(uid, doc)
+
             DocList.append({
                 "id": doc.id,
                 "name": doc.filename,
@@ -257,8 +297,11 @@ def folder_doc_chrildren_post(uid):
 @api.route('/file/file/', methods=['POST'], endpoint='FileFilePost')
 @login_required(role=1)
 def file_file_post(uid):
-    myfile = request.files.get('file')
     project_id = int(request.form.get('project_id'))
+
+    checkid(uid, project_id)
+
+    myfile = request.files.get('file')
     project = Project.query.filter_by(id=project_id).first()
     try:
         filename = secure_filename(myfile.filename) + str(time.time())
@@ -295,6 +338,9 @@ def file_file_post(uid):
 @login_required(role=1)
 def file_doc_id_put(uid, id):
     file = File.query.filter_by(id=id).first()
+
+    check(uid, file)
+
     FileName = request.get_json().get('FileName')
     try:
         file.filename = FileName
@@ -315,6 +361,9 @@ def file_doc_id_put(uid, id):
 def file_file_id_delete(uid, id):
     try:
         file = File.query.filter_by(id=id).first()
+
+        check(uid, file)
+
         file.re = True
         file.delete_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         db.session.commit()
@@ -342,6 +391,9 @@ def file_doc_post(uid):
     mdname = request.get_json().get('mdname')
     mycontent = request.get_json().get('content')
     project_id = request.get_json().get('project_id')
+
+    checkid(uid, project_id)
+
     project = Project.query.filter_by(id = project_id).first()
     try:
         newdoc = Doc(
@@ -370,6 +422,9 @@ def file_doc_post(uid):
 def file_doc_id_delete(uid, id):
     try:
         doc = Doc.query.filter_by(id=id).first()
+
+        check(uid, doc)
+
         doc.re = True
         db.session.commit()
     except Exception as e:
@@ -394,6 +449,9 @@ def file_doc_id_delete(uid, id):
 @login_required(role=1)
 def file_doc_id_get(uid, id):
     doc = Doc.query.filter_by(id=id).first()
+
+    check(uid, doc)
+
     try:
         return jsonify({
             "name": doc.filename,
@@ -412,6 +470,9 @@ def file_doc_id_get(uid, id):
 @login_required(role=1)
 def file_doc_id_put(uid, id):
     doc = Doc.query.filter_by(id=id).first()
+
+    check(uid, doc)
+
     DocName = request.get_json().get('DocName')
     content = request.get_json().get('content')
     try:
@@ -433,6 +494,8 @@ def file_doc_id_put(uid, id):
 @api.route('/project/<int:id>/re/', methods=['GET'], endpoint='ProjectReGet')
 @login_required(role=1)
 def project_re_get(uid, id):
+
+    checkid(uid, id)
 
     docs = Doc.query.filter_by(project_id=id, re=True).all()
     files = File.query.filter_by(project_id=id, re=True).all()
@@ -466,9 +529,11 @@ def project_re_get(uid, id):
     }), 200
 
 
-@api.route('/project/re/', methods=['PUT'], endpoint='ProjectRePut')
+@api.route('/project/<int:id>/re/', methods=['PUT'], endpoint='ProjectRePut')
 @login_required(role=1)
-def project_re_put(uid):
+def project_re_put(uid, id):
+    checkid(uid, id)
+
     doc_list = request.get_json().get('doc')
     file_list = request.get_json().get('file')
 
@@ -490,9 +555,11 @@ def project_re_put(uid):
     }), 200
 
 
-@api.route('/project/re/', methods=['DELETE'], endpoint='ProjectReDelete')
+@api.route('/project/<int:id>/re/', methods=['DELETE'], endpoint='ProjectReDelete')
 @login_required(role=1)
-def project_re_put(uid):
+def project_re_put(uid, id):
+    checkid(uid, id)
+
     doc_list = request.get_json().get('doc')
     file_list = request.get_json().get('file')
 
