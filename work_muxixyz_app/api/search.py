@@ -19,11 +19,11 @@ def search(uid):
         page = int(request.args.get('page'))
     pattern = request.get_json().get('pattern')
     projectID = request.get_json().get('projectID')
-    Sql_file = 'SELECT filename FROM files WHERE filename LIKE %s'
-    Sql_doc = 'SELECT filename FROM docs WHERE filename LIKE %s'
-    args = ['%' + pattern + '%']
-    files = db.execute(Sql_file, args)
-    docs = db.execute(Sql_doc, args)
+#    Sql_file = 'SELECT filename FROM files WHERE filename LIKE %s'
+#    Sql_doc = 'SELECT filename FROM docs WHERE filename LIKE %s'
+#    args = ['%' + pattern + '%']
+    files = File.query.filter(File.filename.like("%"+pattern+"%")).all()
+    docs =  Doc.query.filter(Doc.filename.like("%"+pattern+"%")).all()
     l = list([])
     if projectID > 0:
         projectName = Project.query.filter_by(id = projectID).first().name
