@@ -270,8 +270,6 @@ def user_2b_member(uid):
             "文件夹": 5,
             "进度": 6
         }
-
-
     user_id = request.get_json().get('userID')
     usr = User.query.filter_by(id = user_id).first()
     if (usr.role !=  0) and (usr.team_id is not None):
@@ -286,7 +284,7 @@ def user_2b_member(uid):
     team = Team.query.filter_by(id=usr.team_id).first()
     db.session.add(usr)
     db.session.commit()
-    newfeed(user_id, actions[0], team.name, sourceidmap["团队"], 1)
+    newfeed(user_id, actions[0], team.name, sourceidmap["团队"], team.id)
     response = jsonify({
         "msg": 'successful!',
     })
