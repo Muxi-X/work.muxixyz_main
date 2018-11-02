@@ -32,15 +32,7 @@ def search(uid):
 
     pL = {}
     usr = User.query.filter_by(id = uid).first()
-'''
-    if usr.role > 1:
-        projectList = Project.query.all()
-        if projectList is not None:
-            for project in projectList:
-                pL[project.id] = project.name
-        else:
-            return jsonify({"msg": "Not a project existed any more!"}), 403
-'''
+
     if projectID == 0:
         recordList = User2Project.query.filter_by(user_id = uid).all()
         if recordList is not None:
