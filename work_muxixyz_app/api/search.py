@@ -33,7 +33,7 @@ def search(uid):
     pL = {}
     usr = User.query.filter_by(id = uid).first()
     if usr.role > 1:
-        projectList = Project.all()
+        projectList = Project.query.all()
         if projectList is not None:
             for project in projectList:
                 pL[project.id] = project.name
