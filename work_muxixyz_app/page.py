@@ -8,7 +8,7 @@ def get_rows(Table, Record, Value, pageNum, pageSize, reverse=False):
         rows = db.session.query(Table).count()
     else:
         rows = db.session.query(Table).filter(Record == Value).count()
-    pageMax = rows // pageSize
+    pageMax = type(1)(rows/pageSize)
     if rows % pageSize:
         pageMax += 1
     hasNext = True

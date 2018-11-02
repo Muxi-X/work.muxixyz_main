@@ -13,53 +13,79 @@ def takeKey(dic):
 @api.route("/search/", methods = ['POST'], endpoint = 'Search')
 @login_required(role = 1)
 def search(uid):
+
+    ''' Check the project list, to make sure the information which be returned
+        is secure. And check is that project exist.
+
+        Status Code:   200   OK
+                       201   OK but get none information
+                       401   Unauth
+                       403   ProjectMistake
+
+    '''
     page = 1
     pageSize = 10
     if request.args.get('page') is not None:
         page = int(request.args.get('page'))
     pattern = request.get_json().get('pattern')
     projectID = request.get_json().get('projectID')
-#    Sql_file = 'SELECT filename FROM files WHERE filename LIKE %s'
-#    Sql_doc = 'SELECT filename FROM docs WHERE filename LIKE %s'
-#    args = ['%' + pattern + '%']
+
+    pL = {}
+    usr = User.query.filter_by(id = uid).first()
+    if usr.role > 1:
+        projectList = Project.all()
+        if projectList is not None:
+            for project in projectList:
+                pL[project.id] = project.name
+        else:
+            return jsonify({"msg": "Not a project existed any more!"}), 403
+    elif usr.role == 1 and projectID == 0:
+        recordList = User2Project.query.filter_by(user_id = uid).all()
+        if recordList is not None:
+            for record in recordList:
+                project = Project.query.filter_by(id = record.project_id).first()
+                pL[project.id] = project.name
+        else:
+            return jsonify({"msg": "You're already not join any project!"}), 403
+    elif usr.role == 1 and projectID !=0:
+        project = Project.query.filter_by(id = projectID).first()
+        if project is not None:
+            pL[project.id] = project.name
+        else:
+            return jsonify({"msg": "project not existed!"}), 403
+
     files = File.query.filter(File.filename.like("%"+pattern+"%")).all()
     docs =  Doc.query.filter(Doc.filename.like("%"+pattern+"%")).all()
+
     l = list([])
-    if projectID > 0:
-        projectName = Project.query.filter_by(id = projectID).first().name
     if files is not None:
         for file in files:
-            if projectID == 0:
-                continue
-            elif file.project_id == projectID:
-                projectName = Project.query.filter_by(id = projectID).first().name
+            if file.project_id in pL.keys():
                 l.append({
                     "kind": 1,
                     "sourceID": file.id,
                     "recordName": file.filename,
-                    "projectID": projectID,
-                    "projectName": projectName,
+                    "projectID": file.project_id,
+                    "projectName": pL[file.project_id],
                     "creator": User.query.filter_by(id = file.creator_id).first().name,
                     "time": file.create_time,
                 })
     if docs is not None:
         for doc in docs:
-            if projectID == 0:
-                continue
-            elif doc.project_id == projectID:
-                projectName = Project.query.filter_by(id = projectID).first().name
+            if doc.project_id in pL.keys():
                 l.append({
                     "kind": 1,
                     "sourceID": doc.id,
                     "recordName": doc.filename,
-                    "projectID": projectID,
-                    "projectName": projectName,
+                    "projectID": doc.project_id,
+                    "projectName": pL[doc.project_id],
                     "creator": User.query.filter_by(id = doc.creator_id).first().name,
                     "time": doc.create_time,
                 })
+
     l.sort(key = takeKey, reverse = True)
     recordNum = len(l)
-    pageMax = recordNum / pageSize
+    pageMax = type(1)(recordNum / pageSize)
     if recordNum % pageSize != 0:
         pageMax += 1
     hasNext = True
@@ -68,6 +94,7 @@ def search(uid):
         l = l[pageSize*(page-1):]
     else:
         l = l[pageSize*(page-1):pageSize*page]
+
     response = jsonify({
         "count": recordNum,
         "pageMax": pageMax,
