@@ -41,7 +41,7 @@ def search(uid):
                 pL[project.id] = project.name
         else:
             return jsonify({"msg": "You're already not join any project!"}), 403
-    elif:
+    else:
         project = Project.query.filter_by(id = projectID).first()
         if project is not None:
             pL[project.id] = project.name

@@ -1,0 +1,12 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "manage.py", line 12, in <module>
+    app=create_app(os.getenv('FLASK_CONFIG') or 'default')
+  File "/root/programe/workbench/work.muxixyz_main/work_muxixyz_app/__init__.py", line 31, in create_app
+    from .api import api as api_blueprint
+  File "/root/programe/workbench/work.muxixyz_main/work_muxixyz_app/api/__init__.py", line 5, in <module>
+    from . import management, file, project, share, status, message, search
+  File "/root/programe/workbench/work.muxixyz_main/work_muxixyz_app/api/search.py", line 44
+    elif usr.role >= 1 and projectID == 0:
+    ^
+IndentationError: unexpected indent

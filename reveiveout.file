@@ -1,0 +1,7 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "manage.py", line 5, in <module>
+    from work_muxixyz_app import create_app, db
+  File "/root/programe/workbench/work.muxixyz_main/work_muxixyz_app/__init__.py", line 1, in <module>
+    from flask import Flask
+ImportError: No module named 'flask'
