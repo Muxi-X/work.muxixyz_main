@@ -461,6 +461,7 @@ def file_tree_put(uid, pid):
 
     try:
         project = Project.query.filter_by(id=pid).first()
+        filetree = request.get_json().get('filetree')
         project.filetree = filetree
         db.session.commit()
     except Exception as e:
