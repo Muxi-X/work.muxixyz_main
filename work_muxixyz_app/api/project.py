@@ -371,7 +371,7 @@ def project_file_comments_post(uid, pid, fid):
         }), 500
     curfile = File.query.filter_by(id=fid).first()
     project = Project.query.filter_by(id=curfile.project_id).first()
-    newfeed(uid, actions[4], curfile.filename, sourceidmap["文件"], curfile.id, curfile.project_id, project.name)
+    newfeed(uid, actions[4], curfile.realname, sourceidmap["文件"], curfile.id, curfile.project_id, project.name)
     return jsonify({
         "cid": str(comment.id)
     }), 201
