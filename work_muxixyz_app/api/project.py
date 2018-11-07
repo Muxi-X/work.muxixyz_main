@@ -151,13 +151,7 @@ def project_pid_delete(uid, pid):
 @api.route('/project/<int:pid>/', methods=['GET'], endpoint='ProjectPidGet')
 @login_required(role = 1)
 def project_pid_get(uid, pid):
-    u2ps = User2Project.query.filter_by(user_id=uid).all()
-    flag = True
-    for u2p in u2ps:
-        if u2p.project_id == pid:
-            flag = False
-            break
-    if flag:
+    if not checkid(uid, id):
         return jsonify({}), 401
     try:
         project = Project.query.filter_by(id=pid).first()
