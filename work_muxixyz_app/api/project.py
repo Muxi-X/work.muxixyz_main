@@ -452,7 +452,6 @@ def project_file_comment_delete(uid, pid, fid, cid):
 def file_tree_put(uid, pid):
     if not checkid(uid, pid):
         return jsonify({}), 401
-
     try:
         project = Project.query.filter_by(id=pid).first()
         filetree = request.get_json().get('filetree')
@@ -468,8 +467,7 @@ def file_tree_put(uid, pid):
 @api.route('/folder/filetree/<int:pid>/', methods=['GET'], endpoint='FileTreeGet')
 @login_required(role=1)
 def file_tree_get(uid, pid):
-    u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
-    if u2p is None:
+    if not checkid(uid, pid):
         return jsonify({}), 401
     try:
         return jsonify({
