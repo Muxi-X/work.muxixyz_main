@@ -68,7 +68,7 @@ def search(uid):
         for doc in docs:
             if doc.project_id in pL.keys():
                 l.append({
-                    "kind": 1,
+                    "kind": 0,
                     "sourceID": doc.id,
                     "recordName": doc.filename,
                     "projectID": doc.project_id,
