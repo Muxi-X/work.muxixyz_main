@@ -33,6 +33,15 @@ def user_attention(uid):
             response.status_code = 402
             return response
 
+        record = User2File.query.filter_by(user_id = uid,
+                                           file_id = fileID,
+                                           file_kind = fileKind).first()
+        if record is not None:
+            response = jsonify({
+                "msg": 'You already pay attention to this file!',
+            })
+            response.status_code = 402
+            return response
         rela = User2File(   user_id = uid,
                             file_id = fileID,
                             file_kind = fileKind)
