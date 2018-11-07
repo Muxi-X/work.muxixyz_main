@@ -484,8 +484,7 @@ def file_tree_get(uid, pid):
 @api.route('/folder/doctree/<int:pid>/', methods=['PUT'], endpoint='DocTreePut')
 @login_required(role=1)
 def file_tree_put(uid, pid):
-    u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
-    if u2p is None:
+    if not checkid(uid, pid):
         return jsonify({}), 401
     doctree = request.get_json().get('doctree')
     try:
@@ -503,10 +502,6 @@ def file_tree_put(uid, pid):
 @login_required(role=1)
 def file_tree_get(uid, pid):
     if not checkid(uid, pid):
-        return jsonify({}), 401
-
-    u2p = User2Project.query.filter_by(user_id=uid, project_id=pid).first()
-    if u2p is None:
         return jsonify({}), 401
     try:
         return jsonify({
