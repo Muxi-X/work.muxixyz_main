@@ -58,7 +58,7 @@ def search(uid):
                 l.append({
                     "kind": 1,
                     "sourceID": file.id,
-                    "recordName": file.filename,
+                    "recordName": file.realname,
                     "projectID": file.project_id,
                     "projectName": pL[file.project_id],
                     "creator": User.query.filter_by(id = file.creator_id).first().name,

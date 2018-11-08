@@ -6,6 +6,7 @@ from ..models import User, Project, Comment, User2Project, FolderForFile, Folder
 from ..decorator import login_required
 import time
 from ..mq import newfeed
+from ..GenerateMsg import MakeMsg
 from qiniu import Auth, put_file, etag, BucketManager
 import qiniu.config
 import os
@@ -260,6 +261,7 @@ def project_doc_comments_post(uid, pid, fid):
     curdoc = Doc.query.filter_by(id=fid).first();
     project = Project.query.filter_by(id = curdoc.project_id).first()
     newfeed(uid, actions[4], curdoc.filename, sourceidmap["文档"], curdoc.id, curdoc.project_id, project.name)
+    MakeMsg(curdoc, uid, u"评论")
     return jsonify({
         "cid": str(comment.id)
     }), 201
@@ -366,6 +368,7 @@ def project_file_comments_post(uid, pid, fid):
     curfile = File.query.filter_by(id=fid).first()
     project = Project.query.filter_by(id=curfile.project_id).first()
     newfeed(uid, actions[4], curfile.realname, sourceidmap["文件"], curfile.id, curfile.project_id, project.name)
+    MakeMsg(curfile, uid, u"评论")
     return jsonify({
         "cid": str(comment.id)
     }), 201
