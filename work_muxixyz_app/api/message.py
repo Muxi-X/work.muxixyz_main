@@ -80,7 +80,7 @@ def user_attention(uid):
             l.append({
                 "fileID": f.id,
                 "fileKind": type,
-                "fileName": f.filename,
+                "fileName": f.realname,
                 "userName": editor.name,
                 "projectID": project.id,
                 "projectName": project.name,

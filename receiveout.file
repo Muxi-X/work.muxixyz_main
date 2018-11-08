@@ -1,5 +1,0 @@
-nohup: ignoring input
-usage: manage.py [-?]
-                 {db,shell,test_management,test_project,test_status,test_message,createdb,runserver}
-                 ...
-manage.py: error: invalid choice: 'receive' (choose from 'db', 'shell', 'test_management', 'test_project', 'test_status', 'test_message', 'createdb', 'runserver')
