@@ -96,19 +96,19 @@ def user_attention(uid):
         return response
 
     if request.method == 'DELETE':
-        fileName = request.get_json().get('fileName')
+        fileID = request.get_json().get('fileID')
         fileKind = request.get_json().get('fileKind')
         if fileKind is 1:
-            f = File.query.filter_by(filename = fileName).first()
+            f = File.query.filter_by(id = fileID).first()
         if fileKind is 0:
-            f = Doc.query.filter_by(filename = fileName).first()
+            f = Doc.query.filter_by(id = fileID).first()
         if f is None:
             response = jsonify({
-                "fileName": fileName,
+                "fileID": fileID,
             })
             response.status_code = 403
             return response
-        record = User2File.query.filter_by(file_id = f.id, file_kind = fileKind).first()
+        record = User2File.query.filter_by(file_id = fileID, file_kind = fileKind, user_id = uid).first()
         db.session.delete(record)
         db.session.commit()
         response = jsonify({
