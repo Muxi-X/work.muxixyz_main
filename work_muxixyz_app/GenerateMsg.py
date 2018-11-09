@@ -21,7 +21,7 @@ class Foolish(object):
             self.kind = 1
     
     def getAttentionList(self):
-        usrs=User2File.query.filter_by(file_kind = self.kind, file_id = self._include.id).all()
+        usrs = list([x.user_id] for x in User2File.query.filter_by(file_kind = self.kind, file_id = self._include.id).all() )
         return usrs
     
 
@@ -30,11 +30,11 @@ def MakeMsg(obj, Driver, action):
     users = f__k.getAttentionList()
     if users is None:
         return True
-    for user in users:
+    for user in f__k.getAttentionList():
         msg = Message(  time = TRT(time.time()),
                         action = action,
                         from_id = Driver,
-                        receive_id = user.id,
+                        receive_id = user,
                         file_kind = f__k.kind,
                         file_id = obj.id)
         db.session.add(msg)
