@@ -73,14 +73,17 @@ def user_attention(uid):
                 editor = User.query.filter_by(id = f.creator_id).first()
 
             project = Project.query.filter_by(id = f.project_id).first()
+            filename = ""
             if "doc" in f.__tablename__:
                 type = 0
+                filename = f.filename
             else:
                 type = 1
+                filename = f.realname
             l.append({
                 "fileID": f.id,
                 "fileKind": type,
-                "fileName": f.realname,
+                "fileName": filename,
                 "userName": editor.name,
                 "projectID": project.id,
                 "projectName": project.name,
