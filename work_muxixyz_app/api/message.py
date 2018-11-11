@@ -60,7 +60,8 @@ def user_attention(uid):
         l = list([])
         files = User2File.query.filter_by(user_id = uid).all()
         if len(files) == 0:
-            return jsonify({"msg": 'None record of your attention!'}), 200
+            return jsonify({"list": list([]),
+                            "msg": 'None record of your attention!'}), 200
         for f_id in files:
             if f_id.file_kind is 1:
                 f = File.query.filter_by(id = f_id.file_id).first()
