@@ -68,20 +68,17 @@ def user_attention(uid):
                             "msg": 'None record of your attention!'}), 200
         for f_id in files:
             if f_id.file_kind is 1:
+                f = File.query.filter_by(id = f_id.file_id).first()
                 try:
-                    f = File.query.filter_by(id = f_id.file_id).first()
-                except:
-                    continue
-                else:
                     editor = User.query.filter_by(id = f.creator_id).first()
-            if f_id.file_kind is 0:
-                try:
-                    f = Doc.query.filter_by(id = f_id.file_id).first()
                 except:
                     continue
-                else:
+            if f_id.file_kind is 0:
+                f = Doc.query.filter_by(id = f_id.file_id).first()
+                try:
                     editor = User.query.filter_by(id = f.editor_id).first()
-
+                except:
+                    continue
             if editor is None:
                 editor = User.query.filter_by(id = f.creator_id).first()
 
