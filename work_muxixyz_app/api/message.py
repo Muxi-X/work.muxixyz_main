@@ -8,6 +8,10 @@ from ..timetools import to_readable_time
 from operator import lt
 import time
 from ..timetools import to_readable_time as TRT
+from werkzeug.exceptions import HTTPException
+
+class FileNotFound(HTTPException):
+    pass
 
 @api.route('/user/attention/',methods = ['POST', 'GET', 'DELETE'],endpoint = 'UserAttention')
 @login_required(role = 1)
@@ -64,11 +68,19 @@ def user_attention(uid):
                             "msg": 'None record of your attention!'}), 200
         for f_id in files:
             if f_id.file_kind is 1:
-                f = File.query.filter_by(id = f_id.file_id).first()
-                editor = User.query.filter_by(id = f.creator_id).first()
+                try:
+                    f = File.query.filter_by(id = f_id.file_id).first()
+                except:
+                    continue
+                else:
+                    editor = User.query.filter_by(id = f.creator_id).first()
             if f_id.file_kind is 0:
-                f = Doc.query.filter_by(id = f_id.file_id).first()
-                editor = User.query.filter_by(id = f.editor_id).first()
+                try:
+                    f = Doc.query.filter_by(id = f_id.file_id).first()
+                except:
+                    continue
+                else:
+                    editor = User.query.filter_by(id = f.editor_id).first()
 
             if editor is None:
                 editor = User.query.filter_by(id = f.creator_id).first()
