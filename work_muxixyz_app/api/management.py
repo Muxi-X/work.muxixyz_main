@@ -140,6 +140,8 @@ def group_user_list(uid, gid):
 @api.route('/group/<int:gid>/manageUser/', methods = ['POST'], endpoint = 'GroupManageUser')
 @login_required(role = 2)
 def group_manage_user(uid, gid):
+    count_change = 0
+
     newUList = request.get_json().get('userList')
     oldUList = Group.query.filter_by(id = gid).first().users
     for u in newUList:
@@ -147,10 +149,17 @@ def group_manage_user(uid, gid):
         if usr not in oldUList:
             usr.group_id = gid
             db.session.add(usr)
+            count_change += 1
     for usr in oldUList:
         if usr.id not in newUList:
             usr.group_id=None
             db.session.add(usr)
+            count_change -= 1
+    grp = Group.query.filter_by(id = gid).first()
+    grp.count += count_change
+    if grp.count < 0:
+        grp.count = 0
+    db.session.add(grp)
     db.session.commit()
     response = jsonify({})
     response.status_code = 200
