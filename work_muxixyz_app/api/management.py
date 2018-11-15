@@ -392,7 +392,7 @@ def get_setting(uid, id):
     else:
         request_user = User.query.filter_by(id = uid).first()
         got_user = User.query.filter_by(id = id).first()
-        if request_user.role < got_user.role:
+        if request_user.role == 0:
             response = jsonify({
                 "msg": 'please get yourself information!',
             })
