@@ -69,7 +69,7 @@ def getstatu(uid,sid):
     comments = Comment.query.filter_by(statu_id=sid).all()
     commentList = []
     a_comment = {}
-    for comment in comments[::-1]:
+    for comment in comments:
         user_c = User.query.filter_by(id=comment.creator).first()
         a_comment['cid'] = comment.id
         a_comment['username'] = user_c.name
