@@ -140,8 +140,8 @@ def message_list(uid):
         limit = None
     c = 1
     for m in msgs:
-        if m.readed:
-            continue
+#        if m.readed:
+#            continue
         usr = User.query.filter_by(id = m.from_id).first()
         if usr is None:
             response = jsonify({
