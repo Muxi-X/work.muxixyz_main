@@ -267,41 +267,68 @@ def project_doc_comments_post(uid, pid, fid):
     }), 201
 
 
-@api.route('/project/<int:pid>/doc/<int:fid>/comments/<int:page>/', methods=['GET'], endpoint='ProjectDocCommentsGet')
+# @api.route('/project/<int:pid>/doc/<int:fid>/comments/<int:page>/', methods=['GET'], endpoint='ProjectDocCommentsGet')
+# @login_required(role=1)
+# def project_doc_comments_get(uid, pid, fid, page):
+#     comments = Comment.query.filter_by(doc_id=fid).all()
+#     commentList = []
+#     num = 0
+#     try:
+#         for comment in comments:
+#             num += 1
+#             if num > (page - 1) * 20 and num <= page * 20:
+#                 creator = User.query.filter_by(id=comment.creator).first()
+#                 username = creator.name
+#                 avatar = creator.avatar
+#                 mtime = comment.time
+#                 content = comment.content
+#                 cid = comment.id
+#                 commentList.append(
+#                     {
+#                         "username": username,
+#                         "avatar": avatar,
+#                         "time": mtime,
+#                         "content": content,
+#                         "id": cid
+#                     }
+#                 )
+#             elif num > page * 20:
+#                 break
+#     except Exception as e:
+#         return jsonify({
+#             "errmsg": str(e)
+#         }), 500
+#     return jsonify({
+#         "commentList": commentList,
+#         "count": len(comments)
+#     })
+
+
+@api.route('/project/<int:pid>/doc/<int:fid>/comments/', methods=['GET'], endpoint='ProjectDocCommentsGet')
 @login_required(role=1)
-def project_doc_comments_get(uid, pid, fid, page):
+def project_doc_comments_get(uid, pid, fid):
     comments = Comment.query.filter_by(doc_id=fid).all()
     commentList = []
-    num = 0
-    try:
-        for comment in comments:
-            num += 1
-            if num > (page - 1) * 20 and num <= page * 20:
-                creator = User.query.filter_by(id=comment.creator).first()
-                username = creator.name
-                avatar = creator.avatar
-                mtime = comment.time
-                content = comment.content
-                cid = comment.id
-                commentList.append(
-                    {
-                        "username": username,
-                        "avatar": avatar,
-                        "time": mtime,
-                        "content": content,
-                        "id": cid
-                    }
-                )
-            elif num > page * 20:
-                break
-    except Exception as e:
-        return jsonify({
-            "errmsg": str(e)
-        }), 500
+    for comment in comments[::-1]:
+        creator = User.query.filter_by(id=comment.creator).first()
+        username = creator.name
+        avatar = creator.avatar
+        mtime = comment.time
+        content = comment.content
+        cid = comment.id
+        commentList.append(
+            {
+                "username": username,
+                "avatar": avatar,
+                "time": mtime,
+                "content": content,
+                "id": cid
+            }
+        )
     return jsonify({
         "commentList": commentList,
         "count": len(comments)
-    })
+    }),200
 
 
 @api.route('/project/<int:pid>/doc/<int:fid>/comment/<int:cid>/', methods=['GET'], endpoint='ProjectDocCommentGet')
@@ -374,41 +401,68 @@ def project_file_comments_post(uid, pid, fid):
     }), 201
 
 
-@api.route('/project/<int:pid>/file/<int:fid>/comments/<int:page>/', methods=['GET'], endpoint='ProjectFileCommentsGet')
+# @api.route('/project/<int:pid>/file/<int:fid>/comments/<int:page>/', methods=['GET'], endpoint='ProjectFileCommentsGet')
+# @login_required(role=1)
+# def project_file_comments_get(uid, pid, fid, page):
+#     comments = Comment.query.filter_by(file_id=fid).all()
+#     commentList = []
+#     num = 0
+#     try:
+#         for comment in comments:
+#             num += 1
+#             if num > (page - 1) * 20 and num <= page * 20:
+#                 creator = User.query.filter_by(id=comment.creator).first()
+#                 username = creator.name
+#                 avatar = creator.avatar
+#                 mtime = comment.time
+#                 content = comment.content
+#                 cid = comment.id
+#                 commentList.append(
+#                     {
+#                         "username": username,
+#                         "avatar": avatar,
+#                         "time": mtime,
+#                         "content": content,
+#                         "id": cid
+#                     }
+#                 )
+#             elif num > page * 20:
+#                 break
+#     except Exception as e:
+#         return jsonify({
+#             "errmsg": str(e)
+#         }), 500
+#     return jsonify({
+#         "commentList": commentList,
+#         "count": len(comments)
+#     }),200
+
+
+@api.route('/project/<int:pid>/file/<int:fid>/comments/', methods=['GET'], endpoint='ProjectFileCommentsGet')
 @login_required(role=1)
-def project_file_comments_get(uid, pid, fid, page):
+def project_file_comments_get(uid, pid, fid):
     comments = Comment.query.filter_by(file_id=fid).all()
     commentList = []
-    num = 0
-    try:
-        for comment in comments:
-            num += 1
-            if num > (page - 1) * 20 and num <= page * 20:
-                creator = User.query.filter_by(id=comment.creator).first()
-                username = creator.name
-                avatar = creator.avatar
-                mtime = comment.time
-                content = comment.content
-                cid = comment.id
-                commentList.append(
-                    {
-                        "username": username,
-                        "avatar": avatar,
-                        "time": mtime,
-                        "content": content,
-                        "id": cid
-                    }
-                )
-            elif num > page * 20:
-                break
-    except Exception as e:
-        return jsonify({
-            "errmsg": str(e)
-        }), 500
+    for comment in comments[::-1]:
+        creator = User.query.filter_by(id=comment.creator).first()
+        username = creator.name
+        avatar = creator.avatar
+        mtime = comment.time
+        content = comment.content
+        cid = comment.id
+        commentList.append(
+            {
+                "username": username,
+                "avatar": avatar,
+                "time": mtime,
+                "content": content,
+                "id": cid
+            }
+        )
     return jsonify({
         "commentList": commentList,
         "count": len(comments)
-    })
+    }),200
 
 
 @api.route('/project/<int:pid>/file/<int:fid>/comment/<int:cid>/', methods=['GET'], endpoint='ProjectFileCommentGet')
