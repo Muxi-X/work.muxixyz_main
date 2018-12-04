@@ -12,10 +12,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql.expression import func
 from ..mq import newfeed
 
-WORKENCH_REDISHOST = os.getenv(' WORKENCH_REISHOST')
 num = 0
 page = 1
-redis_statu = redis.Redis(host=WORKBENCH_REDISHOST, port=6379, decode_responses=True)
+redis_statu = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 
 actions = ["加入", "创建", "编辑", "删除", "评论", "移动"]
