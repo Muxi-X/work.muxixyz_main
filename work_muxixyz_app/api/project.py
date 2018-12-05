@@ -344,7 +344,7 @@ def project_doc_comment_get(uid, pid, fid, cid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 500
     return jsonify({
         "username": username,
         "avatar": avatar,
@@ -366,7 +366,7 @@ def project_doc_comment_delete(uid, pid, fid, cid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 500
     return jsonify({
     }), 200
 
@@ -478,7 +478,7 @@ def project_file_comment_get(uid, pid, fid, cid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 500
     return jsonify({
         "username": username,
         "avatar": avatar,
@@ -500,7 +500,7 @@ def project_file_comment_delete(uid, pid, fid, cid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 500
     return jsonify({
     }), 200
 
@@ -517,7 +517,7 @@ def file_tree_put(uid, pid):
     except Exception as e:
         return jsonify({
             'errmsg': str(e)
-        })
+        }), 500
     return jsonify({}), 200
 
 
@@ -529,11 +529,11 @@ def file_tree_get(uid, pid):
     try:
         return jsonify({
             "filetree": Project.query.filter_by(id=pid).first().filetree
-        })
+        }), 200
     except Exception as e:
         return jsonify({
             'errmsg': str(e)
-        })
+        }), 500
 
 
 @api.route('/folder/doctree/<int:pid>/', methods=['PUT'], endpoint='DocTreePut')
@@ -549,7 +549,7 @@ def file_tree_put(uid, pid):
     except Exception as e:
         return jsonify({
             'errmsg': str(e)
-        })
+        }), 500
     return jsonify({}), 200
 
 
@@ -561,8 +561,8 @@ def file_tree_get(uid, pid):
     try:
         return jsonify({
             "doctree": Project.query.filter_by(id=pid).first().doctree
-        })
+        }), 200
     except Exception as e:
         return jsonify({
             'errmsg': str(e)
-        })
+        }), 500
