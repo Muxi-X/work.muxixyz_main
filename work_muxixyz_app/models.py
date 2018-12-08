@@ -174,4 +174,4 @@ class User2File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     file_id = db.Column(db.Integer)
-    file_kind = db.Column(db.Integer, default = 0)
+    file_kind = db.Column(db.Integer, default = 0) # doc: 0 , file: 1

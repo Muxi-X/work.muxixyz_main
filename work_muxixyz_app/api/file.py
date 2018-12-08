@@ -435,6 +435,9 @@ def file_doc_post(uid):
             "errmsg": str(e)
         }), 500
     newfeed(uid, actions[1], mdname, sourceidmap["文档"], newdoc.id, newdoc.project_id, project.name)
+    record = User2File(user_id=uid, file_id=newdoc.id, file_kind=0)
+    db.session.add(record)
+    db.session.commit()
     return jsonify({
         "fid": str(newdoc.id)
     }), 201
