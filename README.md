@@ -1,8 +1,10 @@
 # 木犀工作台/MUXI-WORK-BENCH
+![logo](https://raw.githubusercontent.com/Muxi-X/muxi_workbench_fe/master/logo.png)
+
+木犀团队出品的团队协作工具
+
 ## 后端/BACKEND
 
---------
---------
 
 ## 环境变量/ENV
 
