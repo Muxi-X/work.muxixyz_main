@@ -20,8 +20,8 @@ class User(db.Model):
     status = db.relationship('Statu', backref='user', lazy='dynamic')
     receiveMsgs = db.relationship('Message', backref='user', lazy='dynamic')
     
-    def generate_confirmation_token(self, expiration=315360000):
-        s = Serializer(current_app.config['SECRET_KEY'])
+    def generate_confirmation_token(self):
+        s = Serializer(current_app.config['SECRET_KEY'], expires_in=315360000)
         return s.dumps({'confirm': self.id}).decode('utf-8')
 
 class Team(db.Model):
