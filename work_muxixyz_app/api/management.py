@@ -91,14 +91,10 @@ def group_delete(uid, gid):
 @login_required(role = 1)
 def group_user_list(uid, gid):
     role = 1
-    page = 1
-    pageSize = 10
-    if request.args.get('page') is not None:
-        page = int(request.args.get('page'))
     if gid  ==  0 :
-        data = get_rows(User, User.team_id, 1, page, pageSize)
+        data = User.query.filter_by(team_id = 1).all()
     else:
-        data = get_rows(User, User.group_id, gid, page, pageSize)
+        data = User.query.filter_by(group_id = gid).all()
         grp = Group.query.filter_by(id = gid).first()
         groupName = grp.name
     l = list([])
@@ -127,10 +123,7 @@ def group_user_list(uid, gid):
         db.session.commit()
 
     response = jsonify({
-                 "count": data['rowsNum'],
-                 "pageMax": data['pageMax'],
-                 "pageNow": data['pageNum'],
-                 "hasNext": data['hasNext'],
+                 "count": len(l),
                  "list": l,
              })
     response.status_code = 200
@@ -187,11 +180,7 @@ def group_list(uid):
 @api.route('/project/<int:pid>/userList/', methods = ['GET'], endpoint = 'ProjectUserList')
 @login_required(role = 1)
 def project_user_list(uid, pid):
-    page = 1
-    pageSize = 10
-    if request.args.get('page') is not None:
-        page = int(request.args.get('page'))
-    data = get_rows(User2Project, User2Project.project_id, pid, page, pageSize)
+    data = User2Project.query.filter_by(project_id = pid).all()
     l = list([])
     for record in data['dataList']:
         uid = record.user_id
@@ -202,14 +191,11 @@ def project_user_list(uid, pid):
             "avatar": usr.avatar,
         })
     pjc = Project.query.filter_by(id = pid).first()
-    pjc.count = data['rowsNum']
+    pjc.count = len(l)
     db.session.add(pjc)
     db.session.commit()
     response = jsonify({
-                 "count": data['rowsNum'],
-                 "pageMax": data['pageMax'],
-                 "pageNow": data['pageNum'],
-                 "hasNext": data['hasNext'],
+                 "count": len(l),
                  "list": l,
              })
     response.status_code = 200
