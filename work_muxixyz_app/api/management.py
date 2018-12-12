@@ -98,7 +98,7 @@ def group_user_list(uid, gid):
         grp = Group.query.filter_by(id = gid).first()
         groupName = grp.name
     l = list([])
-    for u in data['dataList']:
+    for u in data:
         if gid == 0:
             grp = Group.query.filter_by(id = u.group_id).first()
             if grp is None:
@@ -182,7 +182,7 @@ def group_list(uid):
 def project_user_list(uid, pid):
     data = User2Project.query.filter_by(project_id = pid).all()
     l = list([])
-    for record in data['dataList']:
+    for record in data:
         uid = record.user_id
         usr = User.query.filter_by(id = uid).first()
         l.append({
@@ -232,7 +232,7 @@ def user_project_list(uid, id):
             })
     else:
         data = get_rows(User2Project, User2Project.user_id, id, page, pageSize)
-        records = data['dataList']
+        records = data
         for record in records:
             pid = record.project_id
             pjc = Project.query.filter_by(id = pid).first()
