@@ -232,7 +232,7 @@ def user_project_list(uid, id):
             })
     else:
         data = get_rows(User2Project, User2Project.user_id, id, page, pageSize)
-        records = data
+        records = data['dataList']
         for record in records:
             pid = record.project_id
             pjc = Project.query.filter_by(id = pid).first()
