@@ -228,7 +228,7 @@ def user_project_list(uid, id):
                 "projectID": pjc.id,
                 "projectName": pjc.name,
                 "intro": pjc.intro,
-                "userCount": pjc.count,
+                "userCount": data['rowsNum'],
             })
     else:
         data = get_rows(User2Project, User2Project.user_id, id, page, pageSize)
@@ -240,8 +240,12 @@ def user_project_list(uid, id):
                 "projectID": pjc.id,
                 "projectName": pjc.name,
                 "intro": pjc.intro,
-                "userCount": pjc.count,
+                "userCount": data['rowsNum'],
             })
+    if pjc.count != data['rowsNum']:
+        pjc.count = data['rowsNum']
+        db.session.add(pjc)
+        db.session.commit()
     response = jsonify({
         "count": data['rowsNum'],
         "pageMax": data['pageMax'],
