@@ -13,17 +13,17 @@ def login_required(role):
         def decorated_function(*args,**kwargs):
             if not 'token' in request.headers:
                 return jsonify({}), 401
-            t=request.headers['token'].encode('utf-8')
-            s=Serializer(current_app.config['SECRET_KEY'])
+            t = request.headers['token'].encode('utf-8')
+            s = Serializer(current_app.config['SECRET_KEY'], expires_in=315360000)
             try:
-                data=s.loads(t)
+                data = s.loads(t)
             except:
                 return jsonify({}), 401
-            uid=data.get('confirm')
-            usr=User.query.filter_by(id=uid).first()
+            uid = data.get('confirm')
+            usr = User.query.filter_by(id=uid).first()
             if role&usr.role != role:
                 return jsonify({}), 401
-            rv=f(uid,*args,**kwargs)
+            rv = f(uid,*args,**kwargs)
             return rv
         return decorated_function
     return deco
