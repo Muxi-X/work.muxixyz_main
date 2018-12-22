@@ -242,10 +242,10 @@ def user_project_list(uid, id):
                 "intro": pjc.intro,
                 "userCount": data['rowsNum'],
             })
-    if pjc.count != data['rowsNum']:
-        pjc.count = data['rowsNum']
-        db.session.add(pjc)
-        db.session.commit()
+            if pjc.count != data['rowsNum']:
+                pjc.count = data['rowsNum']
+                db.session.add(pjc)
+    db.session.commit()
     response = jsonify({
         "count": data['rowsNum'],
         "pageMax": data['pageMax'],
