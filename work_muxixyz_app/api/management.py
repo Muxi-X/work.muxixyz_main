@@ -340,7 +340,11 @@ def manage_project(uid, id):
     for pjc in oldPList:
         if pjc.id not in newPList:
             record = User2Project.query.filter_by(user_id = id, project_id = pid).first()
-            db.session.delete(record)
+            if record is not None:
+                try:
+                    db.session.delete(record)
+                except:
+                    pass
     db.session.commit()
     response = jsonify({})
     response.status_code = 200
