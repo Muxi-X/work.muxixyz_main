@@ -106,6 +106,7 @@ def user_attention(uid):
         return response
 
     if request.method == 'DELETE':
+        f = None
         fileID = request.get_json().get('fileID')
         fileKind = request.get_json().get('fileKind')
         if fileKind is 1:
