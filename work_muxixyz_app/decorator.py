@@ -14,7 +14,7 @@ def login_required(role):
             if not 'token' in request.headers:
                 return jsonify({}), 401
             t = request.headers['token'].encode('utf-8')
-            s = Serializer(current_app.config['SECRET_KEY'], expires_in=315360000)
+            s = Serializer(current_app.config['SECRET_KEY'])
             try:
                 data = s.loads(t)
             except:
