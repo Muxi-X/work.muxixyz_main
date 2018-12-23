@@ -74,7 +74,7 @@ def project_new(uid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     newfeed(uid, actions[0], projectname, sourceidmap["项目"], project.id, project.id, projectname)
     return jsonify({
         "project_id": str(project.id)
@@ -97,7 +97,7 @@ def project_pid_post(uid, pid):
         print(e)
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     # newfeed(uid, actions[2], name, sourceidmap["项目"], project.id, project.id)
     return jsonify({
     }), 201
@@ -143,7 +143,7 @@ def project_pid_delete(uid, pid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     newfeed(uid, actions[3], project.name, sourceidmap["项目"], project.id, project.id, project.name)
     return jsonify({
     }), 200
@@ -167,7 +167,7 @@ def project_pid_get(uid, pid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
 
 
 @api.route('/project/<int:pid>/member/', methods=['PUT'], endpoint='ProjectMemberPut')
@@ -199,7 +199,7 @@ def project_member_put(uid, pid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     # newfeed(uid, u"编辑" + project.name + '的成员', 1, project.id)
     return jsonify({
     }), 200
@@ -230,7 +230,7 @@ def project_member_get(uid, pid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     return jsonify({
         "memberList": memberList
     }), 200
@@ -257,7 +257,7 @@ def project_doc_comments_post(uid, pid, fid):
         db.session.rollback()
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     curdoc = Doc.query.filter_by(id=fid).first();
     project = Project.query.filter_by(id = curdoc.project_id).first()
     newfeed(uid, actions[4], curdoc.filename, sourceidmap["文档"], curdoc.id, curdoc.project_id, project.name)
@@ -297,7 +297,7 @@ def project_doc_comments_post(uid, pid, fid):
 #     except Exception as e:
 #         return jsonify({
 #             "errmsg": str(e)
-#         }), 500
+#         }), 404
 #     return jsonify({
 #         "commentList": commentList,
 #         "count": len(comments)
@@ -344,7 +344,7 @@ def project_doc_comment_get(uid, pid, fid, cid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     return jsonify({
         "username": username,
         "avatar": avatar,
@@ -366,7 +366,7 @@ def project_doc_comment_delete(uid, pid, fid, cid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     return jsonify({
     }), 200
 
@@ -391,7 +391,7 @@ def project_file_comments_post(uid, pid, fid):
         db.session.rollback()
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     curfile = File.query.filter_by(id=fid).first()
     project = Project.query.filter_by(id=curfile.project_id).first()
 #    newfeed(uid, actions[4], curfile.realname, sourceidmap["文件"], curfile.id, curfile.project_id, project.name)
@@ -431,7 +431,7 @@ def project_file_comments_post(uid, pid, fid):
 #     except Exception as e:
 #         return jsonify({
 #             "errmsg": str(e)
-#         }), 500
+#         }), 404
 #     return jsonify({
 #         "commentList": commentList,
 #         "count": len(comments)
@@ -478,7 +478,7 @@ def project_file_comment_get(uid, pid, fid, cid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     return jsonify({
         "username": username,
         "avatar": avatar,
@@ -500,7 +500,7 @@ def project_file_comment_delete(uid, pid, fid, cid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     return jsonify({
     }), 200
 
@@ -517,7 +517,7 @@ def file_tree_put(uid, pid):
     except Exception as e:
         return jsonify({
             'errmsg': str(e)
-        }), 500
+        }), 404
     return jsonify({}), 200
 
 
@@ -533,7 +533,7 @@ def file_tree_get(uid, pid):
     except Exception as e:
         return jsonify({
             'errmsg': str(e)
-        }), 500
+        }), 404
 
 
 @api.route('/folder/doctree/<int:pid>/', methods=['PUT'], endpoint='DocTreePut')
@@ -549,7 +549,7 @@ def file_tree_put(uid, pid):
     except Exception as e:
         return jsonify({
             'errmsg': str(e)
-        }), 500
+        }), 404
     return jsonify({}), 200
 
 
@@ -565,4 +565,4 @@ def file_tree_get(uid, pid):
     except Exception as e:
         return jsonify({
             'errmsg': str(e)
-        }), 500
+        }), 404

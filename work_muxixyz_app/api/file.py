@@ -140,7 +140,7 @@ def folder_file_id_delete(uid, id):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 404
     return jsonify({}), 200
 
 
@@ -179,7 +179,7 @@ def folder_file_chrildren_post(uid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 404
     return jsonify({
         "FolderList": FolderList,
         "FileList": FileList
@@ -208,7 +208,7 @@ def folder_doc_post(uid):
         db.session.rollback()
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     return jsonify({
         "id": str(folderformd.id)
     }), 201
@@ -231,7 +231,7 @@ def folder_doc_id_put(uid, id):
         db.session.rollback()
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     return jsonify({}), 200
 
 
@@ -266,7 +266,7 @@ def folder_doc_id_delete(uid, id):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 404
     return jsonify({}), 200
 
 
@@ -306,7 +306,7 @@ def folder_doc_chrildren_post(uid):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 404
     return jsonify({
         "FolderList": FolderList,
         "DocList": DocList
@@ -346,7 +346,7 @@ def file_file_post(uid):
         db.session.rollback()
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     newfeed(uid, actions[1], myfile.filename, sourceidmap["文件"], newfile.id, project_id, project.name)
     return jsonify({
         "fid": str(newfile.id),
@@ -369,7 +369,7 @@ def file_doc_id_put(uid, id):
     except Exception as e:
         return jsonify({
             'errmsg': str(e)
-        })
+        }), 404
     
     project = Project.query.filter_by(id=file.project_id).first()
     newfeed(uid, actions[2], FileName, sourceidmap["文件"], id, file.project_id, project.name)
@@ -392,7 +392,7 @@ def file_file_id_delete(uid, id):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 404
 
     project = Project.query.filter_by(id=file.project_id).first()
     newfeed(uid, actions[3], file.realname, sourceidmap["文件"], id, file.project_id, project.name)
@@ -433,7 +433,7 @@ def file_doc_post(uid):
         db.session.rollback()
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     newfeed(uid, actions[1], mdname, sourceidmap["文档"], newdoc.id, newdoc.project_id, project.name)
     record = User2File(user_id=uid, file_id=newdoc.id, file_kind=0)
     db.session.add(record)
@@ -457,7 +457,7 @@ def file_doc_id_delete(uid, id):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 404
 
     project = Project.query.filter_by(id=doc.project_id).first()
     newfeed(uid, actions[3], doc.filename, sourceidmap["文档"], doc.id, doc.project_id, project.name)
@@ -491,7 +491,7 @@ def file_doc_id_get(uid, id):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
 
 
 @api.route('/file/doc/<int:id>/', methods=['PUT'], endpoint='FileDocIdPut')
@@ -511,7 +511,7 @@ def file_doc_id_put(uid, id):
     except Exception as e:
         return jsonify({
             'errmsg': str(e)
-        })
+        }), 404
 
     project = Project.query.filter_by(id=doc.project_id).first()
     newfeed(uid, actions[2], doc.filename, sourceidmap["文档"], doc.id, doc.project_id, project.name)
@@ -552,7 +552,7 @@ def project_re_get(uid, id):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        }), 500
+        }), 404
     return jsonify({
         "FolderList": DocList,
         "FileList": FileList
@@ -581,7 +581,7 @@ def project_re_put(uid, id):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 404
     return jsonify({
     }), 200
 
@@ -609,6 +609,6 @@ def project_re_put(uid, id):
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
-        })
+        }), 404
     return jsonify({
     }), 200
