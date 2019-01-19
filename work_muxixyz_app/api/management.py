@@ -550,13 +550,14 @@ def get_invite_link(uid):
     s = Serializer(current_app.config['SECRET_KEY'])
     hash_id = s.dumps({'teamID': team.id}).decode('utf-8')
     response = jsonify({
+        "invite_url": "/team/invite/?hash_id=" + hash_id,
         "hash_id": hash_id,
     })
     response.status_code = 200
     return response
 
 # role: 000
-@api.route('/team/getID/', methods = ['GET'], endpoint = 'GetTeamID')
+@api.route('/team/invite/<string:hash_id>', methods = ['GET'], endpoint = 'GetTeamID')
 def get_team_id():
     hash_id = request.args.get('hash_id')
     if hash_id is None:

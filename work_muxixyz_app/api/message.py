@@ -90,7 +90,14 @@ def user_attention(uid):
             else:
                 type = 1
                 filename = f.realname
+            url = "/project/" + str(project.id) +"/"
+            if fileKind == 0:
+                url = url + "doc/"
+            else:
+                url = url + "file/"
+            url = url + str(f.id)
             l.append({
+                "url": url,
                 "fileID": f.id,
                 "fileKind": type,
                 "fileName": filename,
