@@ -430,7 +430,7 @@ def editsetting(uid, id):
     email = request.get_json().get('email')
     message = request.get_json().get('message')
     usr = User.query.filter_by(id = id).first()
-    usr.username = username
+    usr.name = username
     usr.email = address
     usr.tel = tel
     usr.email_service = email

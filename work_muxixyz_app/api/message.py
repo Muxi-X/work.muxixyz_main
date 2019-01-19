@@ -91,7 +91,7 @@ def user_attention(uid):
                 type = 1
                 filename = f.realname
             url = "/project/" + str(project.id) +"/"
-            if fileKind == 0:
+            if type == 0:
                 url = url + "doc/"
             else:
                 url = url + "file/"
