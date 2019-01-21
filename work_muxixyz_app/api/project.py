@@ -176,16 +176,14 @@ def project_member_put(uid, pid):
     userlist = request.get_json().get('userList')
     try:
         project = Project.query.filter_by(id=pid).first()
-        project.count = len(userlist)
-        db.session.add(project)
         u2ps = User2Project.query.filter_by(project_id=pid).all()
         nu = []
         for u2p in u2ps:
             if u2p.user_id in userlist:
                 nu.append(u2p.user_id)
                 continue
+            project.count -= 1
             db.session.delete(u2p)
-        db.session.commit()
         for user in userlist:
             if user in nu:
                 continue
@@ -193,9 +191,10 @@ def project_member_put(uid, pid):
                 user_id=user,
                 project_id=pid
             )
-            newfeed(uid, actions[0], project.name, sourceidmap["项目"], project.id, project.id, project.name)
+            Project.count += 1
             db.session.add(nuser)
         db.session.commit()
+        newfeed(uid, actions[0], project.name, sourceidmap["项目"], project.id, project.id, project.name)
     except Exception as e:
         return jsonify({
             "errmsg": str(e)
