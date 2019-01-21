@@ -51,13 +51,15 @@ def user_2b_super_user():
 def new_group(uid):
     gname = request.get_json().get('groupName')
     ulist = request.get_json().get('userlist')
+    if Group.query.filter_by(name=gname).first() is not None:
+        return jsonify({"msg": "group name exist!"}), 402
+    if ulist is None:
+        return jsonify({"msg": "user list is None!"}), 402
     group = Group(
         time = to_readable_time(str(int(time.time()))),
         name = gname, 
         count = 0
     )
-    db.session.add(group)
-    db.session.commit()
     for u in ulist:
         usr = User.query.filter_by(id = u).first()
         if usr is None:
@@ -69,10 +71,10 @@ def new_group(uid):
     db.session.commit()
     response = jsonify({
         "msg": 'successful!', 
-    })
-    response.status_code = 200
+    }), 200
     return response
 
+#role: 010
 @api.route('/group/<int:gid>/', methods = ['DELETE'], endpoint = 'GroupDelete')
 @login_required(role = 2)
 def group_delete(uid, gid):
@@ -85,6 +87,21 @@ def group_delete(uid, gid):
     response = jsonify({})
     response.status_code = 200
     return response
+
+@api.route('/group/<int:gid>/rename/', methods = ['POST'], endpoint = "GroupRename")
+@login_required(role = 2)
+def group_rename(uid, gid):
+    rename = request.get_json().get("rename")
+    if rename == "" or rename is None:
+        return jsonify({"msg": "rename is None"}), 402
+    grp = Group.query.filter_by(id = gid).first()
+    grp.name = rename
+    db.session.add(grp)
+    try:
+        db.session.commit()
+    except:
+        return jsonify({"msg": "please keep group name unique!"}), 402
+    return jsonify({"msg": "rename successful!"}), 200
 
 #role: 001
 @api.route('/group/<int:gid>/userList/', methods = ['GET'], endpoint = 'GroupUserList')
@@ -324,6 +341,18 @@ def add_admin(uid):
     db.session.commit()
     response = jsonify({})
     response.status_code = 200
+    return response
+
+#role: 100
+@api.route('/user/delAdmin/', methods = ['POST'], endpoint = 'DeleteAdmin')
+@login_required(role = 4)
+def del_admin(uid):
+    lid = request.get_json().get('unluckydog')
+    unluckydog = User.query.filter_by(id = lid).first()
+    unluckydog.role = 1
+    db.session.add(unluckydog)
+    db.session.commit()
+    response = jsonify({"msg": "successful!"}), 200
     return response
 
 #role: 110

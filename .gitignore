@@ -1,7 +1,8 @@
-.py.swp
-.save
+*.file
+*.py.swp
+*.save
 .swp
-.json
+*.json
 .idea/
 .DS_Store/
 DS_Store/
