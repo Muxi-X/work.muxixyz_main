@@ -32,6 +32,9 @@ sourceidmap = {
 def newstatus(uid):
     content = request.get_json().get('content')
     title = request.get_json().get('title')
+    # 2019.01.25 new
+    os.environ["TZ"] = "Asia/Shanghai"
+    time.tzset()
 
     time1 = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime())
     statu =  Statu( content=content, title=title, time=time1,

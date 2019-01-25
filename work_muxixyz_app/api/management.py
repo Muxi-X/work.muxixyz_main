@@ -458,6 +458,12 @@ def editsetting(uid, id):
     tel = request.get_json().get('tel')
     email = request.get_json().get('email')
     message = request.get_json().get('message')
+
+    # 2019.01.25 new:
+    testU = User.query.filter_by(name=username).first()
+    if testU != None:
+        return jsonify({"msg": "Username has existed!"}), 403
+
     usr = User.query.filter_by(id = id).first()
     usr.name = username
     usr.email = address
