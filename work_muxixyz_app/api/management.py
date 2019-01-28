@@ -237,7 +237,7 @@ def user_project_list(uid, id):
         page = int(request.args.get('page'))
     usr = User.query.filter_by(id = id).first()
     l = list([])
-    if usr.role >  1:
+    if usr.role > 1:
         data = get_rows(Project, None, None, page, pageSize)
         pjcs = data['dataList']
         for pjc in pjcs:

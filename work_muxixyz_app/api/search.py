@@ -1,6 +1,7 @@
 from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
+from ..page import get_rows
 from ..models import Team, Group, User, Project, User2Project, Message, Statu, File, Doc, Comment, Apply
 from ..decorator import login_required
 from ..timetools import to_readable_time
@@ -34,12 +35,18 @@ def search(uid):
     usr = User.query.filter_by(id = uid).first()
 
     if projectID == 0:
-        recordList = User2Project.query.filter_by(user_id = uid).all()
-        if recordList is not None:
-            for record in recordList:
-                project = Project.query.filter_by(id = record.project_id).first()
-                pL[project.id] = project.name
-        else:
+        # 2019.01.28 new
+        if usr.role == 1:
+            recordList = User2Project.query.filter_by(user_id = uid).all()
+            if recordList is not None:
+                for record in recordList:
+                    project = Project.query.filter_by(id=record.project_id).first()
+                    pL[project.id] = project.name
+        if usr.role >= 3:
+            projectList = get_rows(Project, None, None, page, pageSize)['dataList']
+            for p in projectList:
+                pL[p.id] = p.name
+        if len(pL.keys()) == 0:
             return jsonify({"msg": "You're already not join any project!"}), 403
     else:
         project = Project.query.filter_by(id = projectID).first()
