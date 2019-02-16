@@ -53,16 +53,10 @@ def project_new(uid):
     project = Project(name=projectname,
                       intro=intro,
                       time=localtime,
-                      count=count + 1,
+                      count=count
                       team_id=team_id)
     try:
         db.session.add(project)
-        db.session.commit()
-        user2project = User2Project(
-            user_id=user.id,
-            project_id=project.id
-        )
-        db.session.add(user2project)
         db.session.commit()
         for puser in userlist:
             user2project = User2Project(
