@@ -191,7 +191,7 @@ def project_member_put(uid, pid):
                 user_id=user,
                 project_id=pid
             )
-            Project.count += 1
+            project.count += 1
             db.session.add(nuser)
         db.session.commit()
         newfeed(uid, actions[0], project.name, sourceidmap["项目"], project.id, project.id, project.name)
