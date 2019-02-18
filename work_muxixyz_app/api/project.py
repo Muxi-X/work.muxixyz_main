@@ -53,7 +53,7 @@ def project_new(uid):
     project = Project(name=projectname,
                       intro=intro,
                       time=localtime,
-                      count=count
+                      count=count,
                       team_id=team_id)
     try:
         db.session.add(project)
