@@ -454,6 +454,8 @@ def editsetting(uid, id):
         return response
 
     username = request.get_json().get('username')
+    if username == "":
+        return jsonify({"msg": "username can't be a empty string"}), 402
     address = request.get_json().get('address')
     tel = request.get_json().get('tel')
     email = request.get_json().get('email')
