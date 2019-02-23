@@ -324,7 +324,7 @@ def file_file_post(uid):
     myfile = request.files.get('file')
     project = Project.query.filter_by(id=project_id).first()
     try:
-        filename = secure_filename(myfile.filename) + str(time.time())
+        filename = str(time.time()) + secure_filename(myfile.filename)
         myfile.save(os.path.join(os.getcwd(), filename))
         key = filename
         localfile = os.path.join(os.getcwd(), filename)
