@@ -12,8 +12,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql.expression import func
 from ..mq import newfeed
 
-redis_statu = redis.Redis(host=current_app.config['WORKBENCH_REDISHOST'], 
-                          port=current_app.config['WORKBENCH_REDISPORT'], decode_responses=True)
+redis_host = os.getenv("WORKBENCH_REDISHOST")
+redis_port = os.getenv("WORKBENCH_REDISPORT")
+redis_statu = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
 
 num = 0
 page = 1
