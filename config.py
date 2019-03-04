@@ -17,6 +17,9 @@ class Config:
     ACCESS_KEY = os.environ.get('WORKBENCH_ACCESS_KEY')
     FILE_SECRET_KEY = os.environ.get('WORKBENCH_SECRET_KEY')
     URL = os.environ.get('WORKBENCH_URL')
+    # redis
+    REDISHOST = os.environ.get('WORKBENCH_REDISHOST') or "localhost"
+    REDISPORT = os.environ.get('WORKBENCH_REDISPORT') or 6379
 
     @staticmethod
     def init_app(app):
