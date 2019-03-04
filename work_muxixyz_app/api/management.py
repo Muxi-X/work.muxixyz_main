@@ -446,7 +446,7 @@ def get_setting(uid, id):
 @api.route('/user/<int:id>/setting/', methods = ['POST'], endpoint = 'EditSetting')
 @login_required(role = 1)
 def editsetting(uid, id):
-    if uid !=  id:
+    if uid != id:
         response = jsonify({
             "msg": 'this is others personal setting!', 
         })
@@ -463,9 +463,9 @@ def editsetting(uid, id):
 
     usr = User.query.filter_by(id = id).first()
     # 2019.01.25 new:
-    testU = User.query.filter_by(name=username).first()
+    testU = User.query.filter_by(email=address).first()
     if (testU != None) and (testU != usr):
-        return jsonify({"msg": "Username has existed!"}), 409
+        return jsonify({"msg": "User's email has existed!"}), 409
 
     usr.name = username
     usr.email = address
