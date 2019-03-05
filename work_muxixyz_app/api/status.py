@@ -59,7 +59,7 @@ def newstatus(uid):
 @login_required(1)
 def getstatu(uid,sid):
     statu = Statu.query.filter_by(id=sid).first()
-    author_id = Statu.user_id
+    author_id = statu.user_id
     title = statu.title
     content = statu.content
     time = statu.time
