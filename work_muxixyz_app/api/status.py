@@ -59,6 +59,7 @@ def newstatus(uid):
 @login_required(1)
 def getstatu(uid,sid):
     statu = Statu.query.filter_by(id=sid).first()
+    author_id = Statu.user_id
     title = statu.title
     content = statu.content
     time = statu.time
@@ -86,6 +87,7 @@ def getstatu(uid,sid):
     response = jsonify({
         "sid": sid,
         "title": title,
+        "author_id": author_id,
         "content": content,
         "time": time,
         "likeCount": likeCount,
