@@ -37,7 +37,7 @@ def search(uid):
     if projectID == 0:
         # 2019.01.28 new
         if usr.role == 1:
-            recordList = User2Project.query.filter_by(user_id = uid).all()
+            recordList = User2Project.query.filter_by(user_id=uid).all()
             if recordList is not None:
                 for record in recordList:
                     project = Project.query.filter_by(id=record.project_id).first()
@@ -49,14 +49,14 @@ def search(uid):
         if len(pL.keys()) == 0:
             return jsonify({"msg": "You're already not join any project!"}), 403
     else:
-        project = Project.query.filter_by(id = projectID).first()
+        project = Project.query.filter_by(id=projectID).first()
         if project is not None:
             pL[project.id] = project.name
-        else:
+        elif projectID != 0:
             return jsonify({"msg": "project not existed!"}), 403
 
     files = File.query.filter(File.filename.like("%"+pattern+"%")).all()
-    docs =  Doc.query.filter(Doc.filename.like("%"+pattern+"%")).all()
+    docs = Doc.query.filter(Doc.filename.like("%"+pattern+"%")).all()
 
     l = list([])
     if files is not None:
