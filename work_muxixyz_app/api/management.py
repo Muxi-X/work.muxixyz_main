@@ -463,9 +463,9 @@ def editsetting(uid, id):
 
     usr = User.query.filter_by(id = id).first()
     # 2019.01.25 new:
-    testU = User.query.filter_by(email=address).first()
+    testU = User.query.filter_by(name=username).first()
     if (testU != None) and (testU != usr):
-        return jsonify({"msg": "User's email has existed!"}), 409
+        return jsonify({"msg": "Username has existed!"}), 409
 
     usr.name = username
     usr.email = address
