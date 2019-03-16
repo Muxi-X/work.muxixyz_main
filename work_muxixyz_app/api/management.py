@@ -468,7 +468,6 @@ def editsetting(uid, id):
         return jsonify({"msg": "Username has existed!"}), 409
 
     usr.name = username
-    usr.email = address
     usr.tel = tel
     usr.email_service = email
     usr.message = message
