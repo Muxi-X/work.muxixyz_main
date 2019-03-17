@@ -313,6 +313,30 @@ def folder_doc_chrildren_post(uid):
     }), 200
 
 
+@api.route('/editor/image/', methods=['POST', endpoint='EditorImage'])
+@login_required(role=1)
+def upload_image(uid):
+    image = request.files.get('image')
+    try:
+        imagename = str(time.time()) + '.' + secure_filename(myfile.filename)
+        myimage.save(os.path.join(os.getcwd(), imagename))
+        key = imagename
+        localfile = os.path.join(os.getcwd(), imagename)
+        res = qiniu_upload(key, localfile)
+        i = res.find('com')
+        res = 'http://' + res[:i + 3] + '/' + res[i + 3:]
+        os.remove(localfile)
+
+        return jsonify({
+            "image_url": res
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "errmsg": str(e)
+        }), 500
+
+
 @api.route('/file/file/', methods=['POST'], endpoint='FileFilePost')
 @login_required(role=1)
 def file_file_post(uid):
