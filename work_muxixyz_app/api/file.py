@@ -313,13 +313,13 @@ def folder_doc_chrildren_post(uid):
     }), 200
 
 
-@api.route('/editor/image/', methods=['POST', endpoint='EditorImage'])
+@api.route('/editor/image/', methods=['POST'], endpoint='EditorImage')
 @login_required(role=1)
 def upload_image(uid):
     image = request.files.get('image')
     try:
-        imagename = str(time.time()) + '.' + secure_filename(myfile.filename)
-        myimage.save(os.path.join(os.getcwd(), imagename))
+        imagename = str(time.time()) + '.' + secure_filename(image.filename)
+        image.save(os.path.join(os.getcwd(), imagename))
         key = imagename
         localfile = os.path.join(os.getcwd(), imagename)
         res = qiniu_upload(key, localfile)
