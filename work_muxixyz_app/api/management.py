@@ -365,12 +365,17 @@ def manage_project(uid, id):
         pjc = Project.query.filter_by(id = pid).first()
         if pjc not in oldPList:
             record = User2Project(user_id = id, project_id = pid)
+            pjc.count += 1
+            db.session.add(pjc)
             db.session.add(record)
     for pjc in oldPList:
         if pjc.id not in newPList:
             record = User2Project.query.filter_by(user_id = id, project_id = pid).first()
             if record is not None:
                 try:
+                    if pic > 0:
+                        pjc.count -= 1
+                    db.session.add(pjc)
                     db.session.delete(record)
                 except:
                     pass
