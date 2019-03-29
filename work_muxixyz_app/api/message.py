@@ -197,13 +197,7 @@ def message_list(uid):
 @api.route('/message/readAll/',methods = ['POST'],endpoint = 'ReadAll')
 @login_required(role = 1)
 def read_all(uid):
-    username = request.get_json().get('username')
-    usr = User.query.filter_by(name = username).first()
-    if uid !=  usr.id:
-        response = jsonify({})
-        response.status_code = 401
-        return response
-    unread = Message.query.filter_by(receive_id = uid,readed = False).all()
+    unread = Message.query.filter_by(receive_id=uid, readed=False).all()
     for m in unread:
         m.readed = True
         db.session.add(m)
