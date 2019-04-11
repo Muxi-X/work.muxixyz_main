@@ -9,7 +9,8 @@ from work_muxixyz_app import db
 from work_muxixyz_app.models import User
 
 MQHOST = os.getenv("WORKBENCH_MQHOST")
-MQPORT = 5672
+MQPORT = os.getenv("WORKBENCH_MQPORT") or "5672"
+MQPORT = int(MQPORT)
 MQUSERNAME = os.getenv("WORKBENCH_MQUSERNAME")
 MQPASSWORD = os.getenv("WORKBENCH_MQPASSWORD")
 MQQUEUENAME = "feed"
