@@ -3,7 +3,7 @@
 from flask import jsonify, request, current_app, url_for
 from . import api
 from .. import db
-from ..models import Team, Group, User, Project, Message, Statu, File, Doc, FolderForFile, FolderForMd, Comment, \
+from ..models import Feed, Team, Group, User, Project, Message, Statu, File, Doc, FolderForFile, FolderForMd, Comment, \
     User2Project, User2File
 from ..decorator import login_required
 from qiniu import Auth, put_file, etag, BucketManager
