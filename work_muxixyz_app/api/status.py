@@ -122,11 +122,12 @@ def editstatu(uid, sid):
 
 @api.route('/status/<int:sid>/', methods=['DELETE'], endpoint='deletestatu')
 @login_required(1)
-def deletestatu(uid,sid):
+def deletestatu(uid, sid):
     if Statu.query.filter_by(id=sid).first() is not None:
         statu = Statu.query.filter_by(id=sid).first()
         if statu.user_id == uid:
             Statu.query.filter_by(id=sid).delete()
+            Feed.query.filter(Feed.source_objectid == sid).delete()
             response = jsonify({"message":"already delete the statu"})
             response.status_code = 200
     else:
