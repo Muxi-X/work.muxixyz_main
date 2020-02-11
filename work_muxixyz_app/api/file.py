@@ -484,6 +484,8 @@ def file_doc_id_delete(uid, id):
         }), 404
 
     project = Project.query.filter_by(id=doc.project_id).first()
+    # 同步删除之前有关此文档的动态
+    Feed.query.filter(Feed.source_objectid == id).delete()
     newfeed(uid, actions[3], doc.filename, sourceidmap["文档"], doc.id, doc.project_id, project.name)
     MakeMsg(doc, uid, u"删除")
 
