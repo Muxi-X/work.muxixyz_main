@@ -139,7 +139,7 @@ class Comment(db.Model):
     file_id = db.Column(db.Integer, db.ForeignKey('files.id', ondelete='cascade'))
     statu_id = db.Column(db.Integer, db.ForeignKey('status.id', ondelete='cascade'))
 
-    
+
 class Message(db.Model):
     __tablename__ = 'messages'
     id = db.Column(db.Integer, primary_key=True)
@@ -148,7 +148,7 @@ class Message(db.Model):
     readed = db.Column(db.Boolean, default=False)
     from_id = db.Column(db.Integer)
     receive_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    file_kind = db.Column(db.Integer)
+    file_kind = db.Column(db.Integer) # 0-文档; 1-文件; 2-评论
     file_id = db.Column(db.Integer)
    
 

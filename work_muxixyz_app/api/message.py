@@ -4,10 +4,8 @@ from . import api
 from .. import db
 from ..models import Team, Group, User, Project, User2Project, Message, Statu, File, Comment, User2File, Doc
 from ..decorator import login_required
-from ..timetools import to_readable_time
 from operator import lt
 import time
-from ..timetools import to_readable_time as TRT
 from werkzeug.exceptions import HTTPException
 
 class FileNotFound(HTTPException):
@@ -16,7 +14,7 @@ class FileNotFound(HTTPException):
 @api.route('/user/attention/',methods = ['POST', 'GET', 'DELETE'],endpoint = 'UserAttention')
 @login_required(role = 1)
 def user_attention(uid):
-    if request.method  ==  'POST':
+    if request.method == 'POST':
         fileID = request.get_json().get('fileID')
         fileKind = request.get_json().get('fileKind')
         if fileKind is 1:
@@ -158,10 +156,12 @@ def message_list(uid):
             response.status_code = 401
             return response
         f = None
-        if m.file_kind is 0:
+        if m.file_kind == 0:
             f = Doc.query.filter_by(id=m.file_id).first()
-        if m.file_kind is 1:
+        elif m.file_kind == 1:
             f = File.query.filter_by(id=m.file_id).first()
+        elif m.file_kind == 2:
+            f = None
         if f is None:
             l.append({
                 "sourceKind": m.file_kind,
@@ -186,7 +186,7 @@ def message_list(uid):
         c += 1
         if limit is None:
             continue
-        if c  ==  limit+1:
+        if c == limit+1:
             break
     response = jsonify({
         "list": l,

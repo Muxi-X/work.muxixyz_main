@@ -10,6 +10,7 @@ from ..decorator import login_required
 from work_muxixyz_app import db
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql.expression import func
+from ..GenerateMsg import MakeMsg
 from ..mq import newfeed
 
 redis_host = os.getenv("WORKBENCH_REDISHOST")
@@ -246,7 +247,10 @@ def newcomments(uid, sid):
         db.session.add(comment, statu)
         db.session.commit()
         
+        # 评论产生的feed
         newfeed(uid, actions[4], statu.title, sourceidmap["进度"], statu.id)
+        # 评论产生的message ([xxx](user_link)评论了你的[进度](status_link))
+        MakeMsg(statu, uid, u"评论")
         response = jsonify({"message":"comments add successfully"})
         response.status_code = 200
 
