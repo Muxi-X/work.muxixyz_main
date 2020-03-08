@@ -36,7 +36,7 @@ def MakeMsg(obj, Driver, action, is_comment=False):
     if is_comment:
         if obj is None or action == "":
             return True
-        msg = Message(  time = TRT(time.time())),
+        msg = Message(  time = TRT(time.time()),
                         action = action,
                         from_id = Driver,
                         receive_id = obj.user_id,
