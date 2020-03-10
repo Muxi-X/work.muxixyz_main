@@ -36,7 +36,7 @@ def MakeMsg(obj, Driver, action, is_comment=False):
     if is_comment:
         if obj is None or action == "":
             return True
-        msg = Message(  time = TRT(time.time()),
+        msg = Message(  time = TRT(time.time()) if timezone == '+0800' else TRT(time.time()+28800),
                         action = action,
                         from_id = Driver,
                         receive_id = obj.user_id,
@@ -52,7 +52,7 @@ def MakeMsg(obj, Driver, action, is_comment=False):
     if users is None:
         return True
     for user in f__k.getAttentionList():
-        msg = Message(  time = TRT(time.time()),
+        msg = Message(  time = TRT(time.time()) if timezone == '+0800' else TRT(time.time()+28800),
                         action = action,
                         from_id = Driver,
                         receive_id = user,

@@ -1,10 +1,13 @@
+import time
 from flask import Flask
 from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from config import config
 
-mail=Mail()
-db=SQLAlchemy()
+mail = Mail()
+db = SQLAlchemy()
+timezone = time.strftime("%z", time.gmtime())
+
 def create_app(config_name):
     app=Flask(__name__)
     app.config.from_object(config[config_name])
